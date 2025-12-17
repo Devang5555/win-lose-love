@@ -6,32 +6,32 @@ import TripCard from "@/components/TripCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getActiveTrips, getBookableTrips, getUpcomingTrips } from "@/data/trips";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTrips } from "@/hooks/useTrips";
 
 const Trips = () => {
-  const allTrips = getActiveTrips();
-  const bookableTrips = getBookableTrips();
-  const upcomingTrips = getUpcomingTrips();
+  const { trips, loading, isTripBookable, getBookableTrips, getUpcomingTrips } = useTrips();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [showBookableOnly, setShowBookableOnly] = useState(false);
 
   const durations = ["2D/1N", "3D/2N", "3N/2D", "4D/3N", "5D/4N"];
 
-  const filteredTrips = allTrips.filter((trip) => {
-    const matchesSearch = trip.tripName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      trip.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredTrips = trips.filter((trip) => {
+    const matchesSearch = trip.trip_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (trip.summary?.toLowerCase().includes(searchQuery.toLowerCase())) ||
       trip.locations?.some(loc => loc.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesDuration = !selectedDuration || trip.duration === selectedDuration;
-    const matchesBookable = !showBookableOnly || trip.tripStatus === 'active';
+    const tripIsBookable = isTripBookable(trip.trip_id);
+    const matchesBookable = !showBookableOnly || tripIsBookable;
     
     return matchesSearch && matchesDuration && matchesBookable;
   });
 
   // Separate bookable and upcoming from filtered results
-  const filteredBookable = filteredTrips.filter(t => t.tripStatus === 'active');
-  const filteredUpcoming = filteredTrips.filter(t => t.tripStatus === 'upcoming');
+  const filteredBookable = filteredTrips.filter(t => isTripBookable(t.trip_id));
+  const filteredUpcoming = filteredTrips.filter(t => !isTripBookable(t.trip_id));
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -108,7 +108,14 @@ const Trips = () => {
       {/* Trips Content */}
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          {filteredTrips.length === 0 ? (
+          {loading ? (
+            <div className="space-y-6">
+              <Skeleton className="h-64 w-full rounded-2xl" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-64 rounded-2xl" />)}
+              </div>
+            </div>
+          ) : filteredTrips.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-xl text-muted-foreground mb-4">No trips found matching your criteria</p>
               <Button onClick={clearFilters} className="font-semibold">Clear Filters</Button>
@@ -131,7 +138,7 @@ const Trips = () => {
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                     {filteredBookable.map((trip) => (
-                      <TripCard key={trip.tripId} trip={trip} featured />
+                      <TripCard key={trip.trip_id} trip={trip} featured isBookable={true} />
                     ))}
                   </div>
                 </div>
@@ -153,7 +160,7 @@ const Trips = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredUpcoming.map((trip) => (
-                      <TripCard key={trip.tripId} trip={trip} />
+                      <TripCard key={trip.trip_id} trip={trip} isBookable={false} />
                     ))}
                   </div>
                 </div>

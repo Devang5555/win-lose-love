@@ -1,100 +1,26 @@
 import { useState, useEffect } from "react";
 import { Power, PowerOff, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { trips as staticTrips } from "@/data/trips";
-
-interface Trip {
-  id: string;
-  trip_id: string;
-  trip_name: string;
-  price_default: number;
-  duration: string;
-  booking_live: boolean;
-  is_active: boolean;
-  capacity: number;
-}
-
-interface Batch {
-  id: string;
-  trip_id: string;
-  status: string;
-  batch_size: number;
-  seats_booked: number;
-}
+import { useTrips } from "@/hooks/useTrips";
 
 interface TripManagementProps {
   onRefresh: () => void;
 }
 
-// Trip booking status stored in localStorage
-const BOOKING_LIVE_KEY = 'gobhraman_booking_live';
-
-const getBookingLiveStatus = (): Record<string, boolean> => {
-  try {
-    const stored = localStorage.getItem(BOOKING_LIVE_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
-  }
-};
-
-const setBookingLiveStatus = (tripId: string, status: boolean) => {
-  const current = getBookingLiveStatus();
-  current[tripId] = status;
-  localStorage.setItem(BOOKING_LIVE_KEY, JSON.stringify(current));
-};
-
 const TripManagement = ({ onRefresh }: TripManagementProps) => {
   const { toast } = useToast();
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [batches, setBatches] = useState<Batch[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { trips, batches, loading, hasBatches, getAvailableSeats, toggleBookingLive, refetch } = useTrips();
   const [updating, setUpdating] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const { data: dbBatches } = await supabase
-        .from('batches')
-        .select('id, trip_id, status, batch_size, seats_booked');
-
-      if (dbBatches) {
-        setBatches(dbBatches as Batch[]);
-      }
-
-      // Use static trips with localStorage booking status
-      const bookingStatus = getBookingLiveStatus();
-      setTrips(staticTrips.map(t => ({
-        id: t.tripId,
-        trip_id: t.tripId,
-        trip_name: t.tripName,
-        price_default: typeof t.price === 'number' ? t.price : t.price.default,
-        duration: t.duration,
-        booking_live: bookingStatus[t.tripId] ?? false,
-        is_active: t.isActive,
-        capacity: t.capacity || 40
-      })));
-    } catch (err) {
-      console.error('Error fetching data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleBookingLive = async (trip: Trip) => {
+  const handleToggleBookingLive = async (tripId: string, tripName: string, currentStatus: boolean) => {
     // Check if trip has batches before enabling
-    const tripBatches = batches.filter(b => b.trip_id === trip.trip_id && b.status === 'active');
-    const hasAvailableSeats = tripBatches.some(b => b.batch_size - b.seats_booked > 0);
+    const tripBatches = batches.filter(b => b.trip_id === tripId && b.status === 'active');
+    const availableSeats = getAvailableSeats(tripId);
 
-    if (!trip.booking_live && tripBatches.length === 0) {
+    if (!currentStatus && tripBatches.length === 0) {
       toast({
         title: "Cannot Enable Booking",
         description: "Please add at least one batch before launching this trip.",
@@ -103,7 +29,7 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
       return;
     }
 
-    if (!trip.booking_live && !hasAvailableSeats) {
+    if (!currentStatus && availableSeats === 0) {
       toast({
         title: "Cannot Enable Booking",
         description: "No available seats in any batch. Please add more seats or create a new batch.",
@@ -112,24 +38,24 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
       return;
     }
 
-    setUpdating(trip.trip_id);
+    setUpdating(tripId);
 
-    // Update localStorage
-    setBookingLiveStatus(trip.trip_id, !trip.booking_live);
+    const success = await toggleBookingLive(tripId, !currentStatus);
 
-    toast({
-      title: "Success",
-      description: `Booking ${!trip.booking_live ? 'enabled' : 'disabled'} for ${trip.trip_name}`,
-    });
+    if (success) {
+      toast({
+        title: "Trip booking status updated successfully",
+        description: `Booking ${!currentStatus ? 'enabled' : 'disabled'} for ${tripName}`,
+      });
+      onRefresh();
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to update booking status. Please try again.",
+        variant: "destructive",
+      });
+    }
 
-    // Refresh state
-    const bookingStatus = getBookingLiveStatus();
-    setTrips(prev => prev.map(t => ({
-      ...t,
-      booking_live: bookingStatus[t.trip_id] ?? false
-    })));
-    
-    onRefresh();
     setUpdating(null);
   };
 
@@ -210,7 +136,7 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
                   <Switch
                     id={`booking-${trip.trip_id}`}
                     checked={trip.booking_live}
-                    onCheckedChange={() => toggleBookingLive(trip)}
+                    onCheckedChange={() => handleToggleBookingLive(trip.trip_id, trip.trip_name, trip.booking_live)}
                     disabled={isUpdating}
                   />
                 </div>
