@@ -1,0 +1,155 @@
+import { Link } from "react-router-dom";
+import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from "lucide-react";
+import logo from "@/assets/logo.jpg";
+
+const Footer = () => {
+  return (
+    <footer className="bg-foreground text-background">
+      <div className="container mx-auto px-4 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+          {/* Brand */}
+          <div className="lg:col-span-1">
+            <Link to="/" className="flex items-center gap-2 mb-4">
+              <img 
+                src={logo} 
+                alt="GoBhraman Logo" 
+                className="w-12 h-12 object-contain rounded-lg bg-background p-1"
+              />
+              <div className="flex flex-col">
+                <span className="font-serif text-xl font-bold">GoBhraman</span>
+                <span className="text-[10px] opacity-70 -mt-1 tracking-wide">भ्रमण से मिटे भ्रम</span>
+              </div>
+            </Link>
+            <p className="text-sm opacity-80 mb-6">
+              Discover the pristine beaches, historic forts, and authentic Malvani cuisine of the Konkan coast with our curated group trips.
+            </p>
+            <div className="flex gap-4">
+              <a href="#" className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-primary transition-colors">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-primary transition-colors">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-primary transition-colors">
+                <Twitter className="w-5 h-5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-serif text-lg font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-3">
+              <li>
+                <Link to="/trips" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  All Trips
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link to="/faq" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  FAQs
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Popular Destinations */}
+          <div>
+            <h4 className="font-serif text-lg font-semibold mb-4">Destinations</h4>
+            <ul className="space-y-3">
+              <li>
+                <Link to="/trips/malvan-bhraman-001" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  Malvan & Tarkarli
+                </Link>
+              </li>
+              <li>
+                <Link to="/trips/sindhudurg-tarkarli-004" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  Sindhudurg Fort
+                </Link>
+              </li>
+              <li>
+                <Link to="/trips/ratnagiri-beaches-003" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  Ratnagiri & Ganpatipule
+                </Link>
+              </li>
+              <li>
+                <Link to="/trips/konkan-weekend-alibaug-002" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  Alibaug & Murud
+                </Link>
+              </li>
+              <li>
+                <Link to="/trips/guhagar-devgad-006" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  Guhagar & Devgad
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-serif text-lg font-semibold mb-4">Contact Us</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <Phone className="w-5 h-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium">Call Us</p>
+                  <a href="tel:+919415026522" className="text-sm opacity-80 hover:opacity-100">
+                    +91-9415026522
+                  </a>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <Mail className="w-5 h-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium">Email Us</p>
+                  <a href="mailto:bhramanbyua@gmail.com" className="text-sm opacity-80 hover:opacity-100">
+                    bhramanbyua@gmail.com
+                  </a>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium">Based In</p>
+                  <p className="text-sm opacity-80">Mumbai & Pune, India</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-8 border-t border-background/20">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm opacity-70">
+              © {new Date().getFullYear()} GoBhraman. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              <Link to="/privacy" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
+                Terms & Conditions
+              </Link>
+              <Link to="/cancellation" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
+                Cancellation Policy
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

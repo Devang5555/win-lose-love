@@ -1,0 +1,204 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { X, User, Phone, Calendar, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { getActiveTrips } from "@/data/trips";
+
+interface InterestPopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    mobile: "",
+    tripId: "",
+    preferredDate: "",
+  });
+
+  const activeTrips = getActiveTrips();
+
+  if (!isOpen) return null;
+
+  const getTomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate mobile number (10-15 digits)
+    const mobileRegex = /^\d{10,15}$/;
+    if (!mobileRegex.test(formData.mobile.replace(/\D/g, ''))) {
+      toast({
+        title: "Invalid Mobile Number",
+        description: "Please enter a valid mobile number (10-15 digits)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Require user to be logged in
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login to submit your interest.",
+        variant: "destructive",
+      });
+      onClose();
+      navigate("/auth");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const selectedTrip = activeTrips.find(t => t.tripId === formData.tripId);
+      
+      const { error } = await supabase.from("interested_users").insert({
+        user_id: user.id, // Always required, never null
+        name: formData.name,
+        mobile: formData.mobile.replace(/\D/g, ''),
+        trip_id: formData.tripId,
+        trip_name: selectedTrip?.tripName || "",
+        preferred_date: formData.preferredDate,
+        status: "interested",
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Thank you!",
+        description: "Our team will contact you shortly.",
+      });
+      onClose();
+    } catch (error) {
+      console.error("Error submitting interest:", error);
+      toast({
+        title: "Submission Failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Overlay */}
+      <div 
+        className="absolute inset-0 bg-foreground/60 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div className="relative w-full max-w-md bg-card rounded-2xl shadow-xl overflow-hidden animate-scale-in">
+        {/* Header */}
+        <div className="relative px-6 py-5 bg-gradient-to-r from-primary to-accent">
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 p-2 rounded-full bg-background/20 hover:bg-background/30 transition-colors"
+          >
+            <X className="w-4 h-4 text-primary-foreground" />
+          </button>
+          <h2 className="font-serif text-xl font-bold text-primary-foreground">
+            Tell Us Your Travel Interest
+          </h2>
+          <p className="text-primary-foreground/80 text-sm mt-1">
+            We'll help you plan the perfect Konkan trip
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <Label htmlFor="name" className="flex items-center gap-2 mb-2">
+              <User className="w-4 h-4 text-primary" />
+              Full Name
+            </Label>
+            <Input
+              id="name"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="mobile" className="flex items-center gap-2 mb-2">
+              <Phone className="w-4 h-4 text-primary" />
+              Mobile Number
+            </Label>
+            <Input
+              id="mobile"
+              type="tel"
+              required
+              value={formData.mobile}
+              onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+              placeholder="+91 98765 43210"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="trip" className="flex items-center gap-2 mb-2">
+              <MapPin className="w-4 h-4 text-primary" />
+              Trip Interested In
+            </Label>
+            <Select
+              value={formData.tripId}
+              onValueChange={(value) => setFormData({ ...formData, tripId: value })}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a trip" />
+              </SelectTrigger>
+              <SelectContent>
+                {activeTrips.map((trip) => (
+                  <SelectItem key={trip.tripId} value={trip.tripId}>
+                    {trip.tripName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="date" className="flex items-center gap-2 mb-2">
+              <Calendar className="w-4 h-4 text-primary" />
+              Preferred Travel Date
+            </Label>
+            <Input
+              id="date"
+              type="date"
+              required
+              min={getTomorrowDate()}
+              value={formData.preferredDate}
+              onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
+            />
+          </div>
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Submitting..." : "Submit Interest"}
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default InterestPopup;
