@@ -12,7 +12,7 @@ interface TripManagementProps {
 
 const TripManagement = ({ onRefresh }: TripManagementProps) => {
   const { toast } = useToast();
-  const { trips, batches, loading, hasBatches, getAvailableSeats, toggleBookingLive, refetch } = useTrips();
+  const { trips, batches, loading, tripsTableMissing, getAvailableSeats, toggleBookingLive } = useTrips();
   const [updating, setUpdating] = useState<string | null>(null);
 
   const handleToggleBookingLive = async (tripId: string, tripName: string, currentStatus: boolean) => {
@@ -85,21 +85,35 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
       </div>
 
       {/* Important Notice */}
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <div className="text-sm">
-          <p className="font-medium text-amber-700">Booking Live Logic</p>
-          <p className="text-amber-600 mt-1">
-            A trip is bookable ONLY when: Booking Live is ON + At least one active batch exists + Batch has available seats.
-          </p>
+      {tripsTableMissing ? (
+        <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-medium text-destructive">Trip status storage is missing</p>
+            <p className="text-muted-foreground mt-1">
+              The backend table for trips is not available, so Booking Live cannot be saved yet. Create the "trips" table
+              (trip_id + booking_live) to make the toggle work everywhere.
+            </p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-medium text-amber-700">Booking Live Logic</p>
+            <p className="text-amber-600 mt-1">
+              A trip is bookable ONLY when: Booking Live is ON + At least one active batch exists + Batch has available seats.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Trips List */}
       <div className="grid gap-4">
-        {trips.filter(t => t.is_active).map((trip) => {
+        {trips.filter((t) => t.is_active).map((trip) => {
           const stats = getBatchStats(trip.trip_id);
-          const canBook = trip.booking_live && stats.active > 0 && stats.bookedSeats < stats.totalSeats;
+          const availableSeats = getAvailableSeats(trip.trip_id);
+          const canBook = trip.booking_live && stats.active > 0 && availableSeats > 0;
           const isUpdating = updating === trip.trip_id;
 
           return (

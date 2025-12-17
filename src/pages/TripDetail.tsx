@@ -11,16 +11,30 @@ import InterestPopup from "@/components/InterestPopup";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getTrip, getTripPrice, formatPrice, isTripBookable } from "@/data/trips";
+import { getTrip, getTripPrice, formatPrice } from "@/data/trips";
 import { useToast } from "@/hooks/use-toast";
+import { useTrips } from "@/hooks/useTrips";
 
 const TripDetail = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const trip = getTrip(tripId || "");
+  const { isTripBookable, loading } = useTrips();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isInterestOpen, setIsInterestOpen] = useState(false);
   const { toast } = useToast();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-32 text-center">
+          <p className="text-muted-foreground">Loading trip…</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!trip) {
     return (
@@ -39,8 +53,8 @@ const TripDetail = () => {
   }
 
   const price = getTripPrice(trip);
-  const hasMultiplePrices = typeof trip.price === 'object' && trip.price.fromPune;
-  const isBookable = isTripBookable(trip);
+  const hasMultiplePrices = typeof trip.price === "object" && trip.price.fromPune;
+  const isBookable = !!tripId && isTripBookable(tripId);
 
   const handleShare = async () => {
     try {
