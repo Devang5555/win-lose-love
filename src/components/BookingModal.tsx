@@ -346,27 +346,73 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                     />
                   </div>
 
+                  {/* Batch Selection - moved before travelers */}
+                  {batches.length > 0 && (
+                    <div>
+                      <Label className="flex items-center gap-2 mb-2">
+                        <Calendar className="w-4 h-4 text-primary" />
+                        Select Batch
+                      </Label>
+                      <Select
+                        value={formData.batchId}
+                        onValueChange={(value) => {
+                          const selectedBatch = batches.find(b => b.id === value);
+                          const availableSeats = selectedBatch ? selectedBatch.batch_size - selectedBatch.seats_booked : 10;
+                          // Reset travelers to 1 if current selection exceeds available seats
+                          const newTravelers = parseInt(formData.travelers) > availableSeats ? "1" : formData.travelers;
+                          setFormData({ ...formData, batchId: value, travelers: newTravelers });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose your travel dates" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {batches.map((batch) => (
+                            <SelectItem key={batch.id} value={batch.id}>
+                              {batch.batch_name} ({formatBatchDate(batch.start_date)} - {formatBatchDate(batch.end_date)}) - {batch.batch_size - batch.seats_booked} seats left
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="travelers" className="flex items-center gap-2 mb-2">
                         <Users className="w-4 h-4 text-primary" />
                         Travelers
                       </Label>
-                      <Select
-                        value={formData.travelers}
-                        onValueChange={(value) => setFormData({ ...formData, travelers: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                            <SelectItem key={num} value={num.toString()}>
-                              {num} {num === 1 ? 'Person' : 'People'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {(() => {
+                        const selectedBatch = batches.find(b => b.id === formData.batchId);
+                        const maxTravelers = selectedBatch 
+                          ? Math.min(10, selectedBatch.batch_size - selectedBatch.seats_booked)
+                          : 10;
+                        return (
+                          <Select
+                            value={formData.travelers}
+                            onValueChange={(value) => setFormData({ ...formData, travelers: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: maxTravelers }, (_, i) => i + 1).map((num) => (
+                                <SelectItem key={num} value={num.toString()}>
+                                  {num} {num === 1 ? 'Person' : 'People'}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        );
+                      })()}
+                      {formData.batchId && (() => {
+                        const selectedBatch = batches.find(b => b.id === formData.batchId);
+                        const availableSeats = selectedBatch ? selectedBatch.batch_size - selectedBatch.seats_booked : 0;
+                        return availableSeats <= 3 && (
+                          <p className="text-xs text-amber-600 mt-1">Only {availableSeats} seat{availableSeats !== 1 ? 's' : ''} left!</p>
+                        );
+                      })()}
                     </div>
 
                     {hasMultiplePrices && (
@@ -390,31 +436,6 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                       </div>
                     )}
                   </div>
-
-                  {/* Batch Selection */}
-                  {batches.length > 0 && (
-                    <div>
-                      <Label className="flex items-center gap-2 mb-2">
-                        <Calendar className="w-4 h-4 text-primary" />
-                        Select Batch
-                      </Label>
-                      <Select
-                        value={formData.batchId}
-                        onValueChange={(value) => setFormData({ ...formData, batchId: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose your travel dates" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {batches.map((batch) => (
-                            <SelectItem key={batch.id} value={batch.id}>
-                              {batch.batch_name} ({formatBatchDate(batch.start_date)} - {formatBatchDate(batch.end_date)}) - {batch.batch_size - batch.seats_booked} seats left
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
                 </div>
               )}
 
