@@ -1,23 +1,50 @@
 import { Link } from "react-router-dom";
 import { MapPin, Clock, Users, ChevronRight, Bell, Sparkles } from "lucide-react";
-import { Trip, getTripPrice, formatPrice, isTripBookable } from "@/data/trips";
+import { Trip, getTripPrice, formatPrice } from "@/data/trips";
+import { DatabaseTrip } from "@/hooks/useTrips";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface TripCardProps {
-  trip: Trip;
+  trip: Trip | DatabaseTrip;
   featured?: boolean;
+  isBookable?: boolean; // New prop to control bookable state from parent
 }
 
-const TripCard = ({ trip, featured = false }: TripCardProps) => {
-  const price = getTripPrice(trip);
-  const hasMultiplePrices = typeof trip.price === 'object' && trip.price.fromPune;
-  const isBookable = isTripBookable(trip);
+// Type guard to check if trip is DatabaseTrip
+const isDatabaseTrip = (trip: Trip | DatabaseTrip): trip is DatabaseTrip => {
+  return 'trip_id' in trip;
+};
+
+const TripCard = ({ trip, featured = false, isBookable: isBookableProp }: TripCardProps) => {
+  // Handle both Trip and DatabaseTrip types
+  const tripId = isDatabaseTrip(trip) ? trip.trip_id : trip.tripId;
+  const tripName = isDatabaseTrip(trip) ? trip.trip_name : trip.tripName;
+  const summary = isDatabaseTrip(trip) ? (trip.summary || '') : trip.summary;
+  const locations = isDatabaseTrip(trip) ? trip.locations : trip.locations;
+  const duration = trip.duration;
+  const capacity = isDatabaseTrip(trip) ? trip.capacity : trip.capacity;
+  const images = trip.images;
+  const highlights = isDatabaseTrip(trip) ? trip.highlights : trip.highlights;
+  
+  // Price handling
+  const price = isDatabaseTrip(trip) ? trip.price_default : getTripPrice(trip);
+  const hasMultiplePrices = isDatabaseTrip(trip) 
+    ? !!trip.price_from_pune 
+    : (typeof trip.price === 'object' && !!trip.price.fromPune);
+  const punePrice = isDatabaseTrip(trip) 
+    ? trip.price_from_pune 
+    : (typeof trip.price === 'object' ? trip.price.fromPune : null);
+  
+  // Use prop if provided, otherwise fallback to static check
+  const isBookable = isBookableProp !== undefined 
+    ? isBookableProp 
+    : (!isDatabaseTrip(trip) && trip.tripStatus === 'active');
 
   return (
     <Link
-      to={`/trips/${trip.tripId}`}
+      to={`/trips/${tripId}`}
       className={cn(
         "group block bg-card rounded-2xl overflow-hidden border-2 transition-all duration-300 hover:-translate-y-1",
         featured && "lg:flex",
@@ -33,8 +60,8 @@ const TripCard = ({ trip, featured = false }: TripCardProps) => {
       )}>
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent z-10" />
         <img
-          src={trip.images[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800"}
-          alt={trip.tripName}
+          src={images[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800"}
+          alt={tripName}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         
@@ -51,14 +78,8 @@ const TripCard = ({ trip, featured = false }: TripCardProps) => {
         )}
         
         <Badge variant="secondary" className="absolute top-4 right-4 z-20 bg-background/90 text-foreground font-semibold">
-          {trip.duration}
+          {duration}
         </Badge>
-        
-        {trip.availableDates && isBookable && (
-          <Badge variant="secondary" className="absolute bottom-4 left-4 z-20 bg-background/90 text-foreground">
-            Next: {new Date(trip.availableDates[0]).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
-          </Badge>
-        )}
       </div>
 
       {/* Content */}
@@ -70,20 +91,20 @@ const TripCard = ({ trip, featured = false }: TripCardProps) => {
           "font-serif font-bold text-card-foreground group-hover:text-primary transition-colors",
           featured ? "text-2xl lg:text-3xl mb-3" : "text-xl mb-2"
         )}>
-          {trip.tripName}
+          {tripName}
         </h3>
         
         <p className={cn(
           "text-muted-foreground line-clamp-2 mb-4",
           featured ? "text-base lg:text-lg" : "text-sm"
         )}>
-          {trip.summary}
+          {summary}
         </p>
 
         {/* Highlights for featured */}
-        {featured && trip.highlights && (
+        {featured && highlights && (
           <ul className="hidden lg:block space-y-2 mb-6">
-            {trip.highlights.slice(0, 4).map((highlight, index) => (
+            {highlights.slice(0, 4).map((highlight, index) => (
               <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent" />
                 {highlight}
@@ -94,21 +115,21 @@ const TripCard = ({ trip, featured = false }: TripCardProps) => {
 
         {/* Meta */}
         <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-muted-foreground">
-          {trip.locations && (
+          {locations && locations.length > 0 && (
             <span className="flex items-center gap-1">
               <MapPin className="w-4 h-4 text-accent" />
-              {trip.locations.slice(0, 2).join(", ")}
-              {trip.locations.length > 2 && ` +${trip.locations.length - 2}`}
+              {locations.slice(0, 2).join(", ")}
+              {locations.length > 2 && ` +${locations.length - 2}`}
             </span>
           )}
           <span className="flex items-center gap-1">
             <Clock className="w-4 h-4 text-primary" />
-            {trip.duration}
+            {duration}
           </span>
-          {trip.capacity && (
+          {capacity && (
             <span className="flex items-center gap-1">
               <Users className="w-4 h-4 text-forest" />
-              Max {trip.capacity}
+              Max {capacity}
             </span>
           )}
         </div>
@@ -116,9 +137,9 @@ const TripCard = ({ trip, featured = false }: TripCardProps) => {
         {/* Price & CTA */}
         <div className="flex items-end justify-between pt-4 border-t border-border">
           <div>
-            {hasMultiplePrices && typeof trip.price === 'object' && (
+            {hasMultiplePrices && punePrice && (
               <p className="text-xs text-muted-foreground mb-1">
-                From Pune: {formatPrice(trip.price.fromPune!)}
+                From Pune: {formatPrice(punePrice)}
               </p>
             )}
             <div className="flex items-baseline gap-2">

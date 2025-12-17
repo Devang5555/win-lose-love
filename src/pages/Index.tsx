@@ -5,12 +5,15 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import TripCard from "@/components/TripCard";
 import { Button } from "@/components/ui/button";
-import { getBookableTrips, getUpcomingTrips } from "@/data/trips";
+import { useTrips } from "@/hooks/useTrips";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
+  const { trips, loading, isTripBookable, getBookableTrips, getUpcomingTrips } = useTrips();
+  
   const bookableTrips = getBookableTrips();
   const upcomingTrips = getUpcomingTrips().slice(0, 4);
-  const featuredTrip = bookableTrips[0]; // Malvan trip - the ONLY bookable trip
+  const featuredTrip = bookableTrips[0];
 
   const features = [
     {
@@ -42,27 +45,33 @@ const Index = () => {
       {/* Hero */}
       <HeroSection />
 
-      {/* Featured Trip - The ONLY Bookable Trip */}
-      {featuredTrip && (
-        <section className="py-16 md:py-24 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  <span className="text-primary font-bold text-sm uppercase tracking-wider">Live & Bookable</span>
-                </div>
-                <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
-                  Book Your Adventure Now
-                </h2>
-                <p className="text-muted-foreground mt-2">Limited slots available — reserve your spot today!</p>
+      {/* Featured Trip - Bookable Trips */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <span className="text-primary font-bold text-sm uppercase tracking-wider">Live & Bookable</span>
               </div>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
+                Book Your Adventure Now
+              </h2>
+              <p className="text-muted-foreground mt-2">Limited slots available — reserve your spot today!</p>
             </div>
-            
-            <TripCard trip={featuredTrip} featured />
           </div>
-        </section>
-      )}
+          
+          {loading ? (
+            <Skeleton className="h-64 w-full rounded-2xl" />
+          ) : featuredTrip ? (
+            <TripCard trip={featuredTrip} featured isBookable={true} />
+          ) : (
+            <div className="text-center py-12 bg-muted rounded-2xl">
+              <p className="text-muted-foreground">No trips available for booking at the moment. Check back soon!</p>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Why Choose Us */}
       <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-muted to-secondary">
@@ -96,7 +105,7 @@ const Index = () => {
       </section>
 
       {/* Upcoming Trips */}
-      {upcomingTrips.length > 0 && (
+      {!loading && upcomingTrips.length > 0 && (
         <section className="py-16 md:py-24 bg-background">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
@@ -117,7 +126,7 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {upcomingTrips.map((trip) => (
-                <TripCard key={trip.tripId} trip={trip} />
+                <TripCard key={trip.trip_id} trip={trip} isBookable={false} />
               ))}
             </div>
           </div>
