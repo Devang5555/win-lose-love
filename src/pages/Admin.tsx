@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,7 +13,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AdminStats from "@/components/admin/AdminStats";
 import BatchManagement from "@/components/admin/BatchManagement";
-import { openWhatsAppAdvanceVerified, openWhatsAppFullyPaid } from "@/lib/whatsapp";
+import TripManagement from "@/components/admin/TripManagement";
+import LeadsManagement from "@/components/admin/LeadsManagement";
+import { openWhatsAppAdvanceVerified, openWhatsAppFullyPaid, openWhatsAppReminder, openWhatsAppCustom } from "@/lib/whatsapp";
 
 interface Booking {
   id: string;
@@ -439,21 +441,30 @@ const Admin = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="bookings" className="space-y-6">
-            <TabsList className="grid w-full md:w-auto grid-cols-3 md:inline-flex">
-              <TabsTrigger value="bookings" className="gap-2">
-                <Calendar className="w-4 h-4" />
-                Bookings
+          <Tabs defaultValue="trips" className="space-y-6">
+            <TabsList className="grid w-full md:w-auto grid-cols-4 md:inline-flex">
+              <TabsTrigger value="trips" className="gap-2">
+                <MapPin className="w-4 h-4" />
+                Trips
               </TabsTrigger>
               <TabsTrigger value="batches" className="gap-2">
                 <Layers className="w-4 h-4" />
                 Batches
+              </TabsTrigger>
+              <TabsTrigger value="bookings" className="gap-2">
+                <Calendar className="w-4 h-4" />
+                Bookings
               </TabsTrigger>
               <TabsTrigger value="leads" className="gap-2">
                 <Users className="w-4 h-4" />
                 Leads
               </TabsTrigger>
             </TabsList>
+
+            {/* Trips Tab - NEW */}
+            <TabsContent value="trips">
+              <TripManagement onRefresh={fetchData} />
+            </TabsContent>
 
             {/* Batches Tab */}
             <TabsContent value="batches">
