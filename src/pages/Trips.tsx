@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTrips } from "@/hooks/useTrips";
 
 const Trips = () => {
-  const { trips, loading, isTripBookable, getBookableTrips, getUpcomingTrips } = useTrips();
+  const { trips, loading, isTripBookable } = useTrips();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [showBookableOnly, setShowBookableOnly] = useState(false);
@@ -138,7 +138,7 @@ const Trips = () => {
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                     {filteredBookable.map((trip) => (
-                      <TripCard key={trip.trip_id} trip={trip} featured isBookable={true} />
+                      <TripCard key={trip.trip_id} trip={trip} featured isBookable={isTripBookable(trip.trip_id)} />
                     ))}
                   </div>
                 </div>
@@ -160,7 +160,7 @@ const Trips = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredUpcoming.map((trip) => (
-                      <TripCard key={trip.trip_id} trip={trip} isBookable={false} />
+                      <TripCard key={trip.trip_id} trip={trip} isBookable={isTripBookable(trip.trip_id)} />
                     ))}
                   </div>
                 </div>

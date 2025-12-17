@@ -9,8 +9,8 @@ import { useTrips } from "@/hooks/useTrips";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
-  const { trips, loading, isTripBookable, getBookableTrips, getUpcomingTrips } = useTrips();
-  
+  const { loading, getBookableTrips, getUpcomingTrips, isTripBookable } = useTrips();
+
   const bookableTrips = getBookableTrips();
   const upcomingTrips = getUpcomingTrips().slice(0, 4);
   const featuredTrip = bookableTrips[0];
@@ -64,7 +64,7 @@ const Index = () => {
           {loading ? (
             <Skeleton className="h-64 w-full rounded-2xl" />
           ) : featuredTrip ? (
-            <TripCard trip={featuredTrip} featured isBookable={true} />
+            <TripCard trip={featuredTrip} featured isBookable={isTripBookable(featuredTrip.trip_id)} />
           ) : (
             <div className="text-center py-12 bg-muted rounded-2xl">
               <p className="text-muted-foreground">No trips available for booking at the moment. Check back soon!</p>
