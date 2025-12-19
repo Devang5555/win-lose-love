@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,18 +24,14 @@ const Auth = () => {
     fullName: "",
   });
 
-  useEffect(() => {
-    if (user) {
-      // Check if we should show the interest popup (first time after login in this session)
-      const hasShownPopup = sessionStorage.getItem("interestPopupShown");
-      if (!hasShownPopup) {
-        setShowInterestPopup(true);
-        sessionStorage.setItem("interestPopupShown", "true");
-      } else {
-        navigate("/");
-      }
+  // useEffect for popup handling
+  useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const showPopup = params.get("showInterestPopup");
+    if (showPopup === "true") {
+      setShowInterestPopup(true);
     }
-  }, [user, navigate]);
+  }, []);
 
   const handleClosePopup = () => {
     setShowInterestPopup(false);
@@ -57,10 +53,10 @@ const Auth = () => {
           });
         } else {
           toast({
-            title: "Welcome back!",
-            description: "You have successfully logged in.",
+            title: "Welcome back, explorer!",
+            description: "Ready for your next journey.",
           });
-          // Don't navigate here - useEffect will handle showing popup and navigation
+          navigate("/");
         }
       } else {
         if (!formData.fullName.trim()) {
@@ -90,10 +86,10 @@ const Auth = () => {
           }
         } else {
           toast({
-            title: "Account Created!",
-            description: "You can now login and book trips.",
+            title: "Welcome to GoBhraman!",
+            description: "Your journey begins now.",
           });
-          // Don't navigate here - useEffect will handle showing popup and navigation
+          navigate("/");
         }
       }
     } catch (err) {
@@ -116,11 +112,14 @@ const Auth = () => {
           <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
             {/* Header */}
             <div className="px-6 py-8 text-center bg-gradient-to-r from-primary to-accent">
+              <div className="w-16 h-16 rounded-full bg-background/20 flex items-center justify-center mx-auto mb-4">
+                <Compass className="w-8 h-8 text-primary-foreground" />
+              </div>
               <h1 className="font-serif text-2xl font-bold text-primary-foreground">
-                {isLogin ? "Welcome Back" : "Join GoBhraman"}
+                {isLogin ? "Continue Your Journey" : "Join the GoBhraman Community"}
               </h1>
               <p className="text-primary-foreground/80 mt-2">
-                {isLogin ? "Login to manage your bookings" : "Create an account to start your journey"}
+                {isLogin ? "Welcome back, explorer" : "Start exploring India with purpose"}
               </p>
             </div>
 
@@ -185,20 +184,20 @@ const Auth = () => {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Please wait..." : isLogin ? "Login" : "Create Account"}
+                {loading ? "Please wait..." : isLogin ? "Continue Your Journey" : "Join the Community"}
               </Button>
             </form>
 
             {/* Toggle */}
             <div className="px-6 pb-6 text-center">
               <p className="text-muted-foreground">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}
+                {isLogin ? "New to GoBhraman?" : "Already an explorer?"}
                 <button
                   type="button"
                   className="text-primary font-medium ml-2 hover:underline"
                   onClick={() => setIsLogin(!isLogin)}
                 >
-                  {isLogin ? "Sign up" : "Login"}
+                  {isLogin ? "Join us" : "Login"}
                 </button>
               </p>
             </div>

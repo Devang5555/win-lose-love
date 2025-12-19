@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, SlidersHorizontal, X, Sparkles } from "lucide-react";
+import { Search, SlidersHorizontal, X, Sparkles, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TripCard from "@/components/TripCard";
@@ -47,10 +47,10 @@ const Trips = () => {
       <section className="pt-24 pb-12 md:pt-32 md:pb-16 bg-gradient-to-r from-primary via-ocean-dark to-accent">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4">
-            Explore Konkan Trips
+            Explore Our Journeys
           </h1>
           <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto">
-            Discover our curated collection of adventures along the stunning Konkan coast
+            Curated experiences across India for explorers who seek culture, adventure, and real connections
           </p>
         </div>
       </section>
@@ -63,7 +63,7 @@ const Trips = () => {
             <div className="relative flex-1 w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
-                placeholder="Search destinations, trips..."
+                placeholder="Search destinations, experiences..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-12 text-base"
@@ -81,7 +81,7 @@ const Trips = () => {
                 onClick={() => setShowBookableOnly(!showBookableOnly)}
               >
                 <Sparkles className="w-3 h-3 mr-1" />
-                Bookable Now
+                Ready to Join
               </Badge>
               
               {durations.map((duration) => (
@@ -117,7 +117,7 @@ const Trips = () => {
             </div>
           ) : filteredTrips.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-xl text-muted-foreground mb-4">No trips found matching your criteria</p>
+              <p className="text-xl text-muted-foreground mb-4">No journeys found matching your criteria</p>
               <Button onClick={clearFilters} className="font-semibold">Clear Filters</Button>
             </div>
           ) : (
@@ -131,9 +131,9 @@ const Trips = () => {
                     </div>
                     <div>
                       <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                        Book Now
+                        Join Now
                       </h2>
-                      <p className="text-sm text-muted-foreground">Available for immediate booking</p>
+                      <p className="text-sm text-muted-foreground">Limited seats • Reserve your spot today</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
@@ -153,9 +153,9 @@ const Trips = () => {
                     </div>
                     <div>
                       <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-                        Upcoming Adventures
+                        Coming Soon
                       </h2>
-                      <p className="text-sm text-muted-foreground">Coming soon — Get notified when they launch!</p>
+                      <p className="text-sm text-muted-foreground">Get notified when these experiences launch!</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -167,8 +167,8 @@ const Trips = () => {
               )}
 
               <p className="text-sm text-muted-foreground mt-8 text-center">
-                Showing {filteredTrips.length} {filteredTrips.length === 1 ? 'trip' : 'trips'} 
-                {filteredBookable.length > 0 && ` (${filteredBookable.length} bookable)`}
+                Showing {filteredTrips.length} {filteredTrips.length === 1 ? 'journey' : 'journeys'} 
+                {filteredBookable.length > 0 && ` (${filteredBookable.length} ready to join)`}
               </p>
             </>
           )}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   MapPin, Clock, Users, Calendar, Phone, Mail, 
-  Check, X, ChevronRight, ArrowLeft, Share2, Bell, Sparkles, Tent, Flame
+  Check, X, ChevronRight, ArrowLeft, Share2, Bell, Sparkles, Tent, Flame, MessageCircle
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -29,7 +29,7 @@ const TripDetail = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-32 text-center">
-          <p className="text-muted-foreground">Loading trip…</p>
+          <p className="text-muted-foreground">Loading experience…</p>
         </div>
         <Footer />
       </div>
@@ -41,10 +41,10 @@ const TripDetail = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-32 text-center">
-          <h1 className="font-serif text-3xl font-bold text-foreground mb-4">Trip Not Found</h1>
-          <p className="text-muted-foreground mb-8">The trip you're looking for doesn't exist.</p>
+          <h1 className="font-serif text-3xl font-bold text-foreground mb-4">Journey Not Found</h1>
+          <p className="text-muted-foreground mb-8">The experience you're looking for doesn't exist.</p>
           <Button asChild>
-            <Link to="/trips">Browse All Trips</Link>
+            <Link to="/trips">Explore Journeys</Link>
           </Button>
         </div>
         <Footer />
@@ -67,7 +67,7 @@ const TripDetail = () => {
       navigator.clipboard.writeText(window.location.href);
       toast({
         title: "Link Copied!",
-        description: "Trip link has been copied to clipboard.",
+        description: "Experience link has been copied to clipboard.",
       });
     }
   };
@@ -76,11 +76,16 @@ const TripDetail = () => {
     if (!isBookable) {
       toast({
         title: "Coming Soon!",
-        description: "This trip is not yet available for booking. Click 'Notify Me' to get updates.",
+        description: "This journey is launching soon. Click 'Notify Me' to get updates.",
       });
       return;
     }
     setIsBookingOpen(true);
+  };
+
+  const handleWhatsAppClick = () => {
+    const message = encodeURIComponent(`Hi! I'm interested in the ${trip.tripName} journey. Can you share more details?`);
+    window.open(`https://wa.me/919415026522?text=${message}`, '_blank');
   };
 
   return (
@@ -90,7 +95,7 @@ const TripDetail = () => {
       {/* Hero */}
       <section className="relative h-[50vh] md:h-[65vh]">
         <img
-          src={trip.images[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80"}
+          src={trip.images[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80"}
           alt={trip.tripName}
           className="w-full h-full object-cover"
         />
@@ -102,7 +107,7 @@ const TripDetail = () => {
           className="absolute top-24 md:top-28 left-4 md:left-8 flex items-center gap-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors bg-background/20 backdrop-blur-sm px-3 py-2 rounded-full"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="hidden md:inline">Back to Trips</span>
+          <span className="hidden md:inline">Back to Journeys</span>
         </Link>
 
         {/* Status Badge */}
@@ -110,11 +115,11 @@ const TripDetail = () => {
           {isBookable ? (
             <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold px-4 py-2 text-sm animate-pulse">
               <Sparkles className="w-4 h-4 mr-2" />
-              NOW BOOKING
+              READY TO JOIN
             </Badge>
           ) : (
             <Badge className="bg-sunset text-primary-foreground font-bold px-4 py-2 text-sm">
-              🚀 Launching Soon
+              🚀 Coming Soon
             </Badge>
           )}
         </div>
@@ -149,7 +154,7 @@ const TripDetail = () => {
               {/* Highlights */}
               {trip.highlights && (
                 <div className="mb-8">
-                  <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-6">Trip Highlights</h2>
+                  <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-6">Experience Highlights</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {trip.highlights.map((highlight, index) => (
                       <div key={index} className="flex items-start gap-4 p-5 bg-gradient-to-br from-card to-secondary rounded-xl border border-border hover:border-primary/30 transition-colors">
@@ -328,7 +333,7 @@ const TripDetail = () => {
                   {!isBookable && (
                     <div className="bg-sunset/10 border border-sunset/30 rounded-xl p-4 mb-6 text-center">
                       <p className="text-sunset font-bold text-lg">🚀 Coming Soon</p>
-                      <p className="text-sm text-muted-foreground mt-1">This trip is launching soon!</p>
+                      <p className="text-sm text-muted-foreground mt-1">This journey is launching soon!</p>
                     </div>
                   )}
 
@@ -358,7 +363,7 @@ const TripDetail = () => {
                     {trip.capacity && (
                       <div className="flex items-center gap-3 text-sm">
                         <Users className="w-5 h-5 text-accent" />
-                        <span className="text-card-foreground font-medium">Max {trip.capacity} travelers</span>
+                        <span className="text-card-foreground font-medium">Max {trip.capacity} explorers</span>
                       </div>
                     )}
                     {trip.availableDates && isBookable && (
@@ -375,10 +380,16 @@ const TripDetail = () => {
                     )}
                   </div>
 
+                  {isBookable && (
+                    <p className="text-xs text-accent mb-4 font-medium text-center">
+                      Limited seats • Handpicked experiences
+                    </p>
+                  )}
+
                   {isBookable && trip.booking && (
                     <div className="bg-primary/10 rounded-xl p-4 mb-6 border border-primary/20">
                       <p className="text-sm text-primary font-semibold">
-                        ✨ Book with just {formatPrice(trip.booking.advance)} advance
+                        ✨ Reserve with just {formatPrice(trip.booking.advance)} advance
                       </p>
                     </div>
                   )}
@@ -390,7 +401,7 @@ const TripDetail = () => {
                       onClick={handleBookingClick}
                     >
                       <Sparkles className="w-5 h-5 mr-2" />
-                      Book This Trip
+                      Reserve Your Spot
                       <ChevronRight className="w-5 h-5 ml-1" />
                     </Button>
                   ) : (
@@ -400,17 +411,26 @@ const TripDetail = () => {
                       onClick={() => setIsInterestOpen(true)}
                     >
                       <Bell className="w-5 h-5 mr-2" />
-                      Notify Me When Available
+                      Notify Me
                     </Button>
                   )}
 
                   <Button 
                     variant="outline" 
+                    className="w-full mb-3"
+                    onClick={handleWhatsAppClick}
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Chat on WhatsApp
+                  </Button>
+
+                  <Button 
+                    variant="ghost" 
                     className="w-full"
                     onClick={handleShare}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
-                    Share Trip
+                    Share Experience
                   </Button>
                 </div>
 

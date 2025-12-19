@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from "lucide-react";
+import { Mail, Phone, MapPin, Instagram, Facebook, Twitter, Compass } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
 const Footer = () => {
@@ -21,7 +21,7 @@ const Footer = () => {
               </div>
             </Link>
             <p className="text-sm opacity-80 mb-6">
-              Discover the pristine beaches, historic forts, and authentic Malvani cuisine of the Konkan coast with our curated group trips.
+              Curated journeys across India for explorers who seek culture, adventure, and real connections — not tourist checklists.
             </p>
             <div className="flex gap-4">
               <a href="#" className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-primary transition-colors">
@@ -42,12 +42,12 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <Link to="/trips" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
-                  All Trips
+                  Explore Journeys
                 </Link>
               </li>
               <li>
                 <Link to="/about" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
-                  About Us
+                  Our Story
                 </Link>
               </li>
               <li>
@@ -102,7 +102,7 @@ const Footer = () => {
               <li className="flex items-start gap-3">
                 <Phone className="w-5 h-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Call Us</p>
+                  <p className="text-sm font-medium">Call / WhatsApp</p>
                   <a href="tel:+919415026522" className="text-sm opacity-80 hover:opacity-100">
                     +91-9415026522
                   </a>
@@ -132,7 +132,7 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t border-background/20">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm opacity-70">
-              © {new Date().getFullYear()} GoBhraman. All rights reserved.
+              © {new Date().getFullYear()} GoBhraman. Travel with meaning.
             </p>
             <div className="flex gap-6">
               <Link to="/privacy" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
