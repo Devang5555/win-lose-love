@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 interface TripCardProps {
   trip: Trip | DatabaseTrip;
   featured?: boolean;
-  isBookable?: boolean; // New prop to control bookable state from parent
+  isBookable?: boolean;
 }
 
 // Type guard to check if trip is DatabaseTrip
@@ -60,7 +60,7 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp }: TripCa
       )}>
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent z-10" />
         <img
-          src={images[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800"}
+          src={images[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"}
           alt={tripName}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
@@ -69,11 +69,11 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp }: TripCa
         {isBookable ? (
           <Badge className="absolute top-4 left-4 z-20 bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold px-3 py-1 animate-pulse">
             <Sparkles className="w-3 h-3 mr-1" />
-            BOOK NOW
+            JOIN NOW
           </Badge>
         ) : (
           <Badge className="absolute top-4 left-4 z-20 bg-sunset/90 text-primary-foreground font-bold px-3 py-1">
-            🚀 Launching Soon
+            🚀 Coming Soon
           </Badge>
         )}
         
@@ -134,6 +134,13 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp }: TripCa
           )}
         </div>
 
+        {/* Limited seats micro-text */}
+        {isBookable && (
+          <p className="text-xs text-accent mb-3 font-medium">
+            Limited seats • Handpicked experiences
+          </p>
+        )}
+
         {/* Price & CTA */}
         <div className="flex items-end justify-between pt-4 border-t border-border">
           <div>
@@ -155,7 +162,7 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp }: TripCa
           
           {isBookable ? (
             <Button size="sm" className="group-hover:bg-accent group-hover:text-accent-foreground transition-colors font-semibold">
-              Book Now
+              Join This Trip
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
             </Button>
           ) : (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, User, Phone, Calendar, MapPin } from "lucide-react";
+import { X, User, Phone, Calendar, MapPin, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,7 +69,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
       const selectedTrip = activeTrips.find(t => t.tripId === formData.tripId);
       
       const { error } = await supabase.from("interested_users").insert({
-        user_id: user.id, // Always required, never null
+        user_id: user.id,
         name: formData.name,
         mobile: formData.mobile.replace(/\D/g, ''),
         trip_id: formData.tripId,
@@ -81,8 +81,8 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
       if (error) throw error;
 
       toast({
-        title: "Thank you!",
-        description: "Our team will contact you shortly.",
+        title: "You're in!",
+        description: "We'll reach out with updates on this journey.",
       });
       onClose();
     } catch (error) {
@@ -115,11 +115,14 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
           >
             <X className="w-4 h-4 text-primary-foreground" />
           </button>
-          <h2 className="font-serif text-xl font-bold text-primary-foreground">
-            Tell Us Your Travel Interest
-          </h2>
-          <p className="text-primary-foreground/80 text-sm mt-1">
-            We'll help you plan the perfect Konkan trip
+          <div className="flex items-center gap-3 mb-2">
+            <Sparkles className="w-6 h-6 text-primary-foreground" />
+            <h2 className="font-serif text-xl font-bold text-primary-foreground">
+              Get Trip Updates
+            </h2>
+          </div>
+          <p className="text-primary-foreground/80 text-sm">
+            Be the first to know when this journey launches
           </p>
         </div>
 
@@ -142,7 +145,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
           <div>
             <Label htmlFor="mobile" className="flex items-center gap-2 mb-2">
               <Phone className="w-4 h-4 text-primary" />
-              Mobile Number
+              WhatsApp Number
             </Label>
             <Input
               id="mobile"
@@ -157,7 +160,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
           <div>
             <Label htmlFor="trip" className="flex items-center gap-2 mb-2">
               <MapPin className="w-4 h-4 text-primary" />
-              Trip Interested In
+              Journey Interested In
             </Label>
             <Select
               value={formData.tripId}
@@ -165,7 +168,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
               required
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a trip" />
+                <SelectValue placeholder="Select a journey" />
               </SelectTrigger>
               <SelectContent>
                 {activeTrips.map((trip) => (
@@ -180,7 +183,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
           <div>
             <Label htmlFor="date" className="flex items-center gap-2 mb-2">
               <Calendar className="w-4 h-4 text-primary" />
-              Preferred Travel Date
+              Preferred Month
             </Label>
             <Input
               id="date"
@@ -193,7 +196,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Submitting..." : "Submit Interest"}
+            {loading ? "Submitting..." : "Count Me In"}
           </Button>
         </form>
       </div>
