@@ -14,6 +14,192 @@ export type Database = {
   }
   public: {
     Tables: {
+      batches: {
+        Row: {
+          batch_name: string
+          batch_size: number
+          created_at: string | null
+          end_date: string
+          id: string
+          seats_booked: number
+          start_date: string
+          status: string
+          trip_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          batch_name: string
+          batch_size?: number
+          created_at?: string | null
+          end_date: string
+          id?: string
+          seats_booked?: number
+          start_date: string
+          status?: string
+          trip_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          batch_name?: string
+          batch_size?: number
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          seats_booked?: number
+          start_date?: string
+          status?: string
+          trip_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batches_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["trip_id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          advance_paid: number
+          batch_id: string | null
+          booking_status: string
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          notes: string | null
+          num_travelers: number
+          payment_status: string
+          phone: string
+          pickup_location: string | null
+          total_amount: number
+          trip_id: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          advance_paid?: number
+          batch_id?: string | null
+          booking_status?: string
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          num_travelers?: number
+          payment_status?: string
+          phone: string
+          pickup_location?: string | null
+          total_amount: number
+          trip_id: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          advance_paid?: number
+          batch_id?: string | null
+          booking_status?: string
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          num_travelers?: number
+          payment_status?: string
+          phone?: string
+          pickup_location?: string | null
+          total_amount?: number
+          trip_id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interested_users: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          message: string | null
+          phone: string
+          preferred_month: string | null
+          trip_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          message?: string | null
+          phone: string
+          preferred_month?: string | null
+          trip_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string | null
+          phone?: string
+          preferred_month?: string | null
+          trip_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string | null
+          id: string
+          payment_method: string
+          status: string
+          transaction_id: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          payment_method?: string
+          status?: string
+          transaction_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          payment_method?: string
+          status?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trips: {
         Row: {
           advance_amount: number | null

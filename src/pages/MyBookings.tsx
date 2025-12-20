@@ -11,20 +11,22 @@ import Footer from "@/components/Footer";
 
 interface Booking {
   id: string;
+  user_id: string | null;
   trip_id: string;
-  trip_name: string;
-  pickup_location: string;
+  batch_id: string | null;
+  full_name: string;
+  email: string;
+  phone: string;
+  pickup_location: string | null;
   num_travelers: number;
-  travel_date: string | null;
-  amount: number;
-  advance_amount: number | null;
-  remaining_amount: number | null;
-  payment_status: string | null;
-  status: string;
+  total_amount: number;
+  advance_paid: number;
+  payment_status: string;
+  booking_status: string;
+  notes: string | null;
   created_at: string;
+  updated_at: string;
 }
-
-const ADVANCE_AMOUNT = 2000;
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -90,21 +92,16 @@ const MyBookings = () => {
     }
   };
 
-  const getPaymentStatus = (booking: Booking) => {
-    if (booking.payment_status === "fully_paid") return "Fully Paid";
-    if (booking.payment_status === "advance_verified") return "Advance Verified";
-    const advancePaid = booking.advance_amount || ADVANCE_AMOUNT * booking.num_travelers;
-    const balanceAmount = booking.remaining_amount ?? (booking.amount - advancePaid);
-    if (booking.status === "confirmed" && balanceAmount <= 0) {
-      return "Fully Paid";
-    }
-    return "Partial";
+  const getPaymentStatusColor = (status: string) => {
+    if (status === "paid") return "bg-green-500/20 text-green-600 border-green-500/30";
+    if (status === "partial") return "bg-blue-500/20 text-blue-600 border-blue-500/30";
+    return "bg-amber-500/20 text-amber-600 border-amber-500/30";
   };
 
-  const getPaymentStatusColor = (status: string) => {
-    if (status === "Fully Paid") return "bg-green-500/20 text-green-600 border-green-500/30";
-    if (status === "Advance Verified") return "bg-blue-500/20 text-blue-600 border-blue-500/30";
-    return "bg-amber-500/20 text-amber-600 border-amber-500/30";
+  const getPaymentStatusLabel = (status: string) => {
+    if (status === "paid") return "Fully Paid";
+    if (status === "partial") return "Advance Paid";
+    return "Pending";
   };
 
   const formatDate = (dateString: string) => {
@@ -155,9 +152,7 @@ const MyBookings = () => {
           ) : (
             <div className="space-y-4">
               {bookings.map((booking) => {
-                const advancePaid = booking.advance_amount || ADVANCE_AMOUNT * booking.num_travelers;
-                const balanceAmount = booking.remaining_amount ?? Math.max(0, booking.amount - advancePaid);
-                const paymentStatus = getPaymentStatus(booking);
+                const balanceAmount = Math.max(0, booking.total_amount - booking.advance_paid);
                 
                 return (
                   <div
@@ -170,14 +165,14 @@ const MyBookings = () => {
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-2">
                             <h3 className="font-serif text-lg font-bold text-foreground">
-                              {booking.trip_name}
+                              {booking.trip_id}
                             </h3>
-                            {getStatusBadge(booking.status)}
+                            {getStatusBadge(booking.booking_status)}
                           </div>
                           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <MapPin className="w-4 h-4" />
-                              {booking.pickup_location}
+                              {booking.pickup_location || "Not specified"}
                             </span>
                             <span className="flex items-center gap-1">
                               <Users className="w-4 h-4" />
@@ -200,11 +195,11 @@ const MyBookings = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <p className="text-muted-foreground">Total Trip Price</p>
-                            <p className="font-bold text-foreground">₹{booking.amount.toLocaleString()}</p>
+                            <p className="font-bold text-foreground">₹{booking.total_amount.toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-muted-foreground">Advance Paid</p>
-                            <p className="font-bold text-green-600">₹{advancePaid.toLocaleString()}</p>
+                            <p className="font-bold text-green-600">₹{booking.advance_paid.toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-muted-foreground">Remaining Balance</p>
@@ -214,9 +209,9 @@ const MyBookings = () => {
                           </div>
                           <div>
                             <p className="text-muted-foreground">Payment Status</p>
-                            <Badge className={getPaymentStatusColor(paymentStatus)}>
+                            <Badge className={getPaymentStatusColor(booking.payment_status)}>
                               <Wallet className="w-3 h-3 mr-1" />
-                              {paymentStatus}
+                              {getPaymentStatusLabel(booking.payment_status)}
                             </Badge>
                           </div>
                         </div>
@@ -233,7 +228,7 @@ const MyBookings = () => {
                         </Link>
                       </div>
                       
-                      {booking.status === "pending" && (
+                      {booking.booking_status === "pending" && (
                         <div className="p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                           <p className="text-sm text-yellow-700 dark:text-yellow-400">
                             Your payment is being verified. We'll confirm your booking shortly.
