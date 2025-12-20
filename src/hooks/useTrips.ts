@@ -90,26 +90,51 @@ export const useTrips = () => {
       if (batchesError) throw batchesError;
       setBatches((dbBatches || []) as Batch[]);
 
-      // Fetch booking_live from trips table (source of truth for status)
+      // Try to fetch full trips from database first
+      let dbTrips: DatabaseTrip[] = [];
       let bookingStatusMap: Record<string, boolean> = {};
 
       if (SUPABASE_URL && SUPABASE_KEY) {
         try {
-          const response = await fetch(`${SUPABASE_URL}/rest/v1/trips?select=trip_id,booking_live`, {
+          const response = await fetch(`${SUPABASE_URL}/rest/v1/trips?select=*`, {
             headers: {
               apikey: SUPABASE_KEY,
               Authorization: `Bearer ${SUPABASE_KEY}`,
             },
           });
 
-          if (!response.ok) {
-            setTripsTableMissing(true);
-          } else {
+          if (response.ok) {
             setTripsTableMissing(false);
-            const tripStatus: TripDbRecord[] = await response.json();
-            tripStatus.forEach((t) => {
+            const tripData = await response.json();
+            if (tripData && tripData.length > 0) {
+              dbTrips = tripData.map((t: any) => ({
+                id: t.id || t.trip_id,
+                trip_id: t.trip_id,
+                trip_name: t.trip_name,
+                price_default: t.price_default || 0,
+                price_from_pune: t.price_from_pune,
+                price_from_mumbai: t.price_from_mumbai,
+                duration: t.duration || "",
+                summary: t.summary || "",
+                highlights: t.highlights || [],
+                locations: t.locations || [],
+                images: t.images || [],
+                is_active: t.is_active ?? true,
+                booking_live: t.booking_live ?? false,
+                capacity: t.capacity || 30,
+                advance_amount: t.advance_amount || 2000,
+                inclusions: t.inclusions || [],
+                exclusions: t.exclusions || [],
+                contact_phone: t.contact_phone,
+                contact_email: t.contact_email,
+                notes: t.notes,
+              }));
+            }
+            tripData.forEach((t: any) => {
               bookingStatusMap[t.trip_id] = !!t.booking_live;
             });
+          } else {
+            setTripsTableMissing(true);
           }
         } catch {
           setTripsTableMissing(true);
@@ -118,11 +143,15 @@ export const useTrips = () => {
         setTripsTableMissing(true);
       }
 
-      const convertedTrips = staticTrips
-        .filter((t) => t.isActive)
-        .map((trip) => convertStaticToDbTrip(trip, bookingStatusMap[trip.tripId] ?? false));
-
-      setTrips(convertedTrips);
+      // Use DB trips if available, otherwise fall back to static
+      if (dbTrips.length > 0) {
+        setTrips(dbTrips);
+      } else {
+        const convertedTrips = staticTrips
+          .filter((t) => t.isActive)
+          .map((trip) => convertStaticToDbTrip(trip, bookingStatusMap[trip.tripId] ?? false));
+        setTrips(convertedTrips);
+      }
     } catch (err: any) {
       setTrips(staticTrips.filter((t) => t.isActive).map((t) => convertStaticToDbTrip(t, false)));
       setError(err?.message || "Failed to load trips");
