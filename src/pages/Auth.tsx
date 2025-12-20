@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User, Eye, EyeOff, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ const Auth = () => {
   });
 
   // useEffect for popup handling
-  useState(() => {
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const showPopup = params.get("showInterestPopup");
     if (showPopup === "true") {
