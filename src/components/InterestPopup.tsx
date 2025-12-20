@@ -70,12 +70,12 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
       
       const { error } = await supabase.from("interested_users").insert({
         user_id: user.id,
-        name: formData.name,
-        mobile: formData.mobile.replace(/\D/g, ''),
+        full_name: formData.name,
+        email: user.email || "",
+        phone: formData.mobile.replace(/\D/g, ''),
         trip_id: formData.tripId,
-        trip_name: selectedTrip?.tripName || "",
-        preferred_date: formData.preferredDate,
-        status: "interested",
+        preferred_month: formData.preferredDate,
+        message: `Interested in ${selectedTrip?.tripName || "trip"}`,
       });
 
       if (error) throw error;

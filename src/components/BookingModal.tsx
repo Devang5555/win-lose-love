@@ -158,21 +158,17 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
         const { error } = await supabase.from("bookings").insert({
           user_id: user!.id,
           trip_id: trip.tripId,
-          trip_name: trip.tripName,
           full_name: formData.name,
           email: formData.email,
           phone: formData.phone,
           pickup_location: formData.pickupPoint,
           num_travelers: parseInt(formData.travelers),
-          travel_date: selectedBatch?.start_date || null,
-          amount: totalPrice,
-          advance_amount: totalAdvance,
-          remaining_amount: remainingAmount,
+          total_amount: totalPrice,
+          advance_paid: totalAdvance,
           batch_id: formData.batchId || null,
-          upi_transaction_id: formData.upiTransactionId || null,
-          payment_screenshot_url: screenshotUrl,
-          status: "pending",
-          payment_status: "pending_advance",
+          payment_status: "pending",
+          booking_status: "pending",
+          notes: formData.upiTransactionId ? `UPI: ${formData.upiTransactionId}` : null,
         });
 
         if (error) throw error;
