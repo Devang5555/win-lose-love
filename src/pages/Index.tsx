@@ -159,58 +159,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Testimonials Preview */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <span className="text-primary font-bold text-sm uppercase tracking-wider">Explorer Stories</span>
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">
-              What Travellers Say
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Priya Sharma",
-                location: "Mumbai",
-                text: "GoBhraman changed how I see travel. It's not about ticking places off a list — it's about real connections and experiences.",
-                rating: 5
-              },
-              {
-                name: "Rahul Deshmukh",
-                location: "Pune",
-                text: "The attention to detail and local immersion was incredible. Already planning my next journey with them!",
-                rating: 5
-              },
-              {
-                name: "Anjali Patil",
-                location: "Nashik",
-                text: "From hidden beaches to local stories — every moment felt purposeful. This is how travel should be.",
-                rating: 5
-              }
-            ].map((testimonial, index) => (
-              <div 
-                key={index}
-                className="bg-card rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 border border-border"
-              >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-sunset text-sunset" />
-                  ))}
-                </div>
-                <p className="text-muted-foreground mb-4 italic">
-                  "{testimonial.text}"
-                </p>
-                <div>
-                  <p className="font-semibold text-card-foreground">{testimonial.name}</p>
-                  <p className="text-sm text-muted-foreground">{testimonial.location}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <Footer />
     </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,6 +31,8 @@ interface Booking {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  advance_screenshot_url: string | null;
+  remaining_screenshot_url: string | null;
 }
 
 interface InterestedUser {
@@ -71,6 +73,10 @@ const Admin = () => {
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
   const [leadSearchTerm, setLeadSearchTerm] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [advanceScreenshotUrl, setAdvanceScreenshotUrl] = useState<string | null>(null);
+  const [remainingScreenshotUrl, setRemainingScreenshotUrl] = useState<string | null>(null);
+  const [loadingScreenshots, setLoadingScreenshots] = useState(false);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -129,6 +135,47 @@ const Admin = () => {
     
     setFilteredInterested(filtered);
   }, [interestedUsers, leadSearchTerm]);
+
+  // Fetch screenshot URLs when booking is selected
+  useEffect(() => {
+    const fetchScreenshots = async () => {
+      if (!selectedBooking) {
+        setAdvanceScreenshotUrl(null);
+        setRemainingScreenshotUrl(null);
+        return;
+      }
+
+      setLoadingScreenshots(true);
+      
+      try {
+        // Fetch advance screenshot
+        if (selectedBooking.advance_screenshot_url) {
+          const { data } = await supabase.storage
+            .from('payment-screenshots')
+            .createSignedUrl(selectedBooking.advance_screenshot_url, 3600);
+          if (data?.signedUrl) {
+            setAdvanceScreenshotUrl(data.signedUrl);
+          }
+        }
+
+        // Fetch remaining payment screenshot
+        if (selectedBooking.remaining_screenshot_url) {
+          const { data } = await supabase.storage
+            .from('payment-screenshots')
+            .createSignedUrl(selectedBooking.remaining_screenshot_url, 3600);
+          if (data?.signedUrl) {
+            setRemainingScreenshotUrl(data.signedUrl);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching screenshots:', error);
+      } finally {
+        setLoadingScreenshots(false);
+      }
+    };
+
+    fetchScreenshots();
+  }, [selectedBooking]);
 
   const fetchData = async () => {
     const [bookingsRes, interestedRes, batchesRes] = await Promise.all([
@@ -204,6 +251,16 @@ const Admin = () => {
 
   const getPaymentStatusBadge = (paymentStatus: string) => {
     switch (paymentStatus) {
+      case "fully_paid":
+        return <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Fully Paid</Badge>;
+      case "balance_verified":
+        return <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Balance Verified</Badge>;
+      case "balance_pending":
+        return <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Balance Pending</Badge>;
+      case "advance_verified":
+        return <Badge className="bg-teal-500/20 text-teal-600 border-teal-500/30">Advance Verified</Badge>;
+      case "pending_advance":
+        return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">Pending Advance</Badge>;
       case "paid":
         return <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Paid</Badge>;
       case "partial":
@@ -280,9 +337,9 @@ const Admin = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">
-                    {bookings.filter((b) => b.payment_status === "partial").length}
+                    {bookings.filter((b) => ["balance_pending", "partial"].includes(b.payment_status)).length}
                   </p>
-                  <p className="text-sm text-muted-foreground">Partial Paid</p>
+                  <p className="text-sm text-muted-foreground">Balance Pending</p>
                 </div>
               </div>
             </div>
@@ -367,6 +424,18 @@ const Admin = () => {
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
+                <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
+                  <SelectTrigger className="w-full md:w-48">
+                    <SelectValue placeholder="Filter by payment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Payments</SelectItem>
+                    <SelectItem value="pending_advance">Pending Advance</SelectItem>
+                    <SelectItem value="advance_verified">Advance Verified</SelectItem>
+                    <SelectItem value="balance_pending">Balance Pending</SelectItem>
+                    <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Bookings Table */}
@@ -415,7 +484,14 @@ const Admin = () => {
                               <p className="font-medium text-green-600">₹{booking.advance_paid.toLocaleString()}</p>
                             </td>
                             <td className="px-4 py-3">
-                              {getPaymentStatusBadge(booking.payment_status)}
+                              <div className="flex items-center gap-2">
+                                {getPaymentStatusBadge(booking.payment_status)}
+                                {!booking.advance_screenshot_url && booking.payment_status === "pending_advance" && (
+                                  <span className="text-amber-500" title="No screenshot">
+                                    <AlertTriangle className="w-4 h-4" />
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-4 py-3">{getStatusBadge(booking.booking_status)}</td>
                             <td className="px-4 py-3">
@@ -539,7 +615,7 @@ const Admin = () => {
             className="absolute inset-0 bg-foreground/60 backdrop-blur-sm"
             onClick={() => setSelectedBooking(null)}
           />
-          <div className="relative w-full max-w-2xl bg-card rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-3xl bg-card rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <h2 className="font-serif text-xl font-bold text-card-foreground">Booking Details</h2>
               <button
@@ -611,6 +687,93 @@ const Admin = () => {
                 )}
               </div>
 
+              {/* Payment Screenshots Section */}
+              <div className="bg-muted/50 rounded-lg p-4">
+                <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
+                  <Image className="w-4 h-4 text-primary" />
+                  Payment Screenshots
+                </h4>
+                
+                {loadingScreenshots ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Advance Payment Screenshot */}
+                    <div className="border border-border rounded-lg p-3">
+                      <p className="text-sm font-medium text-foreground mb-2">Advance Payment</p>
+                      {advanceScreenshotUrl ? (
+                        <div className="space-y-2">
+                          <img 
+                            src={advanceScreenshotUrl} 
+                            alt="Advance Payment Screenshot" 
+                            className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setViewingImage(advanceScreenshotUrl)}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => window.open(advanceScreenshotUrl, '_blank')}
+                          >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            View Full Image
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-32 bg-muted rounded-lg border-2 border-dashed border-border">
+                          <div className="text-center">
+                            <AlertTriangle className="w-6 h-6 text-amber-500 mx-auto mb-1" />
+                            <p className="text-sm text-muted-foreground">No screenshot uploaded</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Remaining Payment Screenshot */}
+                    <div className="border border-border rounded-lg p-3">
+                      <p className="text-sm font-medium text-foreground mb-2">Remaining Payment</p>
+                      {remainingScreenshotUrl ? (
+                        <div className="space-y-2">
+                          <img 
+                            src={remainingScreenshotUrl} 
+                            alt="Remaining Payment Screenshot" 
+                            className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setViewingImage(remainingScreenshotUrl)}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => window.open(remainingScreenshotUrl, '_blank')}
+                          >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            View Full Image
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-32 bg-muted rounded-lg border-2 border-dashed border-border">
+                          <div className="text-center">
+                            {selectedBooking.payment_status === "balance_pending" ? (
+                              <>
+                                <Clock className="w-6 h-6 text-blue-500 mx-auto mb-1" />
+                                <p className="text-sm text-muted-foreground">Awaiting upload</p>
+                              </>
+                            ) : (
+                              <>
+                                <Image className="w-6 h-6 text-muted-foreground mx-auto mb-1" />
+                                <p className="text-sm text-muted-foreground">Not applicable yet</p>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Booking Status</p>
@@ -622,11 +785,45 @@ const Admin = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4">
-                {selectedBooking.booking_status === "pending" && (
+              {/* Admin Action Buttons */}
+              <div className="flex flex-wrap gap-3 pt-4">
+                {/* Pending Advance - Verify Advance Payment */}
+                {selectedBooking.booking_status === "pending" && selectedBooking.payment_status === "pending_advance" && (
                   <>
                     <Button
-                      onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "partial")}
+                      onClick={() => {
+                        if (!advanceScreenshotUrl) {
+                          toast({
+                            title: "Warning",
+                            description: "No advance payment screenshot uploaded. Please verify payment manually.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        updateBookingStatus(selectedBooking.id, "confirmed", "advance_verified");
+                      }}
+                      className="flex-1"
+                      disabled={!advanceScreenshotUrl}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Verify Advance & Confirm
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => updateBookingStatus(selectedBooking.id, "cancelled")}
+                      className="flex-1"
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Reject
+                    </Button>
+                  </>
+                )}
+
+                {/* Legacy pending status */}
+                {selectedBooking.booking_status === "pending" && selectedBooking.payment_status === "pending" && (
+                  <>
+                    <Button
+                      onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "advance_verified")}
                       className="flex-1"
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
@@ -642,15 +839,71 @@ const Admin = () => {
                     </Button>
                   </>
                 )}
-                {selectedBooking.booking_status === "confirmed" && selectedBooking.payment_status !== "paid" && (
+
+                {/* Advance Verified - Wait for balance or mark fully paid */}
+                {selectedBooking.booking_status === "confirmed" && selectedBooking.payment_status === "advance_verified" && (
+                  <>
+                    <Button
+                      onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "balance_pending")}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <Clock className="w-4 h-4 mr-2" />
+                      Request Balance Payment
+                    </Button>
+                    <Button
+                      onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "fully_paid")}
+                      className="flex-1"
+                    >
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Mark Fully Paid
+                    </Button>
+                  </>
+                )}
+
+                {/* Balance Pending - Verify balance payment */}
+                {selectedBooking.booking_status === "confirmed" && selectedBooking.payment_status === "balance_pending" && (
+                  <>
+                    <Button
+                      onClick={() => {
+                        if (!remainingScreenshotUrl) {
+                          toast({
+                            title: "Warning",
+                            description: "No remaining payment screenshot uploaded. Please verify payment manually.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        updateBookingStatus(selectedBooking.id, "confirmed", "fully_paid");
+                      }}
+                      className="flex-1"
+                      disabled={!remainingScreenshotUrl}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Verify & Mark Fully Paid
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "advance_verified")}
+                      className="flex-1"
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Reject Balance Payment
+                    </Button>
+                  </>
+                )}
+
+                {/* Legacy partial status */}
+                {selectedBooking.booking_status === "confirmed" && selectedBooking.payment_status === "partial" && (
                   <Button
-                    onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "paid")}
+                    onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "fully_paid")}
                     className="flex-1"
                   >
                     <Wallet className="w-4 h-4 mr-2" />
                     Mark as Fully Paid
                   </Button>
                 )}
+
                 <Button
                   variant="outline"
                   onClick={() => window.open(`https://wa.me/${selectedBooking.phone}`, '_blank')}
@@ -659,8 +912,47 @@ const Admin = () => {
                   WhatsApp
                 </Button>
               </div>
+
+              {/* Warning Messages */}
+              {!advanceScreenshotUrl && selectedBooking.payment_status === "pending_advance" && (
+                <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <p className="text-sm text-amber-700 dark:text-amber-400">
+                    Warning: No advance payment screenshot found. Please verify payment before confirming.
+                  </p>
+                </div>
+              )}
+
+              {!remainingScreenshotUrl && selectedBooking.payment_status === "balance_pending" && (
+                <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                  <p className="text-sm text-blue-700 dark:text-blue-400">
+                    Waiting for user to upload remaining payment screenshot.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Image Viewer Modal */}
+      {viewingImage && (
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80"
+          onClick={() => setViewingImage(null)}
+        >
+          <img 
+            src={viewingImage} 
+            alt="Payment Screenshot" 
+            className="max-w-full max-h-full object-contain rounded-lg"
+          />
+          <button
+            onClick={() => setViewingImage(null)}
+            className="absolute top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+          >
+            <XCircle className="w-6 h-6 text-white" />
+          </button>
         </div>
       )}
 
