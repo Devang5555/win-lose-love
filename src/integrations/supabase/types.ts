@@ -64,6 +64,7 @@ export type Database = {
       bookings: {
         Row: {
           advance_paid: number
+          advance_screenshot_url: string | null
           batch_id: string | null
           booking_status: string
           created_at: string | null
@@ -75,6 +76,7 @@ export type Database = {
           payment_status: string
           phone: string
           pickup_location: string | null
+          remaining_screenshot_url: string | null
           total_amount: number
           trip_id: string
           updated_at: string | null
@@ -82,6 +84,7 @@ export type Database = {
         }
         Insert: {
           advance_paid?: number
+          advance_screenshot_url?: string | null
           batch_id?: string | null
           booking_status?: string
           created_at?: string | null
@@ -93,6 +96,7 @@ export type Database = {
           payment_status?: string
           phone: string
           pickup_location?: string | null
+          remaining_screenshot_url?: string | null
           total_amount: number
           trip_id: string
           updated_at?: string | null
@@ -100,6 +104,7 @@ export type Database = {
         }
         Update: {
           advance_paid?: number
+          advance_screenshot_url?: string | null
           batch_id?: string | null
           booking_status?: string
           created_at?: string | null
@@ -111,6 +116,7 @@ export type Database = {
           payment_status?: string
           phone?: string
           pickup_location?: string | null
+          remaining_screenshot_url?: string | null
           total_amount?: number
           trip_id?: string
           updated_at?: string | null

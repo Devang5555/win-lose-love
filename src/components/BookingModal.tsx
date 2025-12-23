@@ -166,8 +166,9 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
           total_amount: totalPrice,
           advance_paid: totalAdvance,
           batch_id: formData.batchId || null,
-          payment_status: "pending",
+          payment_status: "pending_advance",
           booking_status: "pending",
+          advance_screenshot_url: screenshotUrl,
           notes: formData.upiTransactionId ? `UPI: ${formData.upiTransactionId}` : null,
         });
 
