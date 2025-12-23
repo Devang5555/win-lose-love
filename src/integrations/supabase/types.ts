@@ -341,6 +341,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_seats_booked: {
+        Args: { batch_id_param: string; seats_count: number }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

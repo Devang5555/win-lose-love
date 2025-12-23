@@ -176,10 +176,18 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
 
         // Update batch seats_booked count
         if (formData.batchId) {
-          await supabase
+          const travelersCount = parseInt(formData.travelers);
+          // Use direct SQL increment to avoid race conditions
+          const { error: batchError } = await supabase
             .from("batches")
-            .update({ seats_booked: (selectedBatch?.seats_booked || 0) + parseInt(formData.travelers) })
+            .update({ 
+              seats_booked: (selectedBatch?.seats_booked || 0) + travelersCount 
+            })
             .eq("id", formData.batchId);
+          
+          if (batchError) {
+            console.error('Failed to update batch seats:', batchError);
+          }
         }
 
         toast({

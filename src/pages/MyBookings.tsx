@@ -201,6 +201,10 @@ const MyBookings = () => {
   };
 
   const canPayRemainingBalance = (booking: Booking) => {
+    // Don't show if already uploaded remaining screenshot or fully paid
+    if (booking.remaining_screenshot_url) return false;
+    if (booking.payment_status === "fully_paid" || booking.payment_status === "balance_pending") return false;
+    
     return booking.booking_status === "confirmed" && 
            ["advance_verified", "partial"].includes(booking.payment_status) &&
            booking.total_amount > booking.advance_paid;
