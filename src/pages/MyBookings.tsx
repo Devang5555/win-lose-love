@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle, ArrowRight, CreditCard, Wallet, Upload, Image } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle, ArrowRight, CreditCard, Wallet, Upload, Image, AlertCircle, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +30,8 @@ interface Booking {
   updated_at: string;
   advance_screenshot_url: string | null;
   remaining_screenshot_url: string | null;
+  remaining_payment_status: string | null;
+  rejection_reason: string | null;
 }
 
 const MyBookings = () => {
@@ -109,11 +111,15 @@ const MyBookings = () => {
 
       if (uploadError) throw uploadError;
 
+      // Update booking with screenshot URL and set remaining_payment_status to 'uploaded'
       const { error: updateError } = await supabase
         .from("bookings")
         .update({ 
           remaining_screenshot_url: fileName,
-          payment_status: "balance_pending"
+          remaining_payment_status: "uploaded",
+          remaining_payment_uploaded_at: new Date().toISOString(),
+          payment_status: "balance_pending",
+          rejection_reason: null // Clear any previous rejection reason
         })
         .eq("id", bookingId);
 
@@ -192,6 +198,39 @@ const MyBookings = () => {
     }
   };
 
+  const getRemainingPaymentStatusBadge = (status: string | null) => {
+    switch (status) {
+      case "uploaded":
+        return (
+          <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">
+            <Clock className="w-3 h-3 mr-1" />
+            Awaiting Verification
+          </Badge>
+        );
+      case "verified":
+        return (
+          <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Verified
+          </Badge>
+        );
+      case "rejected":
+        return (
+          <Badge className="bg-red-500/20 text-red-600 border-red-500/30">
+            <XCircle className="w-3 h-3 mr-1" />
+            Rejected
+          </Badge>
+        );
+      default:
+        return (
+          <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30">
+            <Wallet className="w-3 h-3 mr-1" />
+            Pending
+          </Badge>
+        );
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-IN", {
       day: "numeric",
@@ -200,14 +239,28 @@ const MyBookings = () => {
     });
   };
 
-  const canPayRemainingBalance = (booking: Booking) => {
-    // Don't show if already uploaded remaining screenshot or fully paid
-    if (booking.remaining_screenshot_url) return false;
-    if (booking.payment_status === "fully_paid" || booking.payment_status === "balance_pending") return false;
+  // Determine if user can upload remaining payment
+  const canUploadRemainingPayment = (booking: Booking) => {
+    // User can upload if:
+    // 1. Booking is confirmed with advance_verified
+    // 2. remaining_payment_status is 'pending' OR 'rejected'
+    // 3. There's a balance to pay
+    const hasBalance = booking.total_amount > booking.advance_paid;
+    const isConfirmed = booking.booking_status === "confirmed";
+    const advanceVerified = ["advance_verified", "partial"].includes(booking.payment_status);
+    const canUpload = booking.remaining_payment_status === "pending" || booking.remaining_payment_status === "rejected";
     
-    return booking.booking_status === "confirmed" && 
-           ["advance_verified", "partial"].includes(booking.payment_status) &&
-           booking.total_amount > booking.advance_paid;
+    return hasBalance && isConfirmed && advanceVerified && canUpload;
+  };
+
+  // Check if remaining payment is pending verification
+  const isRemainingPaymentPendingVerification = (booking: Booking) => {
+    return booking.remaining_payment_status === "uploaded";
+  };
+
+  // Check if fully paid
+  const isFullyPaid = (booking: Booking) => {
+    return booking.payment_status === "fully_paid" || booking.remaining_payment_status === "verified";
   };
 
   if (loading || loadingBookings) {
@@ -225,9 +278,15 @@ const MyBookings = () => {
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="font-serif text-3xl font-bold text-foreground">My Bookings</h1>
-            <p className="text-muted-foreground mt-2">Track your trip bookings and their status</p>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="font-serif text-3xl font-bold text-foreground">My Bookings</h1>
+              <p className="text-muted-foreground mt-2">Track your trip bookings and their status</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={fetchBookings}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
           </div>
 
           {/* Bookings List */}
@@ -301,8 +360,8 @@ const MyBookings = () => {
                           </div>
                           <div>
                             <p className="text-muted-foreground">Remaining Balance</p>
-                            <p className={`font-bold ${balanceAmount > 0 && booking.payment_status !== "fully_paid" ? 'text-amber-600' : 'text-green-600'}`}>
-                              {booking.payment_status === "fully_paid" ? "₹0" : `₹${balanceAmount.toLocaleString()}`}
+                            <p className={`font-bold ${isFullyPaid(booking) ? 'text-green-600' : 'text-amber-600'}`}>
+                              {isFullyPaid(booking) ? "₹0" : `₹${balanceAmount.toLocaleString()}`}
                             </p>
                           </div>
                           <div>
@@ -315,15 +374,30 @@ const MyBookings = () => {
                         </div>
                       </div>
 
-                      {/* Pay Remaining Balance Button */}
-                      {canPayRemainingBalance(booking) && (
+                      {/* Remaining Payment Status (for users who have initiated balance payment) */}
+                      {booking.remaining_payment_status && booking.remaining_payment_status !== "pending" && balanceAmount > 0 && (
+                        <div className="bg-muted/50 rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Remaining Payment Status</p>
+                              {getRemainingPaymentStatusBadge(booking.remaining_payment_status)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Pay Remaining Balance Button - Only show when status is pending or rejected */}
+                      {canUploadRemainingPayment(booking) && (
                         <div className="flex justify-center">
                           <Button 
                             onClick={() => setShowPaymentModal(booking)}
                             className="gap-2"
                           >
                             <Upload className="w-4 h-4" />
-                            Pay Remaining Balance (₹{balanceAmount.toLocaleString()})
+                            {booking.remaining_payment_status === "rejected" 
+                              ? "Re-upload Payment Screenshot" 
+                              : `Pay Remaining Balance (₹${balanceAmount.toLocaleString()})`
+                            }
                           </Button>
                         </div>
                       )}
@@ -348,15 +422,40 @@ const MyBookings = () => {
                         </div>
                       )}
 
-                      {booking.payment_status === "balance_pending" && (
-                        <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                      {/* Remaining Payment Uploaded - Awaiting Verification */}
+                      {isRemainingPaymentPendingVerification(booking) && (
+                        <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
                           <p className="text-sm text-blue-700 dark:text-blue-400">
-                            Your remaining payment screenshot has been submitted. We'll verify it shortly.
+                            Remaining payment submitted. Awaiting admin verification.
                           </p>
                         </div>
                       )}
 
-                      {booking.payment_status === "fully_paid" && (
+                      {/* Remaining Payment Rejected */}
+                      {booking.remaining_payment_status === "rejected" && (
+                        <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                          <div className="flex items-start gap-2">
+                            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                                Payment verification failed
+                              </p>
+                              {booking.rejection_reason && (
+                                <p className="text-sm text-red-600 dark:text-red-300 mt-1">
+                                  Reason: {booking.rejection_reason}
+                                </p>
+                              )}
+                              <p className="text-sm text-red-600 dark:text-red-300 mt-1">
+                                Please re-upload the correct payment proof.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Fully Paid Success Message */}
+                      {isFullyPaid(booking) && (
                         <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20 flex items-center gap-2">
                           <CheckCircle className="w-5 h-5 text-green-600" />
                           <p className="text-sm text-green-700 dark:text-green-400">
@@ -386,13 +485,26 @@ const MyBookings = () => {
           />
           <div className="relative w-full max-w-lg bg-card rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-border">
-              <h2 className="font-serif text-xl font-bold text-card-foreground">Pay Remaining Balance</h2>
+              <h2 className="font-serif text-xl font-bold text-card-foreground">
+                {showPaymentModal.remaining_payment_status === "rejected" 
+                  ? "Re-upload Payment Screenshot" 
+                  : "Pay Remaining Balance"
+                }
+              </h2>
               <p className="text-sm text-muted-foreground">
                 ₹{(showPaymentModal.total_amount - showPaymentModal.advance_paid).toLocaleString()} for {showPaymentModal.trip_id}
               </p>
             </div>
 
             <div className="p-6 space-y-6">
+              {/* Rejection reason if resubmitting */}
+              {showPaymentModal.remaining_payment_status === "rejected" && showPaymentModal.rejection_reason && (
+                <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                  <p className="text-sm font-medium text-red-700 dark:text-red-400">Previous rejection reason:</p>
+                  <p className="text-sm text-red-600 dark:text-red-300">{showPaymentModal.rejection_reason}</p>
+                </div>
+              )}
+
               {/* UPI QR Code */}
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-4">Scan QR code to pay via UPI</p>
@@ -433,49 +545,50 @@ const MyBookings = () => {
                       <div className="py-4">
                         <Image className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                         <p className="text-sm text-muted-foreground">Click to upload screenshot</p>
+                        <p className="text-xs text-muted-foreground mt-1">Max size: 5MB</p>
                       </div>
                     )}
                   </div>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
+                  <input
+                    type="file"
+                    accept="image/*"
                     onChange={handleFileChange}
+                    className="hidden"
                   />
                 </label>
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => {
-                    setShowPaymentModal(null);
-                    setScreenshotFile(null);
-                    setScreenshotPreview(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  className="flex-1"
-                  disabled={!screenshotFile || uploadingId === showPaymentModal.id}
-                  onClick={() => uploadRemainingScreenshot(showPaymentModal.id)}
-                >
-                  {uploadingId === showPaymentModal.id ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-4 h-4 mr-2" />
-                      Submit Payment
-                    </>
-                  )}
-                </Button>
-              </div>
+              {/* Submit Button */}
+              <Button
+                onClick={() => uploadRemainingScreenshot(showPaymentModal.id)}
+                disabled={!screenshotFile || uploadingId === showPaymentModal.id}
+                className="w-full"
+              >
+                {uploadingId === showPaymentModal.id ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Submit Payment Proof
+                  </>
+                )}
+              </Button>
+
+              {/* Cancel Button */}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowPaymentModal(null);
+                  setScreenshotFile(null);
+                  setScreenshotPreview(null);
+                }}
+                className="w-full"
+              >
+                Cancel
+              </Button>
             </div>
           </div>
         </div>

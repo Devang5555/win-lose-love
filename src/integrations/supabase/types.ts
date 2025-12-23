@@ -76,11 +76,16 @@ export type Database = {
           payment_status: string
           phone: string
           pickup_location: string | null
+          rejection_reason: string | null
+          remaining_payment_status: string | null
+          remaining_payment_uploaded_at: string | null
+          remaining_payment_verified_at: string | null
           remaining_screenshot_url: string | null
           total_amount: number
           trip_id: string
           updated_at: string | null
           user_id: string | null
+          verified_by_admin_id: string | null
         }
         Insert: {
           advance_paid?: number
@@ -96,11 +101,16 @@ export type Database = {
           payment_status?: string
           phone: string
           pickup_location?: string | null
+          rejection_reason?: string | null
+          remaining_payment_status?: string | null
+          remaining_payment_uploaded_at?: string | null
+          remaining_payment_verified_at?: string | null
           remaining_screenshot_url?: string | null
           total_amount: number
           trip_id: string
           updated_at?: string | null
           user_id?: string | null
+          verified_by_admin_id?: string | null
         }
         Update: {
           advance_paid?: number
@@ -116,11 +126,16 @@ export type Database = {
           payment_status?: string
           phone?: string
           pickup_location?: string | null
+          rejection_reason?: string | null
+          remaining_payment_status?: string | null
+          remaining_payment_uploaded_at?: string | null
+          remaining_payment_verified_at?: string | null
           remaining_screenshot_url?: string | null
           total_amount?: number
           trip_id?: string
           updated_at?: string | null
           user_id?: string | null
+          verified_by_admin_id?: string | null
         }
         Relationships: [
           {
