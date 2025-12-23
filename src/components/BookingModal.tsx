@@ -174,16 +174,13 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
 
         if (error) throw error;
 
-        // Update batch seats_booked count
+        // Update batch seats_booked count using atomic RPC to prevent race conditions
         if (formData.batchId) {
           const travelersCount = parseInt(formData.travelers);
-          // Use direct SQL increment to avoid race conditions
-          const { error: batchError } = await supabase
-            .from("batches")
-            .update({ 
-              seats_booked: (selectedBatch?.seats_booked || 0) + travelersCount 
-            })
-            .eq("id", formData.batchId);
+          const { error: batchError } = await supabase.rpc(
+            'increment_seats_booked',
+            { batch_id_param: formData.batchId, seats_count: travelersCount }
+          );
           
           if (batchError) {
             console.error('Failed to update batch seats:', batchError);
