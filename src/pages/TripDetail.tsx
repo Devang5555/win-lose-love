@@ -110,30 +110,29 @@ const TripDetail = () => {
           <span className="hidden md:inline">Back to Journeys</span>
         </Link>
 
-        {/* Status Badge */}
-        <div className="absolute top-24 md:top-28 right-4 md:right-8">
-          {isBookable ? (
-            <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold px-4 py-2 text-sm animate-pulse">
-              <Sparkles className="w-4 h-4 mr-2" />
-              READY TO JOIN
-            </Badge>
-          ) : (
-            <Badge className="bg-sunset text-primary-foreground font-bold px-4 py-2 text-sm">
-              🚀 Coming Soon
-            </Badge>
-          )}
-        </div>
-
         {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-12">
           <div className="container mx-auto">
-            <div className="flex flex-wrap gap-2 mb-4">
-              <Badge className="bg-primary text-primary-foreground font-semibold">{trip.duration}</Badge>
-              {trip.locations?.slice(0, 3).map((loc) => (
-                <Badge key={loc} variant="secondary" className="bg-background/30 text-primary-foreground border-0 backdrop-blur-sm">
-                  {loc}
+            {/* Status Badge - moved inside content for better mobile layout */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-wrap gap-1.5 md:gap-2 flex-1 pr-2">
+                <Badge className="bg-primary text-primary-foreground font-semibold text-xs md:text-sm">{trip.duration}</Badge>
+                {trip.locations?.slice(0, 2).map((loc) => (
+                  <Badge key={loc} variant="secondary" className="bg-background/30 text-primary-foreground border-0 backdrop-blur-sm text-xs md:text-sm hidden sm:inline-flex">
+                    {loc}
+                  </Badge>
+                ))}
+              </div>
+              {isBookable ? (
+                <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm animate-pulse whitespace-nowrap flex-shrink-0">
+                  <Sparkles className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                  READY TO JOIN
                 </Badge>
-              ))}
+              ) : (
+                <Badge className="bg-sunset text-primary-foreground font-bold px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm whitespace-nowrap flex-shrink-0">
+                  🚀 Coming Soon
+                </Badge>
+              )}
             </div>
             <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4">
               {trip.tripName}
