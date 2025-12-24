@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, User, Phone, Calendar, MapPin, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { getActiveTrips } from "@/data/trips";
 
 interface InterestPopupProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface TripOption {
+  trip_id: string;
+  trip_name: string;
 }
 
 const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
@@ -20,6 +24,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [trips, setTrips] = useState<TripOption[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",
@@ -27,7 +32,24 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
     preferredDate: "",
   });
 
-  const activeTrips = getActiveTrips();
+  // Fetch trips from database
+  useEffect(() => {
+    const fetchTrips = async () => {
+      const { data, error } = await supabase
+        .from('trips')
+        .select('trip_id, trip_name')
+        .eq('is_active', true)
+        .order('trip_name');
+      
+      if (!error && data) {
+        setTrips(data);
+      }
+    };
+    
+    if (isOpen) {
+      fetchTrips();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -66,7 +88,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
     setLoading(true);
 
     try {
-      const selectedTrip = activeTrips.find(t => t.tripId === formData.tripId);
+      const selectedTrip = trips.find(t => t.trip_id === formData.tripId);
       
       const { error } = await supabase.from("interested_users").insert({
         user_id: user.id,
@@ -75,7 +97,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
         phone: formData.mobile.replace(/\D/g, ''),
         trip_id: formData.tripId,
         preferred_month: formData.preferredDate,
-        message: `Interested in ${selectedTrip?.tripName || "trip"}`,
+        message: `Interested in ${selectedTrip?.trip_name || "trip"}`,
       });
 
       if (error) throw error;
@@ -171,9 +193,9 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
                 <SelectValue placeholder="Select a journey" />
               </SelectTrigger>
               <SelectContent>
-                {activeTrips.map((trip) => (
-                  <SelectItem key={trip.tripId} value={trip.tripId}>
-                    {trip.tripName}
+                {trips.map((trip) => (
+                  <SelectItem key={trip.trip_id} value={trip.trip_id}>
+                    {trip.trip_name}
                   </SelectItem>
                 ))}
               </SelectContent>
