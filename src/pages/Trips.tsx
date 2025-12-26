@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, Sparkles, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,9 +12,18 @@ import { useTrips } from "@/hooks/useTrips";
 
 const Trips = () => {
   const { trips, loading, isTripBookable } = useTrips();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
   const [showBookableOnly, setShowBookableOnly] = useState(false);
+
+  // Sync URL search param with state
+  useEffect(() => {
+    const urlSearch = searchParams.get("search");
+    if (urlSearch) {
+      setSearchQuery(urlSearch);
+    }
+  }, [searchParams]);
 
   const durations = ["2D/1N", "3D/2N", "3N/2D", "4D/3N", "5D/4N"];
 
@@ -37,6 +47,7 @@ const Trips = () => {
     setSearchQuery("");
     setSelectedDuration(null);
     setShowBookableOnly(false);
+    setSearchParams({});
   };
 
   return (

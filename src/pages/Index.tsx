@@ -9,10 +9,9 @@ import { useTrips } from "@/hooks/useTrips";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
-  const { loading, getBookableTrips, getUpcomingTrips, isTripBookable } = useTrips();
+  const { loading, getBookableTrips } = useTrips();
 
   const bookableTrips = getBookableTrips();
-  const upcomingTrips = getUpcomingTrips().slice(0, 4);
 
   const features = [
     {
@@ -114,34 +113,53 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Upcoming Trips */}
-      {!loading && upcomingTrips.length > 0 && (
-        <section className="py-16 md:py-24 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-              <div>
-                <span className="text-sunset font-bold text-sm uppercase tracking-wider">Coming Soon</span>
-                <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">
-                  Upcoming Journeys
-                </h2>
-                <p className="text-muted-foreground mt-2">Get notified when these experiences launch!</p>
-              </div>
-              <Button asChild variant="outline" className="font-semibold">
-                <Link to="/trips">
-                  See What's Coming
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Link>
-              </Button>
+      {/* Popular Destinations */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+            <div>
+              <span className="text-sunset font-bold text-sm uppercase tracking-wider">Explore India</span>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">
+                Popular Destinations
+              </h2>
+              <p className="text-muted-foreground mt-2">Click to discover trips in your favorite destinations</p>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {upcomingTrips.map((trip) => (
-                <TripCard key={trip.trip_id} trip={trip} isBookable={false} />
-              ))}
-            </div>
+            <Button asChild variant="outline" className="font-semibold">
+              <Link to="/trips">
+                View All Trips
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
           </div>
-        </section>
-      )}
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[
+              { name: "Manali", image: "https://images.unsplash.com/photo-1571401835393-8c5f35328320?w=400" },
+              { name: "Goa", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400" },
+              { name: "Gokarna", image: "https://images.unsplash.com/photo-1590766740554-038e9dc9c4d6?w=400" },
+              { name: "Rishikesh", image: "https://images.unsplash.com/photo-1591018653367-2bd4caac9559?w=400" },
+              { name: "Udaipur", image: "https://images.unsplash.com/photo-1595658658481-d53d3f999875?w=400" },
+              { name: "Jaipur", image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400" },
+            ].map((destination) => (
+              <Link
+                key={destination.name}
+                to={`/trips?search=${encodeURIComponent(destination.name)}`}
+                className="group relative rounded-2xl overflow-hidden aspect-square shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+              >
+                <img
+                  src={destination.image}
+                  alt={destination.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h3 className="font-serif text-lg font-bold text-white">{destination.name}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 bg-gradient-to-r from-primary via-ocean-dark to-accent">
