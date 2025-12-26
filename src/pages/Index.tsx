@@ -65,12 +65,12 @@ const Index = () => {
               <Skeleton className="h-64 w-full rounded-2xl" />
             </div>
           ) : bookableTrips.length > 0 ? (
-            <div className="grid grid-cols-1 gap-8">
-              {bookableTrips.map((trip, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {bookableTrips.map((trip) => (
                 <TripCard 
                   key={trip.trip_id} 
                   trip={trip} 
-                  featured={index === 0} 
+                  featured={false} 
                   isBookable={true} 
                 />
               ))}
