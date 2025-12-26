@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -142,6 +142,7 @@ const Admin = () => {
         (u) =>
           u.full_name.toLowerCase().includes(term) ||
           u.phone.includes(term) ||
+          u.email.toLowerCase().includes(term) ||
           u.trip_id.toLowerCase().includes(term)
       );
     }
@@ -710,12 +711,58 @@ Please re-upload the correct payment proof from your dashboard.
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by name, phone, or trip..."
+                    placeholder="Search by name, phone, email, or trip..."
                     value={leadSearchTerm}
                     onChange={(e) => setLeadSearchTerm(e.target.value)}
                     className="pl-10"
                   />
                 </div>
+                <Button 
+                  onClick={() => {
+                    const csvData = filteredInterested.map(lead => ({
+                      Name: lead.full_name,
+                      Email: lead.email || '',
+                      Phone: lead.phone,
+                      Trip: lead.trip_id,
+                      'Preferred Month': lead.preferred_month || '',
+                      'Submitted At': formatDate(lead.created_at),
+                      Type: lead.user_id ? 'Registered' : 'Guest',
+                    }));
+
+                    const headers = Object.keys(csvData[0] || {});
+                    const csvContent = [
+                      headers.join(','),
+                      ...csvData.map(row => 
+                        headers.map(header => {
+                          const value = row[header as keyof typeof row] || '';
+                          const escaped = String(value).replace(/"/g, '""');
+                          return escaped.includes(',') || escaped.includes('"') ? `"${escaped}"` : escaped;
+                        }).join(',')
+                      )
+                    ].join('\n');
+
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `interested-users-${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    toast({
+                      title: "Export Successful",
+                      description: `Exported ${filteredInterested.length} leads to CSV`,
+                    });
+                  }} 
+                  variant="outline"
+                  disabled={filteredInterested.length === 0}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Export CSV ({filteredInterested.length})
+                </Button>
               </div>
 
               {/* Leads Table */}

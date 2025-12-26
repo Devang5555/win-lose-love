@@ -253,6 +253,10 @@ export const useTrips = () => {
     return trips.filter((trip) => !isTripBookable(trip.trip_id));
   }, [trips, isTripBookable]);
 
+  const getPopularDestinations = useCallback((limit: number = 6): DatabaseTrip[] => {
+    return trips.slice(0, limit);
+  }, [trips]);
+
   const getTrip = useCallback(
     (tripId: string): DatabaseTrip | undefined => {
       return trips.find((t) => t.trip_id === tripId);
@@ -303,6 +307,7 @@ export const useTrips = () => {
     isTripBookable,
     getBookableTrips,
     getUpcomingTrips,
+    getPopularDestinations,
     getTrip,
     getTripPrice,
     formatPrice,
