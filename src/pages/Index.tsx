@@ -146,8 +146,8 @@ const Index = () => {
             {[
               { name: "Manali", tripId: "manali-escape-009", image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400" },
               { name: "Goa", tripId: "goa-beach-bliss-010", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400" },
-              { name: "Gokarna", tripId: "gokarna-beach-trek-011", image: "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400" },
-              { name: "Rishikesh", tripId: "rishikesh-adventure-012", image: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?w=400" },
+              { name: "Gokarna", tripId: "gokarna-beach-trek-011", image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=400&auto=format&fit=crop&q=80" },
+              { name: "Rishikesh", tripId: "rishikesh-adventure-012", image: "https://images.unsplash.com/photo-1548013146-72479768bada?w=400&auto=format&fit=crop&q=80" },
               { name: "Udaipur", tripId: "udaipur-royal-013", image: "https://images.unsplash.com/photo-1595658658481-d53d3f999875?w=400" },
               { name: "Jaipur", tripId: "jaipur-pink-city-014", image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400" },
             ].map((destination) => (

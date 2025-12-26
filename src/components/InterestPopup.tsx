@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { X, User, Phone, Calendar, MapPin, Sparkles } from "lucide-react";
+
+import { X, User, Phone, Calendar, MapPin, Sparkles, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,11 +23,12 @@ interface TripOption {
 const InterestPopup = ({ isOpen, onClose, preselectedTripId }: InterestPopupProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  
   const [loading, setLoading] = useState(false);
   const [trips, setTrips] = useState<TripOption[]>([]);
   const [formData, setFormData] = useState({
     name: "",
+    email: user?.email || "",
     mobile: "",
     tripId: preselectedTripId || "",
     preferredDate: "",
@@ -77,6 +78,15 @@ const InterestPopup = ({ isOpen, onClose, preselectedTripId }: InterestPopupProp
       return;
     }
 
+    if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email.trim())) {
+      toast({
+        title: "Valid Email Required",
+        description: "Please enter a valid email so we can contact you.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!formData.tripId) {
       toast({
         title: "Trip Required",
@@ -98,46 +108,30 @@ const InterestPopup = ({ isOpen, onClose, preselectedTripId }: InterestPopupProp
       return;
     }
 
-    // Require user to be logged in
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please login to submit your interest.",
-        variant: "destructive",
-      });
-      onClose();
-      navigate("/auth");
-      return;
-    }
 
     setLoading(true);
 
     try {
-      const selectedTrip = trips.find(t => t.trip_id === formData.tripId);
-      
+      const selectedTrip = trips.find((t) => t.trip_id === formData.tripId);
+
       // Format phone with + prefix for database validation
-      const phoneWithPrefix = cleanedMobile.startsWith('+') ? cleanedMobile : `+${cleanedMobile}`;
-      
+      const phoneWithPrefix = cleanedMobile.startsWith("+") ? cleanedMobile : `+${cleanedMobile}`;
+
       const insertData = {
-        user_id: user.id,
+        user_id: user?.id ?? null,
         full_name: formData.name.trim(),
-        email: user.email || "",
+        email: formData.email.trim(),
         phone: phoneWithPrefix,
         trip_id: formData.tripId,
         preferred_month: formData.preferredDate || null,
         message: `Interested in ${selectedTrip?.trip_name || "trip"}`,
       };
 
-      console.log("Submitting interest:", insertData);
-      
-      const { error, data } = await supabase.from("interested_users").insert(insertData).select();
+      const { error } = await supabase.from("interested_users").insert(insertData);
 
       if (error) {
-        console.error("Supabase error:", error);
         throw error;
       }
-
-      console.log("Interest submitted successfully:", data);
 
       toast({
         title: "You're in!",
@@ -147,6 +141,7 @@ const InterestPopup = ({ isOpen, onClose, preselectedTripId }: InterestPopupProp
       // Reset form
       setFormData({
         name: "",
+        email: user?.email || "",
         mobile: "",
         tripId: "",
         preferredDate: "",
@@ -207,6 +202,21 @@ const InterestPopup = ({ isOpen, onClose, preselectedTripId }: InterestPopupProp
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Enter your full name"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="email" className="flex items-center gap-2 mb-2">
+              <Mail className="w-4 h-4 text-primary" />
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="you@example.com"
             />
           </div>
 
