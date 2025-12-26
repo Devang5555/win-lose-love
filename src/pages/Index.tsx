@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Star, Shield, Users, Headphones, Sparkles, Compass } from "lucide-react";
+import { ArrowRight, Star, Shield, Users, Headphones, Sparkles, Compass, Calendar } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
@@ -9,9 +9,10 @@ import { useTrips } from "@/hooks/useTrips";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
-  const { loading, getBookableTrips } = useTrips();
+  const { loading, getBookableTrips, getUpcomingTrips } = useTrips();
 
   const bookableTrips = getBookableTrips();
+  const upcomingTrips = getUpcomingTrips();
 
   const features = [
     {
@@ -134,10 +135,10 @@ const Index = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { name: "Manali", tripId: "manali-escape-009", image: "https://images.unsplash.com/photo-1571401835393-8c5f35328320?w=400" },
+              { name: "Manali", tripId: "manali-escape-009", image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400" },
               { name: "Goa", tripId: "goa-beach-bliss-010", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400" },
-              { name: "Gokarna", tripId: "gokarna-beach-trek-011", image: "https://images.unsplash.com/photo-1590766740554-038e9dc9c4d6?w=400" },
-              { name: "Rishikesh", tripId: "rishikesh-adventure-012", image: "https://images.unsplash.com/photo-1591018653367-2bd4caac9559?w=400" },
+              { name: "Gokarna", tripId: "gokarna-beach-trek-011", image: "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400" },
+              { name: "Rishikesh", tripId: "rishikesh-adventure-012", image: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?w=400" },
               { name: "Udaipur", tripId: "udaipur-royal-013", image: "https://images.unsplash.com/photo-1595658658481-d53d3f999875?w=400" },
               { name: "Jaipur", tripId: "jaipur-pink-city-014", image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400" },
             ].map((destination) => (
@@ -158,6 +159,53 @@ const Index = () => {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Upcoming Trips Section */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-background to-muted">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-5 h-5 text-sunset" />
+                <span className="text-sunset font-bold text-sm uppercase tracking-wider">Coming Soon</span>
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
+                Upcoming Trips
+              </h2>
+              <p className="text-muted-foreground mt-2">Register your interest — be the first to know when bookings open!</p>
+            </div>
+            <Button asChild variant="outline" className="font-semibold">
+              <Link to="/trips">
+                View All Trips
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+          
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-64 w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : upcomingTrips.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingTrips.slice(0, 6).map((trip) => (
+                <TripCard 
+                  key={trip.trip_id} 
+                  trip={trip} 
+                  featured={false} 
+                  isBookable={false} 
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-muted rounded-2xl">
+              <p className="text-muted-foreground">More exciting trips coming soon! Stay tuned.</p>
+            </div>
+          )}
         </div>
       </section>
 
