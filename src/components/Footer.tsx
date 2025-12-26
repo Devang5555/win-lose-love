@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Instagram, Facebook, Twitter, Compass } from "lucide-react";
+import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from "lucide-react";
 import logo from "@/assets/logo.jpg";
+import { useTrips } from "@/hooks/useTrips";
 
 const Footer = () => {
+  const { getPopularDestinations } = useTrips();
+  const destinations = getPopularDestinations(6);
+
   return (
     <footer className="bg-foreground text-background">
       <div className="container mx-auto px-4 py-12 md:py-16">
@@ -67,36 +71,16 @@ const Footer = () => {
           <div>
             <h4 className="font-serif text-lg font-semibold mb-4">Destinations</h4>
             <ul className="space-y-3">
-              <li>
-                <span className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors cursor-default">
-                  Manali
-                </span>
-              </li>
-              <li>
-                <span className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors cursor-default">
-                  Goa
-                </span>
-              </li>
-              <li>
-                <span className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors cursor-default">
-                  Gokarna
-                </span>
-              </li>
-              <li>
-                <span className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors cursor-default">
-                  Rishikesh
-                </span>
-              </li>
-              <li>
-                <span className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors cursor-default">
-                  Udaipur
-                </span>
-              </li>
-              <li>
-                <span className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors cursor-default">
-                  Jaipur
-                </span>
-              </li>
+              {destinations.map((trip) => (
+                <li key={trip.trip_id}>
+                  <Link 
+                    to={`/trips/${trip.trip_id}`}
+                    className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors"
+                  >
+                    {trip.locations?.[0] || trip.trip_name.split(' ')[0]}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

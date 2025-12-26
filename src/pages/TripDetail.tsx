@@ -19,10 +19,17 @@ const TripDetail = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const trip = getTrip(tripId || "");
-  const { isTripBookable, loading } = useTrips();
+  const { isTripBookable, loading, getTrip: getDbTrip } = useTrips();
+  const dbTrip = tripId ? getDbTrip(tripId) : undefined;
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isInterestOpen, setIsInterestOpen] = useState(false);
   const { toast } = useToast();
+
+  // Use database price if available, otherwise fall back to static
+  const displayPrice = dbTrip?.price_default ?? (trip ? getTripPrice(trip) : 0);
+  const advanceAmount = dbTrip?.advance_amount ?? trip?.booking?.advance ?? 2000;
+  const hasPunePrice = dbTrip?.price_from_pune || (typeof trip?.price === 'object' && trip.price.fromPune);
+  const punePrice = dbTrip?.price_from_pune ?? (typeof trip?.price === 'object' ? trip.price.fromPune : null);
 
   if (loading) {
     return (
@@ -52,8 +59,6 @@ const TripDetail = () => {
     );
   }
 
-  const price = getTripPrice(trip);
-  const hasMultiplePrices = typeof trip.price === "object" && trip.price.fromPune;
   const isBookable = !!tripId && isTripBookable(tripId);
 
   const handleShare = async () => {
@@ -337,19 +342,19 @@ const TripDetail = () => {
                   )}
 
                   <div className="mb-6">
-                    {hasMultiplePrices && typeof trip.price === 'object' && (
+                    {hasPunePrice && punePrice && (
                       <div className="flex justify-between items-center mb-2 text-sm text-muted-foreground">
                         <span>From Pune</span>
-                        <span className="font-medium">{formatPrice(trip.price.fromPune!)}</span>
+                        <span className="font-medium">{formatPrice(punePrice)}</span>
                       </div>
                     )}
                     <div className="flex items-baseline gap-2">
                       <span className={`text-4xl font-bold ${isBookable ? 'text-primary' : 'text-muted-foreground'}`}>
-                        {formatPrice(price)}
+                        {formatPrice(displayPrice)}
                       </span>
                       <span className="text-muted-foreground">per person</span>
                     </div>
-                    {hasMultiplePrices && (
+                    {hasPunePrice && (
                       <p className="text-xs text-muted-foreground mt-1">From Mumbai</p>
                     )}
                   </div>
@@ -385,10 +390,10 @@ const TripDetail = () => {
                     </p>
                   )}
 
-                  {isBookable && trip.booking && (
+                  {isBookable && (
                     <div className="bg-primary/10 rounded-xl p-4 mb-6 border border-primary/20">
                       <p className="text-sm text-primary font-semibold">
-                        ✨ Reserve with just {formatPrice(trip.booking.advance)} advance
+                        ✨ Reserve with just {formatPrice(advanceAmount)} advance
                       </p>
                     </div>
                   )}
