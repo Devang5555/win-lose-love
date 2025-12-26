@@ -11,12 +11,13 @@ import { useTrips } from "@/hooks/useTrips";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
-  const { loading, getBookableTrips, getUpcomingTrips } = useTrips();
+  const { loading, getBookableTrips, getUpcomingTrips, getPopularDestinations } = useTrips();
   const [showInterestPopup, setShowInterestPopup] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
 
   const bookableTrips = getBookableTrips();
   const upcomingTrips = getUpcomingTrips();
+  const popularDestinations = getPopularDestinations(6);
 
   const handleRegisterInterest = (tripId: string) => {
     setSelectedTripId(tripId);
@@ -142,32 +143,37 @@ const Index = () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {[
-              { name: "Manali", tripId: "manali-escape-009", image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400" },
-              { name: "Goa", tripId: "goa-beach-bliss-010", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400" },
-              { name: "Gokarna", tripId: "gokarna-beach-trek-011", image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=400&auto=format&fit=crop&q=80" },
-              { name: "Rishikesh", tripId: "rishikesh-adventure-012", image: "https://images.unsplash.com/photo-1548013146-72479768bada?w=400&auto=format&fit=crop&q=80" },
-              { name: "Udaipur", tripId: "udaipur-royal-013", image: "https://images.unsplash.com/photo-1595658658481-d53d3f999875?w=400" },
-              { name: "Jaipur", tripId: "jaipur-pink-city-014", image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400" },
-            ].map((destination) => (
-              <Link
-                key={destination.name}
-                to={`/trips/${destination.tripId}`}
-                className="group relative rounded-2xl overflow-hidden aspect-square shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
-              >
-                <img
-                  src={destination.image}
-                  alt={destination.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <h3 className="font-serif text-lg font-bold text-white">{destination.name}</h3>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Skeleton key={i} className="aspect-square rounded-2xl" />
+              ))}
+            </div>
+          ) : popularDestinations.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {popularDestinations.map((trip) => (
+                <Link
+                  key={trip.trip_id}
+                  to={`/trips/${trip.trip_id}`}
+                  className="group relative rounded-2xl overflow-hidden aspect-square shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+                >
+                  <img
+                    src={trip.images[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"}
+                    alt={trip.trip_name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h3 className="font-serif text-lg font-bold text-white">{trip.trip_name.split(' ')[0]}</h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-muted rounded-2xl">
+              <p className="text-muted-foreground">Destinations coming soon!</p>
+            </div>
+          )}
         </div>
       </section>
 
