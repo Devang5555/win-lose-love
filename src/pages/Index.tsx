@@ -134,16 +134,16 @@ const Index = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { name: "Manali", image: "https://images.unsplash.com/photo-1571401835393-8c5f35328320?w=400" },
-              { name: "Goa", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400" },
-              { name: "Gokarna", image: "https://images.unsplash.com/photo-1590766740554-038e9dc9c4d6?w=400" },
-              { name: "Rishikesh", image: "https://images.unsplash.com/photo-1591018653367-2bd4caac9559?w=400" },
-              { name: "Udaipur", image: "https://images.unsplash.com/photo-1595658658481-d53d3f999875?w=400" },
-              { name: "Jaipur", image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400" },
+              { name: "Manali", tripId: "manali-escape-009", image: "https://images.unsplash.com/photo-1571401835393-8c5f35328320?w=400" },
+              { name: "Goa", tripId: "goa-beach-bliss-010", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400" },
+              { name: "Gokarna", tripId: "gokarna-beach-trek-011", image: "https://images.unsplash.com/photo-1590766740554-038e9dc9c4d6?w=400" },
+              { name: "Rishikesh", tripId: "rishikesh-adventure-012", image: "https://images.unsplash.com/photo-1591018653367-2bd4caac9559?w=400" },
+              { name: "Udaipur", tripId: "udaipur-royal-013", image: "https://images.unsplash.com/photo-1595658658481-d53d3f999875?w=400" },
+              { name: "Jaipur", tripId: "jaipur-pink-city-014", image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400" },
             ].map((destination) => (
               <Link
                 key={destination.name}
-                to={`/trips?search=${encodeURIComponent(destination.name)}`}
+                to={`/trip/${destination.tripId}`}
                 className="group relative rounded-2xl overflow-hidden aspect-square shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
               >
                 <img
