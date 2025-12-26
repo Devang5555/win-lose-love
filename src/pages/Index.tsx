@@ -1,18 +1,27 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Star, Shield, Users, Headphones, Sparkles, Compass, Calendar } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import TripCard from "@/components/TripCard";
+import InterestPopup from "@/components/InterestPopup";
 import { Button } from "@/components/ui/button";
 import { useTrips } from "@/hooks/useTrips";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const { loading, getBookableTrips, getUpcomingTrips } = useTrips();
+  const [showInterestPopup, setShowInterestPopup] = useState(false);
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
 
   const bookableTrips = getBookableTrips();
   const upcomingTrips = getUpcomingTrips();
+
+  const handleRegisterInterest = (tripId: string) => {
+    setSelectedTripId(tripId);
+    setShowInterestPopup(true);
+  };
 
   const features = [
     {
@@ -144,7 +153,7 @@ const Index = () => {
             ].map((destination) => (
               <Link
                 key={destination.name}
-                to={`/trip/${destination.tripId}`}
+                to={`/trips/${destination.tripId}`}
                 className="group relative rounded-2xl overflow-hidden aspect-square shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
               >
                 <img
@@ -197,7 +206,8 @@ const Index = () => {
                   key={trip.trip_id} 
                   trip={trip} 
                   featured={false} 
-                  isBookable={false} 
+                  isBookable={false}
+                  onRegisterInterest={handleRegisterInterest}
                 />
               ))}
             </div>
@@ -237,6 +247,16 @@ const Index = () => {
 
 
       <Footer />
+
+      {/* Interest Popup */}
+      <InterestPopup 
+        isOpen={showInterestPopup} 
+        onClose={() => {
+          setShowInterestPopup(false);
+          setSelectedTripId(null);
+        }}
+        preselectedTripId={selectedTripId}
+      />
     </div>
   );
 };
