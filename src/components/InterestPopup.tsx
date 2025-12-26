@@ -62,9 +62,29 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate required fields
+    if (!formData.name.trim()) {
+      toast({
+        title: "Name Required",
+        description: "Please enter your full name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.tripId) {
+      toast({
+        title: "Trip Required",
+        description: "Please select a journey you're interested in",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Validate mobile number (10-15 digits)
+    const cleanedMobile = formData.mobile.replace(/\D/g, '');
     const mobileRegex = /^\d{10,15}$/;
-    if (!mobileRegex.test(formData.mobile.replace(/\D/g, ''))) {
+    if (!mobileRegex.test(cleanedMobile)) {
       toast({
         title: "Invalid Mobile Number",
         description: "Please enter a valid mobile number (10-15 digits)",
@@ -90,28 +110,49 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
     try {
       const selectedTrip = trips.find(t => t.trip_id === formData.tripId);
       
-      const { error } = await supabase.from("interested_users").insert({
+      // Format phone with + prefix for database validation
+      const phoneWithPrefix = cleanedMobile.startsWith('+') ? cleanedMobile : `+${cleanedMobile}`;
+      
+      const insertData = {
         user_id: user.id,
-        full_name: formData.name,
+        full_name: formData.name.trim(),
         email: user.email || "",
-        phone: formData.mobile.replace(/\D/g, ''),
+        phone: phoneWithPrefix,
         trip_id: formData.tripId,
-        preferred_month: formData.preferredDate,
+        preferred_month: formData.preferredDate || null,
         message: `Interested in ${selectedTrip?.trip_name || "trip"}`,
-      });
+      };
 
-      if (error) throw error;
+      console.log("Submitting interest:", insertData);
+      
+      const { error, data } = await supabase.from("interested_users").insert(insertData).select();
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      console.log("Interest submitted successfully:", data);
 
       toast({
         title: "You're in!",
         description: "We'll reach out with updates on this journey.",
       });
+      
+      // Reset form
+      setFormData({
+        name: "",
+        mobile: "",
+        tripId: "",
+        preferredDate: "",
+      });
+      
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting interest:", error);
       toast({
         title: "Submission Failed",
-        description: "Something went wrong. Please try again.",
+        description: error?.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
