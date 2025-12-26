@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface InterestPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  preselectedTripId?: string | null;
 }
 
 interface TripOption {
@@ -19,7 +20,7 @@ interface TripOption {
   trip_name: string;
 }
 
-const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
+const InterestPopup = ({ isOpen, onClose, preselectedTripId }: InterestPopupProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",
-    tripId: "",
+    tripId: preselectedTripId || "",
     preferredDate: "",
   });
 
@@ -48,8 +49,12 @@ const InterestPopup = ({ isOpen, onClose }: InterestPopupProps) => {
     
     if (isOpen) {
       fetchTrips();
+      // Update tripId when preselectedTripId changes
+      if (preselectedTripId) {
+        setFormData(prev => ({ ...prev, tripId: preselectedTripId }));
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, preselectedTripId]);
 
   if (!isOpen) return null;
 

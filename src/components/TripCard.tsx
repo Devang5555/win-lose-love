@@ -10,6 +10,7 @@ interface TripCardProps {
   trip: Trip | DatabaseTrip;
   featured?: boolean;
   isBookable?: boolean;
+  onRegisterInterest?: (tripId: string) => void;
 }
 
 // Type guard to check if trip is DatabaseTrip
@@ -17,7 +18,7 @@ const isDatabaseTrip = (trip: Trip | DatabaseTrip): trip is DatabaseTrip => {
   return 'trip_id' in trip;
 };
 
-const TripCard = ({ trip, featured = false, isBookable: isBookableProp }: TripCardProps) => {
+const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegisterInterest }: TripCardProps) => {
   // Handle both Trip and DatabaseTrip types
   const tripId = isDatabaseTrip(trip) ? trip.trip_id : trip.tripId;
   const tripName = isDatabaseTrip(trip) ? trip.trip_name : trip.tripName;
@@ -166,9 +167,18 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp }: TripCa
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
             </Button>
           ) : (
-            <Button variant="outline" size="sm" className="group-hover:bg-sunset/10 group-hover:text-sunset group-hover:border-sunset transition-colors">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="group-hover:bg-sunset/10 group-hover:text-sunset group-hover:border-sunset transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onRegisterInterest?.(tripId);
+              }}
+            >
               <Bell className="w-4 h-4 mr-1" />
-              Notify Me
+              Register Interest
             </Button>
           )}
         </div>
