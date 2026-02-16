@@ -20,6 +20,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Destinations = lazy(() => import("./pages/Destinations"));
 const DestinationDetail = lazy(() => import("./pages/DestinationDetail"));
 const SearchPage = lazy(() => import("./pages/Search"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPostPage = lazy(() => import("./pages/BlogPost"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,6 +59,8 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/my-bookings" element={<MyBookings />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/booking-success/:bookingId" element={<BookingSuccess />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

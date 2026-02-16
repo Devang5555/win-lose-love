@@ -50,6 +50,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/blog" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  Travel Blog
+                </Link>
+              </li>
+              <li>
                 <Link to="/about" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
                   Our Story
                 </Link>
@@ -57,11 +62,6 @@ const Footer = () => {
               <li>
                 <Link to="/contact" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
                   Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/faq" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
-                  FAQs
                 </Link>
               </li>
             </ul>
