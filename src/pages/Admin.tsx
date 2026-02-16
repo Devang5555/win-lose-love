@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -45,6 +46,18 @@ interface Booking {
   remaining_payment_status: string | null;
   remaining_payment_uploaded_at: string | null;
   rejection_reason: string | null;
+  cancellation_reason: string | null;
+  cancelled_at: string | null;
+}
+
+interface Refund {
+  id: string;
+  booking_id: string;
+  amount: number;
+  refund_status: string;
+  reason: string | null;
+  processed_at: string | null;
+  created_at: string;
 }
 
 interface InterestedUser {
@@ -94,6 +107,10 @@ const Admin = () => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [processingAction, setProcessingAction] = useState(false);
+  const [refunds, setRefunds] = useState<Refund[]>([]);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelRefundAmount, setCancelRefundAmount] = useState("0");
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -196,12 +213,13 @@ const Admin = () => {
   }, [selectedBooking]);
 
   const fetchData = async () => {
-    const [bookingsRes, interestedRes, batchesRes, tripsRes, destsRes] = await Promise.all([
+    const [bookingsRes, interestedRes, batchesRes, tripsRes, destsRes, refundsRes] = await Promise.all([
       supabase.from("bookings").select("*").order("created_at", { ascending: false }),
       supabase.from("interested_users").select("*").order("created_at", { ascending: false }),
       supabase.from("batches").select("*").order("start_date", { ascending: true }),
       supabase.from("trips").select("trip_id, trip_name, destination_id"),
       supabase.from("destinations").select("id, name"),
+      supabase.from("refunds").select("*").order("created_at", { ascending: false }),
     ]);
 
     if (bookingsRes.error) {
@@ -233,6 +251,10 @@ const Admin = () => {
     }
     if (!destsRes.error) {
       setAnalyticsDestinations(destsRes.data || []);
+    }
+
+    if (!refundsRes.error) {
+      setRefunds(refundsRes.data || []);
     }
 
     setLoadingData(false);
@@ -375,6 +397,90 @@ Please re-upload the correct payment proof from your dashboard.
     }
   };
 
+  // Cancel booking with seat release via RPC
+  const cancelBooking = async (booking: Booking, reason: string, refundAmount: number) => {
+    if (!reason.trim()) {
+      toast({ title: "Error", description: "Please provide a cancellation reason", variant: "destructive" });
+      return;
+    }
+
+    // 48h policy check - warn if trip starts within 48 hours
+    if (booking.batch_id) {
+      const batch = batches.find(b => b.id === booking.batch_id);
+      if (batch) {
+        const hoursUntilStart = (new Date(batch.start_date).getTime() - Date.now()) / (1000 * 60 * 60);
+        if (hoursUntilStart < 48 && hoursUntilStart > 0) {
+          if (!confirm("⚠️ Trip starts within 48 hours! This requires admin override. Proceed with cancellation?")) {
+            return;
+          }
+        }
+      }
+    }
+
+    setProcessingAction(true);
+    try {
+      const { error } = await supabase.rpc("cancel_booking_with_seat_release", {
+        p_booking_id: booking.id,
+        p_reason: reason,
+        p_refund_amount: refundAmount,
+      });
+
+      if (error) throw error;
+
+      toast({ title: "Booking Cancelled", description: "Seats released and booking cancelled successfully." });
+
+      // Notify user via WhatsApp
+      const message = `❌ Booking Cancelled
+
+Hi ${booking.full_name},
+
+Your booking for *${booking.trip_id}* has been cancelled.
+
+Reason: ${reason}
+${refundAmount > 0 ? `\nRefund Amount: ₹${refundAmount.toLocaleString()} (processing)` : ''}
+
+For queries, please contact us.
+
+– Team GoBhraman`;
+      window.open(`https://wa.me/${booking.phone}?text=${encodeURIComponent(message)}`, '_blank');
+
+      fetchData();
+      setSelectedBooking(null);
+      setShowCancelModal(false);
+      setCancelReason("");
+      setCancelRefundAmount("0");
+    } catch (error: any) {
+      console.error('Error cancelling booking:', error);
+      toast({ title: "Error", description: error.message || "Failed to cancel booking", variant: "destructive" });
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  // Update refund status
+  const updateRefundStatus = async (refundId: string, status: string) => {
+    const updateData: Record<string, any> = { refund_status: status };
+    if (status === "processed") {
+      updateData.processed_at = new Date().toISOString();
+    }
+
+    const { error } = await supabase.from("refunds").update(updateData).eq("id", refundId);
+    if (error) {
+      toast({ title: "Error", description: "Failed to update refund status", variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: `Refund marked as ${status}` });
+      // If refund processed, update booking status to refunded
+      if (status === "processed") {
+        const refund = refunds.find(r => r.id === refundId);
+        if (refund) {
+          await supabase.from("bookings").update({ booking_status: "refunded" }).eq("id", refund.booking_id);
+        }
+      }
+      fetchData();
+    }
+  };
+
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -385,6 +491,8 @@ Please re-upload the correct payment proof from your dashboard.
         return <Badge className="bg-gray-500/20 text-gray-600 border-gray-500/30">Expired</Badge>;
       case "cancelled":
         return <Badge className="bg-red-500/20 text-red-600 border-red-500/30">Cancelled</Badge>;
+      case "refunded":
+        return <Badge className="bg-purple-500/20 text-purple-600 border-purple-500/30">Refunded</Badge>;
       default:
         return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">Pending</Badge>;
     }
@@ -609,11 +717,24 @@ Please re-upload the correct payment proof from your dashboard.
                 </div>
               </div>
             </div>
+            <div className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <Ban className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">
+                    {bookings.filter((b) => b.booking_status === "cancelled").length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Cancelled</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Tabs */}
           <Tabs defaultValue="trips" className="space-y-6">
-            <TabsList className="grid w-full md:w-auto grid-cols-6 md:inline-flex">
+            <TabsList className="grid w-full md:w-auto grid-cols-7 md:inline-flex">
               <TabsTrigger value="analytics" className="gap-2">
                 <BarChart3 className="w-4 h-4" />
                 Analytics
@@ -631,6 +752,13 @@ Please re-upload the correct payment proof from your dashboard.
                 Bookings
                 {pendingRemainingVerification.length > 0 && (
                   <Badge className="ml-1 bg-blue-500 text-white">{pendingRemainingVerification.length}</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="refunds" className="gap-2">
+                <DollarSign className="w-4 h-4" />
+                Refunds
+                {refunds.filter(r => r.refund_status === "pending").length > 0 && (
+                  <Badge className="ml-1 bg-amber-500 text-white">{refunds.filter(r => r.refund_status === "pending").length}</Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger value="reviews" className="gap-2">
@@ -687,6 +815,7 @@ Please re-upload the correct payment proof from your dashboard.
                     <SelectItem value="confirmed">Confirmed</SelectItem>
                     <SelectItem value="expired">Expired</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
@@ -773,6 +902,84 @@ Please re-upload the correct payment proof from your dashboard.
                             </td>
                           </tr>
                         ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Refunds Tab */}
+            <TabsContent value="refunds" className="space-y-4">
+              <div className="bg-card border border-border rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Booking</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Customer</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Amount</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Reason</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Status</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Created</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {refunds.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                            No refunds yet
+                          </td>
+                        </tr>
+                      ) : (
+                        refunds.map((refund) => {
+                          const relatedBooking = bookings.find(b => b.id === refund.booking_id);
+                          return (
+                            <tr key={refund.id} className="hover:bg-muted/30 transition-colors">
+                              <td className="px-4 py-3">
+                                <p className="text-sm font-medium text-foreground">{relatedBooking?.trip_id || "—"}</p>
+                                <p className="text-xs text-muted-foreground">{refund.booking_id.slice(0, 8)}...</p>
+                              </td>
+                              <td className="px-4 py-3">
+                                <p className="font-medium text-foreground">{relatedBooking?.full_name || "—"}</p>
+                                <p className="text-sm text-muted-foreground">{relatedBooking?.phone || ""}</p>
+                              </td>
+                              <td className="px-4 py-3">
+                                <p className="font-semibold text-foreground">₹{Number(refund.amount).toLocaleString()}</p>
+                              </td>
+                              <td className="px-4 py-3">
+                                <p className="text-sm text-foreground max-w-[200px] truncate">{refund.reason || "—"}</p>
+                              </td>
+                              <td className="px-4 py-3">
+                                <Badge className={
+                                  refund.refund_status === "processed" 
+                                    ? "bg-green-500/20 text-green-600 border-green-500/30" 
+                                    : "bg-amber-500/20 text-amber-600 border-amber-500/30"
+                                }>
+                                  {refund.refund_status === "processed" ? "Processed" : "Pending"}
+                                </Badge>
+                              </td>
+                              <td className="px-4 py-3">
+                                <p className="text-sm text-muted-foreground">{formatDate(refund.created_at)}</p>
+                                {refund.processed_at && (
+                                  <p className="text-xs text-green-600">Processed: {formatDate(refund.processed_at)}</p>
+                                )}
+                              </td>
+                              <td className="px-4 py-3">
+                                {refund.refund_status === "pending" && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => updateRefundStatus(refund.id, "processed")}
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    Mark Processed
+                                  </Button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
@@ -935,6 +1142,9 @@ Please re-upload the correct payment proof from your dashboard.
               setSelectedBooking(null);
               setShowRejectModal(false);
               setRejectionReason("");
+              setShowCancelModal(false);
+              setCancelReason("");
+              setCancelRefundAmount("0");
             }}
           />
           <div className="relative w-full max-w-3xl bg-card rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
@@ -945,6 +1155,9 @@ Please re-upload the correct payment proof from your dashboard.
                   setSelectedBooking(null);
                   setShowRejectModal(false);
                   setRejectionReason("");
+                  setShowCancelModal(false);
+                  setCancelReason("");
+                  setCancelRefundAmount("0");
                 }}
                 className="p-2 rounded-full hover:bg-muted transition-colors"
               >
@@ -1129,6 +1342,39 @@ Please re-upload the correct payment proof from your dashboard.
                   <p className="font-medium text-foreground">{formatDate(selectedBooking.created_at)}</p>
                 </div>
               </div>
+
+              {/* Cancellation Info */}
+              {selectedBooking.booking_status === "cancelled" && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                  <h4 className="font-medium text-red-700 dark:text-red-400 mb-2 flex items-center gap-2">
+                    <Ban className="w-4 h-4" />
+                    Cancellation Details
+                  </h4>
+                  {selectedBooking.cancellation_reason && (
+                    <p className="text-sm text-foreground mb-1"><strong>Reason:</strong> {selectedBooking.cancellation_reason}</p>
+                  )}
+                  {selectedBooking.cancelled_at && (
+                    <p className="text-sm text-muted-foreground">Cancelled on: {formatDate(selectedBooking.cancelled_at)}</p>
+                  )}
+                  {(() => {
+                    const bookingRefunds = refunds.filter(r => r.booking_id === selectedBooking.id);
+                    if (bookingRefunds.length === 0) return null;
+                    return (
+                      <div className="mt-2 pt-2 border-t border-red-500/20">
+                        <p className="text-sm font-medium text-foreground mb-1">Refund(s):</p>
+                        {bookingRefunds.map(r => (
+                          <div key={r.id} className="flex items-center justify-between text-sm">
+                            <span>₹{Number(r.amount).toLocaleString()}</span>
+                            <Badge className={r.refund_status === "processed" ? "bg-green-500/20 text-green-600" : "bg-amber-500/20 text-amber-600"}>
+                              {r.refund_status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
               {/* Rejection Reason Input */}
               {showRejectModal && (
@@ -1316,6 +1562,20 @@ Please re-upload the correct payment proof from your dashboard.
                   </div>
                 )}
 
+                {/* Cancel Booking Button - show for non-cancelled/non-expired/non-refunded */}
+                {!["cancelled", "expired", "refunded"].includes(selectedBooking.booking_status) && !showCancelModal && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      setShowCancelModal(true);
+                      setCancelRefundAmount(selectedBooking.advance_paid > 0 ? selectedBooking.advance_paid.toString() : "0");
+                    }}
+                  >
+                    <Ban className="w-4 h-4 mr-2" />
+                    Cancel Booking
+                  </Button>
+                )}
+
                 <Button
                   variant="outline"
                   onClick={() => window.open(`https://wa.me/${selectedBooking.phone}`, '_blank')}
@@ -1324,6 +1584,62 @@ Please re-upload the correct payment proof from your dashboard.
                   WhatsApp
                 </Button>
               </div>
+
+              {/* Cancel Booking Modal */}
+              {showCancelModal && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                  <h4 className="font-medium text-red-700 dark:text-red-400 mb-2 flex items-center gap-2">
+                    <Ban className="w-4 h-4" />
+                    Cancel Booking
+                  </h4>
+                  <p className="text-sm text-red-600 dark:text-red-300 mb-3">
+                    This will cancel the booking{selectedBooking.booking_status === "confirmed" ? " and release seats back to the batch" : ""}. This action cannot be undone.
+                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm mb-1 block">Cancellation Reason *</Label>
+                      <Textarea
+                        placeholder="Enter reason for cancellation..."
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm mb-1 block">Refund Amount (₹)</Label>
+                      <Input
+                        type="number"
+                        value={cancelRefundAmount}
+                        onChange={(e) => setCancelRefundAmount(e.target.value)}
+                        min="0"
+                        max={selectedBooking.total_amount.toString()}
+                        placeholder="0"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Total paid: ₹{selectedBooking.advance_paid.toLocaleString()} | Set to 0 for no refund
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="destructive"
+                        onClick={() => cancelBooking(selectedBooking, cancelReason, parseFloat(cancelRefundAmount) || 0)}
+                        disabled={!cancelReason.trim() || processingAction}
+                      >
+                        {processingAction ? "Cancelling..." : "Confirm Cancellation"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowCancelModal(false);
+                          setCancelReason("");
+                          setCancelRefundAmount("0");
+                        }}
+                      >
+                        Go Back
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Warning Messages */}
               {!advanceScreenshotUrl && selectedBooking.payment_status === "pending_advance" && (
