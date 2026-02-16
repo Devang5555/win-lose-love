@@ -368,6 +368,51 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          contacted_at: string | null
+          created_at: string
+          destination_interest: string | null
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          source: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          wallet_credited: boolean
+        }
+        Insert: {
+          contacted_at?: string | null
+          created_at?: string
+          destination_interest?: string | null
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          wallet_credited?: boolean
+        }
+        Update: {
+          contacted_at?: string | null
+          created_at?: string
+          destination_interest?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          wallet_credited?: boolean
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number

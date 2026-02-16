@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import TripCard from "@/components/TripCard";
 import InterestPopup from "@/components/InterestPopup";
+import ExitIntentPopup from "@/components/ExitIntentPopup";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTrips } from "@/hooks/useTrips";
@@ -307,6 +308,8 @@ const Index = () => {
         }}
         preselectedTripId={selectedTripId}
       />
+
+      <ExitIntentPopup />
     </div>
   );
 };
