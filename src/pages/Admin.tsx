@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3 } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +15,7 @@ import Footer from "@/components/Footer";
 import BatchManagement from "@/components/admin/BatchManagement";
 import TripManagement from "@/components/admin/TripManagement";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
+import ReviewsManagement from "@/components/admin/ReviewsManagement";
 import { 
   openWhatsAppAdvanceVerified, 
   openWhatsAppFullyPaid,
@@ -612,7 +613,7 @@ Please re-upload the correct payment proof from your dashboard.
 
           {/* Tabs */}
           <Tabs defaultValue="trips" className="space-y-6">
-            <TabsList className="grid w-full md:w-auto grid-cols-5 md:inline-flex">
+            <TabsList className="grid w-full md:w-auto grid-cols-6 md:inline-flex">
               <TabsTrigger value="analytics" className="gap-2">
                 <BarChart3 className="w-4 h-4" />
                 Analytics
@@ -631,6 +632,10 @@ Please re-upload the correct payment proof from your dashboard.
                 {pendingRemainingVerification.length > 0 && (
                   <Badge className="ml-1 bg-blue-500 text-white">{pendingRemainingVerification.length}</Badge>
                 )}
+              </TabsTrigger>
+              <TabsTrigger value="reviews" className="gap-2">
+                <Star className="w-4 h-4" />
+                Reviews
               </TabsTrigger>
               <TabsTrigger value="leads" className="gap-2">
                 <Users className="w-4 h-4" />
@@ -773,6 +778,11 @@ Please re-upload the correct payment proof from your dashboard.
                   </table>
                 </div>
               </div>
+            </TabsContent>
+
+            {/* Reviews Tab */}
+            <TabsContent value="reviews">
+              <ReviewsManagement />
             </TabsContent>
 
             {/* Leads Tab */}

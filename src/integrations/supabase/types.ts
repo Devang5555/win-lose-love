@@ -287,6 +287,42 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          is_verified: boolean
+          is_visible: boolean
+          rating: number
+          review_text: string | null
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          is_verified?: boolean
+          is_visible?: boolean
+          rating: number
+          review_text?: string | null
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          is_verified?: boolean
+          is_visible?: boolean
+          rating?: number
+          review_text?: string | null
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trips: {
         Row: {
           advance_amount: number | null
