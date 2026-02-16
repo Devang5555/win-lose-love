@@ -16,11 +16,13 @@ export type Database = {
     Tables: {
       batches: {
         Row: {
+          available_seats: number | null
           batch_name: string
           batch_size: number
           created_at: string | null
           end_date: string
           id: string
+          price_override: number | null
           seats_booked: number
           start_date: string
           status: string
@@ -28,11 +30,13 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          available_seats?: number | null
           batch_name: string
           batch_size?: number
           created_at?: string | null
           end_date: string
           id?: string
+          price_override?: number | null
           seats_booked?: number
           start_date: string
           status?: string
@@ -40,11 +44,13 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          available_seats?: number | null
           batch_name?: string
           batch_size?: number
           created_at?: string | null
           end_date?: string
           id?: string
+          price_override?: number | null
           seats_booked?: number
           start_date?: string
           status?: string
@@ -146,6 +152,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      destinations: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          hero_image: string | null
+          id: string
+          name: string
+          slug: string
+          state: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          hero_image?: string | null
+          id?: string
+          name: string
+          slug: string
+          state: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          hero_image?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          state?: string
+        }
+        Relationships: []
       }
       interested_users: {
         Row: {
@@ -254,12 +290,15 @@ export type Database = {
       trips: {
         Row: {
           advance_amount: number | null
+          base_price: number | null
           booking_live: boolean | null
           capacity: number | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string | null
+          destination_id: string | null
           duration: string
+          duration_days: number | null
           exclusions: string[] | null
           highlights: string[] | null
           id: string
@@ -268,9 +307,11 @@ export type Database = {
           is_active: boolean | null
           locations: string[] | null
           notes: string | null
+          overview: string | null
           price_default: number
           price_from_mumbai: number | null
           price_from_pune: number | null
+          slug: string | null
           summary: string | null
           trip_id: string
           trip_name: string
@@ -278,12 +319,15 @@ export type Database = {
         }
         Insert: {
           advance_amount?: number | null
+          base_price?: number | null
           booking_live?: boolean | null
           capacity?: number | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
+          destination_id?: string | null
           duration: string
+          duration_days?: number | null
           exclusions?: string[] | null
           highlights?: string[] | null
           id?: string
@@ -292,9 +336,11 @@ export type Database = {
           is_active?: boolean | null
           locations?: string[] | null
           notes?: string | null
+          overview?: string | null
           price_default?: number
           price_from_mumbai?: number | null
           price_from_pune?: number | null
+          slug?: string | null
           summary?: string | null
           trip_id: string
           trip_name: string
@@ -302,12 +348,15 @@ export type Database = {
         }
         Update: {
           advance_amount?: number | null
+          base_price?: number | null
           booking_live?: boolean | null
           capacity?: number | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
+          destination_id?: string | null
           duration?: string
+          duration_days?: number | null
           exclusions?: string[] | null
           highlights?: string[] | null
           id?: string
@@ -316,15 +365,25 @@ export type Database = {
           is_active?: boolean | null
           locations?: string[] | null
           notes?: string | null
+          overview?: string | null
           price_default?: number
           price_from_mumbai?: number | null
           price_from_pune?: number | null
+          slug?: string | null
           summary?: string | null
           trip_id?: string
           trip_name?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "trips_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
