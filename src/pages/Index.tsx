@@ -12,6 +12,7 @@ import { useTrips } from "@/hooks/useTrips";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useWishlist } from "@/hooks/useWishlist";
 import { Skeleton } from "@/components/ui/skeleton";
+import WalletBanner from "@/components/WalletBanner";
 
 const Index = () => {
   const { loading, getBookableTrips, getUpcomingTrips } = useTrips();
@@ -57,6 +58,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
+
+      {/* Wallet Nudge Banner */}
+      <div className="container mx-auto px-4 -mt-4 mb-4 relative z-10">
+        <WalletBanner />
+      </div>
 
       {/* Featured Trip - Bookable Trips */}
       <section className="py-16 md:py-24 bg-background">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle, ArrowRight, CreditCard, Wallet, Upload, Image, AlertCircle, RefreshCw, Heart, TrendingDown, Star } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { generateUpiQrString, getMerchantUpiId } from "@/lib/upi";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useTrips } from "@/hooks/useTrips";
 import ReviewForm from "@/components/ReviewForm";
+import WalletTab from "@/components/WalletTab";
 
 interface Booking {
   id: string;
@@ -42,6 +43,7 @@ interface Booking {
 
 const MyBookings = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -329,15 +331,19 @@ const MyBookings = () => {
             </Button>
           </div>
 
-          <Tabs defaultValue="bookings" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs defaultValue={searchParams.get("tab") || "bookings"} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="bookings" className="gap-2">
                 <Calendar className="w-4 h-4" />
-                My Bookings
+                Bookings
               </TabsTrigger>
               <TabsTrigger value="wishlist" className="gap-2">
                 <Heart className="w-4 h-4" />
                 Wishlist ({wishlist.length})
+              </TabsTrigger>
+              <TabsTrigger value="wallet" className="gap-2">
+                <Wallet className="w-4 h-4" />
+                Wallet
               </TabsTrigger>
             </TabsList>
 
@@ -720,6 +726,11 @@ const MyBookings = () => {
                   })}
                 </div>
               )}
+            </TabsContent>
+
+            {/* Wallet Tab */}
+            <TabsContent value="wallet">
+              <WalletTab />
             </TabsContent>
           </Tabs>
         </div>

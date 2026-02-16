@@ -173,6 +173,7 @@ export type Database = {
           payment_status: string
           phone: string
           pickup_location: string | null
+          referral_code_used: string | null
           rejection_reason: string | null
           remaining_payment_status: string | null
           remaining_payment_uploaded_at: string | null
@@ -183,6 +184,7 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
           verified_by_admin_id: string | null
+          wallet_discount: number | null
           whatsapp_optin: boolean | null
         }
         Insert: {
@@ -201,6 +203,7 @@ export type Database = {
           payment_status?: string
           phone: string
           pickup_location?: string | null
+          referral_code_used?: string | null
           rejection_reason?: string | null
           remaining_payment_status?: string | null
           remaining_payment_uploaded_at?: string | null
@@ -211,6 +214,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           verified_by_admin_id?: string | null
+          wallet_discount?: number | null
           whatsapp_optin?: boolean | null
         }
         Update: {
@@ -229,6 +233,7 @@ export type Database = {
           payment_status?: string
           phone?: string
           pickup_location?: string | null
+          referral_code_used?: string | null
           rejection_reason?: string | null
           remaining_payment_status?: string | null
           remaining_payment_uploaded_at?: string | null
@@ -239,6 +244,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           verified_by_admin_id?: string | null
+          wallet_discount?: number | null
           whatsapp_optin?: boolean | null
         }
         Relationships: [
@@ -430,6 +436,68 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          user_id: string
+          uses_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          user_id: string
+          uses_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          uses_count?: number
+        }
+        Relationships: []
+      }
+      referral_earnings: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string
+          id: string
+          referred_user_id: string
+          referrer_user_id: string
+          status: string
+        }
+        Insert: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          referred_user_id: string
+          referrer_user_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          referred_user_id?: string
+          referrer_user_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_earnings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       refunds: {
         Row: {
           amount: number
@@ -620,6 +688,77 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          type: string
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          type: string
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          type?: string
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          total_earned: number
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_consents: {
         Row: {
           created_at: string
@@ -735,6 +874,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_wallet_to_booking: {
+        Args: { p_amount: number; p_booking_id: string; p_user_id: string }
+        Returns: boolean
+      }
       cancel_booking_with_seat_release: {
         Args: {
           p_booking_id: string
@@ -767,6 +910,15 @@ export type Database = {
         }
         Returns: string
       }
+      credit_referral_reward: {
+        Args: {
+          p_booking_id: string
+          p_referred_user_id: string
+          p_referrer_code: string
+        }
+        Returns: boolean
+      }
+      generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]

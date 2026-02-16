@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, User, LogOut, Calendar, Shield } from "lucide-react";
+import { Menu, X, Phone, User, LogOut, Calendar, Shield, Wallet } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
+import { useWallet } from "@/hooks/useWallet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
+  const { balance } = useWallet();
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -85,12 +87,26 @@ const Navbar = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2 font-semibold">
+                  <Button variant="outline" size="sm" className="gap-2 font-semibold relative">
                     <User className="w-4 h-4" />
                     <span className="max-w-[100px] truncate">{user.email?.split('@')[0]}</span>
+                    {balance > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                        ₹{balance >= 1000 ? `${(balance / 1000).toFixed(0)}k` : balance}
+                      </span>
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
+                  {balance > 0 && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-bookings?tab=wallet" className="flex items-center gap-2 cursor-pointer">
+                        <Wallet className="w-4 h-4 text-primary" />
+                        <span>Wallet</span>
+                        <span className="ml-auto text-xs font-bold text-primary">₹{balance.toLocaleString()}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link to="/my-bookings" className="flex items-center gap-2 cursor-pointer">
                       <Calendar className="w-4 h-4" />

@@ -25,6 +25,9 @@ import StarRating from "@/components/StarRating";
 import { useReviews } from "@/hooks/useReviews";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useWallet } from "@/hooks/useWallet";
+import WalletBanner from "@/components/WalletBanner";
 
 const TripDetail = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -64,6 +67,8 @@ const TripDetail = () => {
   const { toast } = useToast();
   const { isInWishlist, isToggling, toggleWishlist } = useWishlist();
   const { stats: reviewStats } = useReviews(tripId);
+  const { user } = useAuth();
+  const { balance } = useWallet();
 
   const loading = tripsLoading || liveLoading;
 
@@ -556,6 +561,15 @@ const TripDetail = () => {
                     <p className="text-xs text-accent mb-4 font-medium text-center">
                       Limited seats • Handpicked experiences
                     </p>
+                  )}
+
+                  {/* Wallet Credit Nudge */}
+                  {user && balance > 0 && isBookable && (
+                    <div className="bg-primary/10 rounded-xl p-4 mb-4 border border-primary/20">
+                      <p className="text-sm text-primary font-semibold flex items-center gap-2">
+                        💰 Use ₹{Math.min(balance, displayPrice).toLocaleString()} travel credits on this booking
+                      </p>
+                    </div>
                   )}
 
                   {isBookable && (

@@ -13,6 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { generateUpiQrString, getMerchantUpiId } from "@/lib/upi";
+import { useWallet } from "@/hooks/useWallet";
+import { Switch } from "@/components/ui/switch";
 
 interface Batch {
   id: string;
@@ -36,6 +38,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { balance, applyWalletCredit, creditReferral } = useWallet();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -51,7 +54,9 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
     batchId: "",
     upiTransactionId: "",
     whatsappOptin: false,
+    referralCode: "",
   });
+  const [useWalletCredits, setUseWalletCredits] = useState(false);
 
   // Fetch available batches for this trip
   useEffect(() => {
@@ -99,9 +104,11 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
   })();
 
   const totalPrice = selectedPrice * parseInt(formData.travelers);
+  const walletApplicable = useWalletCredits ? Math.min(balance, totalPrice) : 0;
+  const effectiveTotalPrice = totalPrice - walletApplicable;
   const advanceAmount = trip.booking?.advance || 2000;
-  const totalAdvance = advanceAmount * parseInt(formData.travelers);
-  const remainingAmount = totalPrice - totalAdvance;
+  const totalAdvance = Math.max(0, advanceAmount * parseInt(formData.travelers) - walletApplicable);
+  const remainingAmount = effectiveTotalPrice - totalAdvance;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -207,6 +214,8 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
           advance_screenshot_url: screenshotUrl,
           payment_status: "pending_advance",
           notes: formData.upiTransactionId ? `UPI: ${formData.upiTransactionId}` : null,
+          referral_code_used: formData.referralCode || null,
+          wallet_discount: walletApplicable,
         })
         .eq("id", bookingId);
 
@@ -240,6 +249,24 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
         }
       } catch (notifErr) {
         console.warn('WhatsApp notification failed (non-blocking):', notifErr);
+      }
+
+      // Apply wallet credits if used (fire-and-forget, non-blocking)
+      if (walletApplicable > 0) {
+        try {
+          await applyWalletCredit(bookingId, walletApplicable);
+        } catch (walletErr) {
+          console.warn('Wallet credit application failed (non-blocking):', walletErr);
+        }
+      }
+
+      // Credit referral reward if referral code was used (fire-and-forget)
+      if (formData.referralCode) {
+        try {
+          await creditReferral(formData.referralCode, bookingId);
+        } catch (refErr) {
+          console.warn('Referral credit failed (non-blocking):', refErr);
+        }
       }
 
       toast({
@@ -307,10 +334,12 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
       batchId: "",
       upiTransactionId: "",
       whatsappOptin: false,
+      referralCode: "",
     });
     setScreenshotFile(null);
     setScreenshotPreview(null);
     setBookingId(null);
+    setUseWalletCredits(false);
     onClose();
   };
 
@@ -550,6 +579,35 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
 
               {step === 2 && (
                 <div className="space-y-4">
+                  {/* Wallet Credits Toggle */}
+                  {balance > 0 && (
+                    <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">
+                          💰 Apply ₹{Math.min(balance, totalPrice).toLocaleString()} wallet credits
+                        </span>
+                      </div>
+                      <Switch
+                        checked={useWalletCredits}
+                        onCheckedChange={setUseWalletCredits}
+                      />
+                    </div>
+                  )}
+
+                  {/* Referral Code */}
+                  <div>
+                    <Label htmlFor="referralCode" className="text-sm mb-1 block text-muted-foreground">
+                      Have a referral code?
+                    </Label>
+                    <Input
+                      id="referralCode"
+                      value={formData.referralCode}
+                      onChange={(e) => setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })}
+                      placeholder="e.g. GB1A2B3C"
+                      className="font-mono"
+                    />
+                  </div>
+
                   <div className="bg-muted rounded-lg p-4">
                     <h4 className="font-medium text-card-foreground mb-3">Payment Summary</h4>
                     <div className="space-y-2 text-sm">
@@ -562,8 +620,18 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                         <span className="text-card-foreground">× {formData.travelers}</span>
                       </div>
                       <div className="flex justify-between pt-2 border-t border-border font-medium">
+                        <span className="text-card-foreground">Subtotal</span>
+                        <span className="text-card-foreground">{formatPrice(totalPrice)}</span>
+                      </div>
+                      {walletApplicable > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>Wallet Credit</span>
+                          <span>-{formatPrice(walletApplicable)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between pt-2 border-t border-border font-medium">
                         <span className="text-card-foreground">Total Amount</span>
-                        <span className="text-primary text-lg">{formatPrice(totalPrice)}</span>
+                        <span className="text-primary text-lg">{formatPrice(effectiveTotalPrice)}</span>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">Advance to pay now</span>
