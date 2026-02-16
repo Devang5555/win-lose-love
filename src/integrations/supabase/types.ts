@@ -183,6 +183,7 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
           verified_by_admin_id: string | null
+          whatsapp_optin: boolean | null
         }
         Insert: {
           advance_paid?: number
@@ -210,6 +211,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           verified_by_admin_id?: string | null
+          whatsapp_optin?: boolean | null
         }
         Update: {
           advance_paid?: number
@@ -237,6 +239,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           verified_by_admin_id?: string | null
+          whatsapp_optin?: boolean | null
         }
         Relationships: [
           {
@@ -247,6 +250,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      broadcast_messages: {
+        Row: {
+          audience_filter: Json | null
+          audience_type: string
+          created_at: string
+          created_by: string
+          failed_count: number
+          id: string
+          message_template: string
+          recipient_count: number
+          sent_at: string | null
+          sent_count: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          audience_filter?: Json | null
+          audience_type?: string
+          created_at?: string
+          created_by: string
+          failed_count?: number
+          id?: string
+          message_template: string
+          recipient_count?: number
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          audience_filter?: Json | null
+          audience_type?: string
+          created_at?: string
+          created_by?: string
+          failed_count?: number
+          id?: string
+          message_template?: string
+          recipient_count?: number
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       destinations: {
         Row: {
@@ -571,6 +619,92 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      whatsapp_consents: {
+        Row: {
+          created_at: string
+          id: string
+          opted_in: boolean
+          opted_in_at: string
+          opted_out_at: string | null
+          phone: string
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opted_in?: boolean
+          opted_in_at?: string
+          opted_out_at?: string | null
+          phone: string
+          source?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opted_in?: boolean
+          opted_in_at?: string
+          opted_out_at?: string | null
+          phone?: string
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_message_logs: {
+        Row: {
+          broadcast_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          message_body: string
+          message_type: string
+          recipient_phone: string
+          recipient_user_id: string | null
+          sent_at: string | null
+          status: string
+          whatsapp_message_id: string | null
+        }
+        Insert: {
+          broadcast_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_body: string
+          message_type?: string
+          recipient_phone: string
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          whatsapp_message_id?: string | null
+        }
+        Update: {
+          broadcast_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_body?: string
+          message_type?: string
+          recipient_phone?: string
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          whatsapp_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_message_logs_broadcast_id_fkey"
+            columns: ["broadcast_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wishlist: {
         Row: {
