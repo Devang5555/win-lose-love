@@ -36,6 +36,8 @@ interface Booking {
   remaining_screenshot_url: string | null;
   remaining_payment_status: string | null;
   rejection_reason: string | null;
+  cancellation_reason: string | null;
+  cancelled_at: string | null;
 }
 
 const MyBookings = () => {
@@ -187,6 +189,13 @@ const MyBookings = () => {
           <Badge className="bg-red-500/20 text-red-600 border-red-500/30">
             <XCircle className="w-3 h-3 mr-1" />
             Cancelled
+          </Badge>
+        );
+      case "refunded":
+        return (
+          <Badge className="bg-purple-500/20 text-purple-600 border-purple-500/30">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Refunded
           </Badge>
         );
       default:
@@ -445,6 +454,26 @@ const MyBookings = () => {
                           </div>
                         </div>
                       </div>
+
+                      {/* Cancellation Details */}
+                      {(booking.booking_status === "cancelled" || booking.booking_status === "refunded") && (
+                        <div className="bg-red-500/10 rounded-lg p-4 border border-red-500/20">
+                          <h4 className="text-sm font-medium text-red-700 dark:text-red-400 flex items-center gap-2 mb-2">
+                            <XCircle className="w-4 h-4" />
+                            {booking.booking_status === "refunded" ? "Booking Refunded" : "Booking Cancelled"}
+                          </h4>
+                          {booking.cancellation_reason && (
+                            <p className="text-sm text-foreground">
+                              <strong>Reason:</strong> {booking.cancellation_reason}
+                            </p>
+                          )}
+                          {booking.cancelled_at && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Cancelled on {formatDate(booking.cancelled_at)}
+                            </p>
+                          )}
+                        </div>
+                      )}
 
                       {/* Remaining Payment Status (for users who have initiated balance payment) */}
                       {booking.remaining_payment_status && booking.remaining_payment_status !== "pending" && balanceAmount > 0 && (

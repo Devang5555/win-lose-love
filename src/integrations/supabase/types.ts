@@ -73,6 +73,8 @@ export type Database = {
           advance_screenshot_url: string | null
           batch_id: string | null
           booking_status: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string | null
           email: string
           full_name: string
@@ -98,6 +100,8 @@ export type Database = {
           advance_screenshot_url?: string | null
           batch_id?: string | null
           booking_status?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string | null
           email: string
           full_name: string
@@ -123,6 +127,8 @@ export type Database = {
           advance_screenshot_url?: string | null
           batch_id?: string | null
           booking_status?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string | null
           email?: string
           full_name?: string
@@ -286,6 +292,44 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      refunds: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          id: string
+          processed_at: string | null
+          reason: string | null
+          refund_status: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          reason?: string | null
+          refund_status?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          reason?: string | null
+          refund_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -468,6 +512,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_booking_with_seat_release: {
+        Args: {
+          p_booking_id: string
+          p_reason: string
+          p_refund_amount?: number
+        }
+        Returns: undefined
+      }
       confirm_booking_after_payment: {
         Args: { p_booking_id: string }
         Returns: undefined
