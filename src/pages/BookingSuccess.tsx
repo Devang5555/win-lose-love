@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { formatPrice } from "@/data/trips";
+import ReferralCard from "@/components/ReferralCard";
 
 interface BookingDetails {
   id: string;
@@ -211,6 +212,11 @@ const BookingSuccess = () => {
             <p className="text-sm text-primary font-medium">
               ✨ Your payment screenshot is under verification. We'll confirm within 2-4 hours during business hours and notify you at <strong>{booking.email}</strong>.
             </p>
+          </div>
+
+          {/* Referral Card */}
+          <div className="mb-8">
+            <ReferralCard />
           </div>
 
           {/* Actions */}
