@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
 import InterestPopup from "@/components/InterestPopup";
+import BatchSelector, { BatchInfo } from "@/components/BatchSelector";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,6 +24,7 @@ const TripDetail = () => {
   const dbTrip = tripId ? getDbTrip(tripId) : undefined;
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isInterestOpen, setIsInterestOpen] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState<BatchInfo | null>(null);
   const { toast } = useToast();
 
   // Use database price if available, otherwise fall back to static
@@ -350,7 +352,7 @@ const TripDetail = () => {
                     )}
                     <div className="flex items-baseline gap-2">
                       <span className={`text-4xl font-bold ${isBookable ? 'text-primary' : 'text-muted-foreground'}`}>
-                        {formatPrice(displayPrice)}
+                        {formatPrice(selectedBatch?.price_override ?? displayPrice)}
                       </span>
                       <span className="text-muted-foreground">per person</span>
                     </div>
@@ -364,25 +366,33 @@ const TripDetail = () => {
                       <Clock className="w-5 h-5 text-primary" />
                       <span className="text-card-foreground font-medium">{trip.duration}</span>
                     </div>
-                    {trip.capacity && (
+                    {selectedBatch && (
+                      <div className="flex items-center gap-3 text-sm">
+                        <Users className="w-5 h-5 text-accent" />
+                        <span className="text-card-foreground font-medium">
+                          {selectedBatch.available_seats} seat{selectedBatch.available_seats !== 1 ? 's' : ''} remaining
+                        </span>
+                      </div>
+                    )}
+                    {!selectedBatch && trip.capacity && (
                       <div className="flex items-center gap-3 text-sm">
                         <Users className="w-5 h-5 text-accent" />
                         <span className="text-card-foreground font-medium">Max {trip.capacity} explorers</span>
                       </div>
                     )}
-                    {trip.availableDates && isBookable && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Calendar className="w-5 h-5 text-forest" />
-                        <span className="text-card-foreground font-medium">
-                          Next: {new Date(trip.availableDates[0]).toLocaleDateString('en-IN', { 
-                            month: 'short', 
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Batch Selector */}
+                  {isBookable && tripId && (
+                    <div className="mb-6">
+                      <BatchSelector
+                        tripId={tripId}
+                        basePrice={displayPrice}
+                        selectedBatchId={selectedBatch?.id ?? null}
+                        onSelectBatch={setSelectedBatch}
+                      />
+                    </div>
+                  )}
 
                   {isBookable && (
                     <p className="text-xs text-accent mb-4 font-medium text-center">
@@ -403,10 +413,11 @@ const TripDetail = () => {
                       className="w-full mb-3 h-12 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity" 
                       size="lg"
                       onClick={handleBookingClick}
+                      disabled={!!selectedBatch && selectedBatch.available_seats === 0}
                     >
                       <Sparkles className="w-5 h-5 mr-2" />
-                      Reserve Your Spot
-                      <ChevronRight className="w-5 h-5 ml-1" />
+                      {selectedBatch && selectedBatch.available_seats === 0 ? "Sold Out" : "Reserve Your Spot"}
+                      {!(selectedBatch && selectedBatch.available_seats === 0) && <ChevronRight className="w-5 h-5 ml-1" />}
                     </Button>
                   ) : (
                     <Button 
