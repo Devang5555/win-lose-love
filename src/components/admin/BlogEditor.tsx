@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, memo } from "react";
 import { Plus, Edit2, Trash2, Eye, EyeOff, Save, ArrowLeft, Globe, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useBlogPosts, BlogPost } from "@/hooks/useBlogPosts";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 interface BlogEditorProps {
   destinations: { id: string; name: string }[];
@@ -152,14 +153,8 @@ const BlogEditor = ({ destinations }: BlogEditorProps) => {
               <Textarea value={excerpt} onChange={e => setExcerpt(e.target.value)} placeholder="Short summary for cards..." rows={3} />
             </div>
             <div>
-              <Label>Content (HTML)</Label>
-              <Textarea
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                placeholder="<p>Write your blog post content here...</p>"
-                rows={20}
-                className="font-mono text-sm"
-              />
+              <Label>Content</Label>
+              <RichTextEditor content={content} onChange={setContent} />
             </div>
           </div>
 
