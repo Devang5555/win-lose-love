@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import TripManagement from "@/components/admin/TripManagement";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import ReviewsManagement from "@/components/admin/ReviewsManagement";
 import AuditLogs from "@/components/admin/AuditLogs";
+import BlogEditor from "@/components/admin/BlogEditor";
 import FinancialReconciliation from "@/components/admin/FinancialReconciliation";
 import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
@@ -816,6 +817,12 @@ For queries, please contact us.
                   Audit Logs
                 </TabsTrigger>
               )}
+              {can('manage_content') && (
+                <TabsTrigger value="blog" className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  Blog
+                </TabsTrigger>
+              )}
               {can('view_financial_data') && (
                 <TabsTrigger value="finance" className="gap-2">
                   <IndianRupee className="w-4 h-4" />
@@ -1187,6 +1194,13 @@ For queries, please contact us.
             {can('view_audit_logs') && (
               <TabsContent value="audit">
                 <AuditLogs />
+              </TabsContent>
+            )}
+
+            {/* Blog Tab */}
+            {can('manage_content') && (
+              <TabsContent value="blog">
+                <BlogEditor destinations={analyticsDestinations} />
               </TabsContent>
             )}
 

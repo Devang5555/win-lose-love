@@ -12,15 +12,17 @@ Deno.serve(async () => {
 
   const siteUrl = "https://win-lose-love.lovable.app";
 
-  const [{ data: trips }, { data: destinations }] = await Promise.all([
+  const [{ data: trips }, { data: destinations }, { data: blogPosts }] = await Promise.all([
     supabase.from("trips").select("slug, trip_id, updated_at").eq("is_active", true),
     supabase.from("destinations").select("slug, created_at"),
+    supabase.from("blog_posts").select("slug, updated_at").eq("is_published", true),
   ]);
 
   const staticPages = [
     { loc: "/", priority: "1.0" },
     { loc: "/trips", priority: "0.8" },
     { loc: "/destinations", priority: "0.8" },
+    { loc: "/blog", priority: "0.7" },
     { loc: "/about", priority: "0.5" },
     { loc: "/contact", priority: "0.5" },
   ];
@@ -37,7 +39,13 @@ Deno.serve(async () => {
     priority: "0.7",
   }));
 
-  const allPages = [...staticPages, ...tripPages, ...destPages];
+  const blogPages = (blogPosts || []).map((b: any) => ({
+    loc: `/blog/${b.slug}`,
+    lastmod: b.updated_at?.split("T")[0],
+    priority: "0.6",
+  }));
+
+  const allPages = [...staticPages, ...tripPages, ...destPages, ...blogPages];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
