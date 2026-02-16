@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Clock, Users, ChevronRight, Bell, Sparkles } from "lucide-react";
 import { Trip, getTripPrice, formatPrice } from "@/data/trips";
@@ -69,6 +70,9 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
         <img
           src={images[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"}
           alt={tripName}
+          loading="lazy"
+          width={800}
+          height={450}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         
@@ -205,4 +209,4 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
   );
 };
 
-export default TripCard;
+export default memo(TripCard);

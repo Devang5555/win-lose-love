@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import { format, parseISO, startOfMonth, isWithinInterval } from "date-fns";
 import { TrendingUp, IndianRupee, Users, ShoppingBag, BarChart3, Package, AlertTriangle, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -471,4 +471,4 @@ const AdminAnalytics = ({ bookings, batches, trips, destinations }: AdminAnalyti
   );
 };
 
-export default AdminAnalytics;
+export default memo(AdminAnalytics);
