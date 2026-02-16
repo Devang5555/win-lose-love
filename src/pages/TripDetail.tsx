@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   MapPin, Clock, Users, Calendar, Phone, Mail, 
@@ -23,13 +23,41 @@ import SeoMeta from "@/components/SeoMeta";
 import TripReviews from "@/components/TripReviews";
 import StarRating from "@/components/StarRating";
 import { useReviews } from "@/hooks/useReviews";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const TripDetail = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
-  const trip = getTrip(tripId || "");
-  const { isTripBookable, loading, getTrip: getDbTrip } = useTrips();
-  const dbTrip = tripId ? getDbTrip(tripId) : undefined;
+  const staticTrip = getTrip(tripId || "");
+  const { isTripBookable, loading: tripsLoading, getTrip: getDbTrip } = useTrips();
+
+  // Live query for this specific trip from DB with refetchOnWindowFocus
+  const { data: liveDbTrip, isLoading: liveLoading } = useQuery({
+    queryKey: ["trip", tripId],
+    queryFn: async () => {
+      if (!tripId) return null;
+      const { data, error } = await supabase
+        .from("trips")
+        .select("*")
+        .eq("trip_id", tripId)
+        .maybeSingle();
+      if (error) {
+        console.error("[TripDetail] DB fetch error:", error);
+        return null;
+      }
+      return data;
+    },
+    enabled: !!tripId,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+  });
+
+  // Prefer live DB data, fall back to useTrips hook, then static
+  const dbTrip = liveDbTrip || (tripId ? getDbTrip(tripId) : undefined);
+  // Use static trip data for itinerary/stayDetails/activities/cancellationPolicy (not in DB)
+  const trip = staticTrip;
+
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isInterestOpen, setIsInterestOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<BatchInfo | null>(null);
@@ -37,7 +65,22 @@ const TripDetail = () => {
   const { isInWishlist, isToggling, toggleWishlist } = useWishlist();
   const { stats: reviewStats } = useReviews(tripId);
 
-  // Use database price if available, otherwise fall back to static
+  const loading = tripsLoading || liveLoading;
+
+  // Use DB values as primary source for editable fields
+  const tripName = dbTrip?.trip_name ?? trip?.tripName ?? "";
+  const tripSummary = dbTrip?.summary ?? trip?.summary ?? "";
+  const tripDuration = dbTrip?.duration ?? trip?.duration ?? "";
+  const tripHighlights = dbTrip?.highlights ?? trip?.highlights ?? [];
+  const tripInclusions = dbTrip?.inclusions ?? trip?.inclusions ?? [];
+  const tripExclusions = dbTrip?.exclusions ?? trip?.exclusions ?? [];
+  const tripLocations = dbTrip?.locations ?? trip?.locations ?? [];
+  const tripImages = dbTrip?.images ?? trip?.images ?? [];
+  const tripCapacity = dbTrip?.capacity ?? trip?.capacity ?? 30;
+  const tripNotes = dbTrip?.notes ?? trip?.notes ?? "";
+  const tripContactPhone = dbTrip?.contact_phone ?? trip?.contact?.phone ?? "";
+  const tripContactEmail = dbTrip?.contact_email ?? trip?.contact?.email ?? "";
+
   const displayPrice = dbTrip?.price_default ?? (trip ? getTripPrice(trip) : 0);
   const advanceAmount = dbTrip?.advance_amount ?? trip?.booking?.advance ?? 2000;
   const hasPunePrice = dbTrip?.price_from_pune || (typeof trip?.price === 'object' && trip.price.fromPune);
@@ -47,13 +90,13 @@ const TripDetail = () => {
 
   // JSON-LD structured data
   const tripJsonLd = useMemo(() => {
-    if (!trip) return null;
+    if (!tripName) return null;
     const schema: Record<string, any> = {
       "@context": "https://schema.org",
       "@type": "TouristTrip",
-      name: trip.tripName,
-      description: trip.summary || "",
-      image: trip.images?.[0] || "",
+      name: tripName,
+      description: tripSummary,
+      image: tripImages?.[0] || "",
       touristType: "Adventure",
       provider: {
         "@type": "Organization",
@@ -69,10 +112,10 @@ const TripDetail = () => {
           : "https://schema.org/PreOrder",
         url: typeof window !== "undefined" ? window.location.href : "",
       },
-      duration: trip.duration,
+      duration: tripDuration,
     };
 
-    if (trip.itinerary) {
+    if (trip?.itinerary) {
       schema.itinerary = {
         "@type": "ItemList",
         numberOfItems: trip.itinerary.length,
@@ -95,7 +138,7 @@ const TripDetail = () => {
     }
 
     return schema;
-  }, [trip, displayPrice, isBookable, reviewStats]);
+  }, [tripName, tripSummary, tripImages, tripDuration, displayPrice, isBookable, trip?.itinerary, reviewStats]);
 
   if (loading) {
     return (
@@ -109,7 +152,7 @@ const TripDetail = () => {
     );
   }
 
-  if (!trip) {
+  if (!trip && !dbTrip) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -125,12 +168,11 @@ const TripDetail = () => {
     );
   }
 
-
   const handleShare = async () => {
     try {
       await navigator.share({
-        title: trip.tripName,
-        text: trip.summary,
+        title: tripName,
+        text: tripSummary,
         url: window.location.href,
       });
     } catch {
@@ -154,17 +196,16 @@ const TripDetail = () => {
   };
 
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent(`Hi! I'm interested in the ${trip.tripName} journey. Can you share more details?`);
+    const message = encodeURIComponent(`Hi! I'm interested in the ${tripName} journey. Can you share more details?`);
     window.open(`https://wa.me/919415026522?text=${message}`, '_blank');
   };
-
 
   return (
     <div className="min-h-screen bg-background">
       <SeoMeta
-        title={`${trip.tripName} - GoBhraman`}
-        description={trip.summary || `Explore ${trip.tripName} with GoBhraman`}
-        image={trip.images?.[0]}
+        title={`${tripName} - GoBhraman`}
+        description={tripSummary || `Explore ${tripName} with GoBhraman`}
+        image={tripImages?.[0]}
         url={window.location.href}
         type="product"
       />
@@ -174,13 +215,12 @@ const TripDetail = () => {
       {/* Hero */}
       <section className="relative h-[50vh] md:h-[65vh]">
         <img
-          src={trip.images[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80"}
-          alt={trip.tripName}
+          src={tripImages[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80"}
+          alt={tripName}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/40 to-transparent" />
         
-        {/* Back Button */}
         <Link 
           to="/trips"
           className="absolute top-24 md:top-28 left-4 md:left-8 flex items-center gap-2 text-primary-foreground/90 hover:text-primary-foreground transition-colors bg-background/20 backdrop-blur-sm px-3 py-2 rounded-full"
@@ -189,14 +229,12 @@ const TripDetail = () => {
           <span className="hidden md:inline">Back to Journeys</span>
         </Link>
 
-        {/* Content */}
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-12">
           <div className="container mx-auto">
-            {/* Status Badge - moved inside content for better mobile layout */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex flex-wrap gap-1.5 md:gap-2 flex-1 pr-2">
-                <Badge className="bg-primary text-primary-foreground font-semibold text-xs md:text-sm">{trip.duration}</Badge>
-                {trip.locations?.slice(0, 2).map((loc) => (
+                <Badge className="bg-primary text-primary-foreground font-semibold text-xs md:text-sm">{tripDuration}</Badge>
+                {tripLocations?.slice(0, 2).map((loc) => (
                   <Badge key={loc} variant="secondary" className="bg-background/30 text-primary-foreground border-0 backdrop-blur-sm text-xs md:text-sm hidden sm:inline-flex">
                     {loc}
                   </Badge>
@@ -215,7 +253,7 @@ const TripDetail = () => {
             </div>
             <div className="flex items-start gap-3">
               <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4 flex-1">
-                {trip.tripName}
+                {tripName}
               </h1>
               {tripId && (
                 <WishlistButton
@@ -229,7 +267,7 @@ const TripDetail = () => {
               )}
             </div>
             <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl">
-              {trip.summary}
+              {tripSummary}
             </p>
             {reviewStats.totalReviews > 0 && (
               <div className="flex items-center gap-2 mt-3">
@@ -250,11 +288,11 @@ const TripDetail = () => {
             {/* Main Content */}
             <div className="lg:col-span-2">
               {/* Highlights */}
-              {trip.highlights && (
+              {tripHighlights.length > 0 && (
                 <div className="mb-8">
                   <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-6">Experience Highlights</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {trip.highlights.map((highlight, index) => (
+                    {tripHighlights.map((highlight, index) => (
                       <div key={index} className="flex items-start gap-4 p-5 bg-gradient-to-br from-card to-secondary rounded-xl border border-border hover:border-primary/30 transition-colors">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
                           <Check className="w-5 h-5 text-primary-foreground" />
@@ -267,7 +305,7 @@ const TripDetail = () => {
               )}
 
               {/* Stay Details for camping trips */}
-              {trip.stayDetails && (
+              {trip?.stayDetails && (
                 <div className="mb-8">
                   <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
                     <Tent className="w-7 h-7 text-primary" />
@@ -287,7 +325,7 @@ const TripDetail = () => {
               )}
 
               {/* Activities for camping trips */}
-              {trip.activities && (
+              {trip?.activities && (
                 <div className="mb-8">
                   <h2 className="font-serif text-2xl font-bold text-foreground mb-4">Featured Activities</h2>
                   <div className="flex flex-wrap gap-2">
@@ -312,7 +350,7 @@ const TripDetail = () => {
                 </TabsList>
 
                 <TabsContent value="itinerary" className="space-y-6">
-                  {trip.itinerary ? (
+                  {trip?.itinerary ? (
                     trip.itinerary.map((day) => (
                       <div key={day.day} className="bg-card rounded-2xl border border-border overflow-hidden shadow-card">
                         <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-6 py-5 border-b border-border">
@@ -358,9 +396,9 @@ const TripDetail = () => {
                         </div>
                         What's Included
                       </h3>
-                      {trip.inclusions ? (
+                      {tripInclusions.length > 0 ? (
                         <ul className="space-y-3">
-                          {trip.inclusions.map((item, index) => (
+                          {tripInclusions.map((item, index) => (
                             <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground">
                               <Check className="w-4 h-4 text-forest flex-shrink-0 mt-0.5" />
                               {item}
@@ -380,9 +418,9 @@ const TripDetail = () => {
                         </div>
                         Not Included
                       </h3>
-                      {trip.exclusions ? (
+                      {tripExclusions.length > 0 ? (
                         <ul className="space-y-3">
-                          {trip.exclusions.map((item, index) => (
+                          {tripExclusions.map((item, index) => (
                             <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground">
                               <X className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
                               {item}
@@ -397,7 +435,7 @@ const TripDetail = () => {
                 </TabsContent>
 
                 <TabsContent value="policy" className="space-y-6">
-                  {trip.cancellationPolicy && (
+                  {trip?.cancellationPolicy && (
                     <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
                       <h3 className="font-serif text-xl font-semibold text-card-foreground mb-5">
                         Cancellation Policy
@@ -415,10 +453,10 @@ const TripDetail = () => {
                     </div>
                   )}
 
-                  {trip.notes && (
+                  {tripNotes && (
                     <div className="bg-gradient-to-br from-accent/10 to-sunset/10 rounded-2xl p-6 border border-accent/20">
                       <h3 className="font-serif text-lg font-semibold text-foreground mb-3">Important Note</h3>
-                      <p className="text-muted-foreground">{trip.notes}</p>
+                      <p className="text-muted-foreground">{tripNotes}</p>
                     </div>
                   )}
                 </TabsContent>
@@ -430,7 +468,6 @@ const TripDetail = () => {
               <div className="sticky top-28 space-y-6">
                 {/* Booking Card */}
                 <div className={`bg-card rounded-2xl border-2 p-6 shadow-xl ${isBookable ? 'border-primary/50' : 'border-border'}`}>
-                  {/* Status indicator for upcoming */}
                   {!isBookable && (
                     <div className="bg-sunset/10 border border-sunset/30 rounded-xl p-4 mb-6 text-center">
                       <p className="text-sunset font-bold text-lg">🚀 Coming Soon</p>
@@ -485,7 +522,7 @@ const TripDetail = () => {
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center gap-3 text-sm">
                       <Clock className="w-5 h-5 text-primary" />
-                      <span className="text-card-foreground font-medium">{trip.duration}</span>
+                      <span className="text-card-foreground font-medium">{tripDuration}</span>
                     </div>
                     {selectedBatch && (
                       <div className="flex items-center gap-3 text-sm">
@@ -495,10 +532,10 @@ const TripDetail = () => {
                         </span>
                       </div>
                     )}
-                    {!selectedBatch && trip.capacity && (
+                    {!selectedBatch && tripCapacity && (
                       <div className="flex items-center gap-3 text-sm">
                         <Users className="w-5 h-5 text-accent" />
-                        <span className="text-card-foreground font-medium">Max {trip.capacity} explorers</span>
+                        <span className="text-card-foreground font-medium">Max {tripCapacity} explorers</span>
                       </div>
                     )}
                   </div>
@@ -571,26 +608,30 @@ const TripDetail = () => {
                 </div>
 
                 {/* Contact Card */}
-                {trip.contact && (
+                {(tripContactPhone || tripContactEmail) && (
                   <div className="bg-gradient-to-br from-secondary to-muted rounded-2xl p-6 border border-border">
                     <h3 className="font-serif text-lg font-semibold text-foreground mb-4">
                       Need Help?
                     </h3>
                     <div className="space-y-3">
-                      <a 
-                        href={`tel:${trip.contact.phone}`}
-                        className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <Phone className="w-4 h-4" />
-                        {trip.contact.phone}
-                      </a>
-                      <a 
-                        href={`mailto:${trip.contact.email}`}
-                        className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <Mail className="w-4 h-4" />
-                        {trip.contact.email}
-                      </a>
+                      {tripContactPhone && (
+                        <a 
+                          href={`tel:${tripContactPhone}`}
+                          className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          <Phone className="w-4 h-4" />
+                          {tripContactPhone}
+                        </a>
+                      )}
+                      {tripContactEmail && (
+                        <a 
+                          href={`mailto:${tripContactEmail}`}
+                          className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          <Mail className="w-4 h-4" />
+                          {tripContactEmail}
+                        </a>
+                      )}
                     </div>
                   </div>
                 )}
@@ -603,7 +644,7 @@ const TripDetail = () => {
       <Footer />
 
       {/* Booking Modal - Only for active trips */}
-      {isBookable && (
+      {isBookable && trip && (
         <BookingModal 
           trip={trip}
           isOpen={isBookingOpen}
