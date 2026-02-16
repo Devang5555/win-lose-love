@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import TripManagement from "@/components/admin/TripManagement";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import ReviewsManagement from "@/components/admin/ReviewsManagement";
 import AuditLogs from "@/components/admin/AuditLogs";
+import FinancialReconciliation from "@/components/admin/FinancialReconciliation";
 import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
   openWhatsAppAdvanceVerified, 
@@ -111,6 +112,7 @@ const Admin = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [processingAction, setProcessingAction] = useState(false);
   const [refunds, setRefunds] = useState<Refund[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelRefundAmount, setCancelRefundAmount] = useState("0");
@@ -216,13 +218,14 @@ const Admin = () => {
   }, [selectedBooking]);
 
   const fetchData = async () => {
-    const [bookingsRes, interestedRes, batchesRes, tripsRes, destsRes, refundsRes] = await Promise.all([
+    const [bookingsRes, interestedRes, batchesRes, tripsRes, destsRes, refundsRes, paymentsRes] = await Promise.all([
       supabase.from("bookings").select("*").order("created_at", { ascending: false }),
       supabase.from("interested_users").select("*").order("created_at", { ascending: false }),
       supabase.from("batches").select("*").order("start_date", { ascending: true }),
       supabase.from("trips").select("trip_id, trip_name, destination_id"),
       supabase.from("destinations").select("id, name"),
       supabase.from("refunds").select("*").order("created_at", { ascending: false }),
+      supabase.from("payments").select("*").order("created_at", { ascending: false }),
     ]);
 
     if (bookingsRes.error) {
@@ -258,6 +261,10 @@ const Admin = () => {
 
     if (!refundsRes.error) {
       setRefunds(refundsRes.data || []);
+    }
+
+    if (!paymentsRes.error) {
+      setPayments(paymentsRes.data || []);
     }
 
     setLoadingData(false);
@@ -809,6 +816,12 @@ For queries, please contact us.
                   Audit Logs
                 </TabsTrigger>
               )}
+              {can('view_financial_data') && (
+                <TabsTrigger value="finance" className="gap-2">
+                  <IndianRupee className="w-4 h-4" />
+                  Finance
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {/* Analytics Tab */}
@@ -1174,6 +1187,19 @@ For queries, please contact us.
             {can('view_audit_logs') && (
               <TabsContent value="audit">
                 <AuditLogs />
+              </TabsContent>
+            )}
+
+            {/* Finance Tab */}
+            {can('view_financial_data') && (
+              <TabsContent value="finance">
+                <FinancialReconciliation
+                  bookings={bookings}
+                  payments={payments}
+                  refunds={refunds}
+                  trips={analyticsTrips}
+                  destinations={analyticsDestinations}
+                />
               </TabsContent>
             )}
           </Tabs>
