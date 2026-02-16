@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle, ArrowRight, CreditCard, Wallet, Upload, Image, AlertCircle, RefreshCw, Heart, TrendingDown } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle, ArrowRight, CreditCard, Wallet, Upload, Image, AlertCircle, RefreshCw, Heart, TrendingDown, Star } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { generateUpiQrString, getMerchantUpiId } from "@/lib/upi";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useTrips } from "@/hooks/useTrips";
+import ReviewForm from "@/components/ReviewForm";
 
 interface Booking {
   id: string;
@@ -47,6 +48,8 @@ const MyBookings = () => {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState<Booking | null>(null);
+  const [reviewingBooking, setReviewingBooking] = useState<string | null>(null);
+  const [reviewedBookings, setReviewedBookings] = useState<Set<string>>(new Set());
   const { wishlist, loading: wishlistLoading, isInWishlist, isToggling, toggleWishlist, hasPriceDropped, getSavedPrice } = useWishlist();
   const { trips, loading: tripsLoading, isTripBookable, getTripBatches } = useTrips();
 
@@ -59,8 +62,20 @@ const MyBookings = () => {
   useEffect(() => {
     if (user) {
       fetchBookings();
+      fetchUserReviews();
     }
   }, [user]);
+
+  const fetchUserReviews = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("reviews")
+      .select("booking_id")
+      .eq("user_id", user.id);
+    if (data) {
+      setReviewedBookings(new Set(data.map((r) => r.booking_id)));
+    }
+  };
 
   const fetchBookings = async () => {
     const { data, error } = await supabase
@@ -460,7 +475,20 @@ const MyBookings = () => {
                       )}
 
                       {/* Actions */}
-                      <div className="flex justify-end">
+                      <div className="flex items-center justify-between">
+                        {/* Write Review Button */}
+                        {booking.booking_status === "confirmed" && !reviewedBookings.has(booking.id) && reviewingBooking !== booking.id && (
+                          <Button variant="outline" size="sm" onClick={() => setReviewingBooking(booking.id)} className="gap-1">
+                            <Star className="w-4 h-4" />
+                            Write a Review
+                          </Button>
+                        )}
+                        {reviewedBookings.has(booking.id) && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-500" /> Reviewed
+                          </span>
+                        )}
+                        {!booking.booking_status.match(/confirmed/) && !reviewedBookings.has(booking.id) && <span />}
                         <Link
                           to={`/trips/${booking.trip_id}`}
                           className="text-sm text-primary hover:underline flex items-center gap-1"
@@ -469,6 +497,19 @@ const MyBookings = () => {
                           <ArrowRight className="w-3 h-3" />
                         </Link>
                       </div>
+
+                      {/* Review Form */}
+                      {reviewingBooking === booking.id && (
+                        <ReviewForm
+                          tripId={booking.trip_id}
+                          bookingId={booking.id}
+                          onSuccess={() => {
+                            setReviewingBooking(null);
+                            setReviewedBookings((prev) => new Set(prev).add(booking.id));
+                          }}
+                          onCancel={() => setReviewingBooking(null)}
+                        />
+                      )}
                       
                       {/* Status Messages */}
                       {booking.booking_status === "initiated" && (

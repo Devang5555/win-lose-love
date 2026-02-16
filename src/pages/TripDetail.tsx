@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   MapPin, Clock, Users, Calendar, Phone, Mail, 
-  Check, X, ChevronRight, ArrowLeft, Share2, Bell, Sparkles, Tent, Flame, MessageCircle
+  Check, X, ChevronRight, ArrowLeft, Share2, Bell, Sparkles, Tent, Flame, MessageCircle, Star
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -20,6 +20,9 @@ import { useTrips } from "@/hooks/useTrips";
 import { useWishlist } from "@/hooks/useWishlist";
 import JsonLd from "@/components/JsonLd";
 import SeoMeta from "@/components/SeoMeta";
+import TripReviews from "@/components/TripReviews";
+import StarRating from "@/components/StarRating";
+import { useReviews } from "@/hooks/useReviews";
 
 const TripDetail = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -32,6 +35,7 @@ const TripDetail = () => {
   const [selectedBatch, setSelectedBatch] = useState<BatchInfo | null>(null);
   const { toast } = useToast();
   const { isInWishlist, isToggling, toggleWishlist } = useWishlist();
+  const { stats: reviewStats } = useReviews(tripId);
 
   // Use database price if available, otherwise fall back to static
   const displayPrice = dbTrip?.price_default ?? (trip ? getTripPrice(trip) : 0);
@@ -80,8 +84,18 @@ const TripDetail = () => {
       };
     }
 
+    if (reviewStats.totalReviews > 0) {
+      schema.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: reviewStats.averageRating.toFixed(1),
+        reviewCount: reviewStats.totalReviews,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
+
     return schema;
-  }, [trip, displayPrice, isBookable]);
+  }, [trip, displayPrice, isBookable, reviewStats]);
 
   if (loading) {
     return (
@@ -217,6 +231,14 @@ const TripDetail = () => {
             <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl">
               {trip.summary}
             </p>
+            {reviewStats.totalReviews > 0 && (
+              <div className="flex items-center gap-2 mt-3">
+                <StarRating rating={Math.round(reviewStats.averageRating)} size="sm" />
+                <span className="text-primary-foreground/80 text-sm font-medium">
+                  {reviewStats.averageRating.toFixed(1)} ({reviewStats.totalReviews} review{reviewStats.totalReviews !== 1 ? "s" : ""})
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -277,6 +299,9 @@ const TripDetail = () => {
                   </div>
                 </div>
               )}
+
+              {/* Reviews Section */}
+              {tripId && <TripReviews tripId={tripId} />}
 
               {/* Tabs */}
               <Tabs defaultValue="itinerary" className="w-full">
