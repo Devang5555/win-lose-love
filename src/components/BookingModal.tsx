@@ -251,6 +251,24 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
         console.warn('WhatsApp notification failed (non-blocking):', notifErr);
       }
 
+      // Send WhatsApp confirmation to user if opted in (fire-and-forget)
+      if (formData.whatsappOptin && formData.phone) {
+        try {
+          const confirmationMsg = `✅ Booking Confirmed!\n\nHi ${formData.name},\n\nYour booking for *${trip.tripName}* has been confirmed!\n\n📋 Details:\n• Travelers: ${formData.travelers}\n• Pickup: ${formData.pickupPoint === 'pune' ? 'Pune' : 'Mumbai'}\n• Total: ₹${effectiveTotalPrice.toLocaleString()}\n• Advance Paid: ₹${totalAdvance.toLocaleString()}${walletApplicable > 0 ? `\n• Wallet Credit: -₹${walletApplicable.toLocaleString()}` : ''}\n\nView your booking: ${window.location.origin}/my-bookings\n\nThank you for choosing GoBhraman! 🌄\n\n– Team GoBhraman`;
+
+          await supabase.functions.invoke('whatsapp-broadcast', {
+            body: {
+              action: 'send_single',
+              phone: formData.phone,
+              message: confirmationMsg,
+              message_type: 'confirmation',
+            },
+          });
+        } catch (waErr) {
+          console.warn('WhatsApp confirmation failed (non-blocking):', waErr);
+        }
+      }
+
       // Apply wallet credits if used (fire-and-forget, non-blocking)
       if (walletApplicable > 0) {
         try {
