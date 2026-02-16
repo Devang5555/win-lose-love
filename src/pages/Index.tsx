@@ -10,11 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTrips } from "@/hooks/useTrips";
 import { useDestinations } from "@/hooks/useDestinations";
+import { useWishlist } from "@/hooks/useWishlist";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const { loading, getBookableTrips, getUpcomingTrips } = useTrips();
   const { destinations, loading: destLoading, getDestinationsByState, getFeaturedDestinations } = useDestinations();
+  const { isInWishlist, isToggling, toggleWishlist } = useWishlist();
   const [showInterestPopup, setShowInterestPopup] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
 
@@ -54,8 +56,6 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
-      {/* Hero */}
       <HeroSection />
 
       {/* Featured Trip - Bookable Trips */}
@@ -85,7 +85,12 @@ const Index = () => {
                   key={trip.trip_id} 
                   trip={trip} 
                   featured={false} 
-                  isBookable={true} 
+                  isBookable={true}
+                  wishlistProps={{
+                    isSaved: isInWishlist(trip.trip_id),
+                    isToggling: isToggling(trip.trip_id),
+                    onToggle: toggleWishlist,
+                  }}
                 />
               ))}
             </div>
@@ -106,7 +111,6 @@ const Index = () => {
               Travel with Purpose
             </h2>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
               <div 
@@ -116,12 +120,8 @@ const Index = () => {
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-serif text-lg font-semibold text-card-foreground mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {feature.description}
-                </p>
+                <h3 className="font-serif text-lg font-semibold text-card-foreground mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -134,9 +134,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
               <span className="text-sunset font-bold text-sm uppercase tracking-wider">Explore India</span>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">
-                Popular Destinations
-              </h2>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">Popular Destinations</h2>
               <p className="text-muted-foreground mt-2">Discover trips across India's most extraordinary places</p>
             </div>
             <Button asChild variant="outline" className="font-semibold">
@@ -197,9 +195,7 @@ const Index = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <span className="text-primary font-bold text-sm uppercase tracking-wider">PAN India</span>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">
-                Explore by State
-              </h2>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">Explore by State</h2>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Object.entries(byState).sort(([a], [b]) => a.localeCompare(b)).map(([state, dests]) => (
@@ -211,12 +207,8 @@ const Index = () => {
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-3">
                     <Mountain className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="font-serif text-lg font-bold text-card-foreground group-hover:text-primary transition-colors">
-                    {state}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {dests.length} destination{dests.length !== 1 ? "s" : ""}
-                  </p>
+                  <h3 className="font-serif text-lg font-bold text-card-foreground group-hover:text-primary transition-colors">{state}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{dests.length} destination{dests.length !== 1 ? "s" : ""}</p>
                 </Link>
               ))}
             </div>
@@ -224,7 +216,7 @@ const Index = () => {
         </section>
       )}
 
-      {/* Upcoming Trips Section */}
+      {/* Upcoming Trips */}
       <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-background to-muted">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
@@ -233,9 +225,7 @@ const Index = () => {
                 <Calendar className="w-5 h-5 text-sunset" />
                 <span className="text-sunset font-bold text-sm uppercase tracking-wider">Coming Soon</span>
               </div>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
-                Upcoming Trips
-              </h2>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">Upcoming Trips</h2>
               <p className="text-muted-foreground mt-2">Register your interest — be the first to know when bookings open!</p>
             </div>
             <Button asChild variant="outline" className="font-semibold">
@@ -261,6 +251,11 @@ const Index = () => {
                   featured={false} 
                   isBookable={false}
                   onRegisterInterest={handleRegisterInterest}
+                  wishlistProps={{
+                    isSaved: isInWishlist(trip.trip_id),
+                    isToggling: isToggling(trip.trip_id),
+                    onToggle: toggleWishlist,
+                  }}
                 />
               ))}
             </div>
@@ -290,18 +285,14 @@ const Index = () => {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="text-lg px-8 bg-transparent border-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground font-semibold">
-              <Link to="/contact">
-                Chat on WhatsApp
-              </Link>
+              <Link to="/contact">Chat on WhatsApp</Link>
             </Button>
           </div>
         </div>
       </section>
 
-
       <Footer />
 
-      {/* Interest Popup */}
       <InterestPopup 
         isOpen={showInterestPopup} 
         onClose={() => {

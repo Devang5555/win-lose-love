@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle, ArrowRight, CreditCard, Wallet, Upload, Image, AlertCircle, RefreshCw } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle, ArrowRight, CreditCard, Wallet, Upload, Image, AlertCircle, RefreshCw, Heart, TrendingDown } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +11,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { QRCodeSVG } from "qrcode.react";
 import { generateUpiQrString, getMerchantUpiId } from "@/lib/upi";
+import { useWishlist } from "@/hooks/useWishlist";
+import { useTrips } from "@/hooks/useTrips";
 
 interface Booking {
   id: string;
@@ -44,6 +47,8 @@ const MyBookings = () => {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState<Booking | null>(null);
+  const { wishlist, loading: wishlistLoading, isInWishlist, isToggling, toggleWishlist, hasPriceDropped, getSavedPrice } = useWishlist();
+  const { trips, loading: tripsLoading, isTripBookable, getTripBatches } = useTrips();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -291,8 +296,8 @@ const MyBookings = () => {
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="font-serif text-3xl font-bold text-foreground">My Bookings</h1>
-              <p className="text-muted-foreground mt-2">Track your trip bookings and their status</p>
+              <h1 className="font-serif text-3xl font-bold text-foreground">My Dashboard</h1>
+              <p className="text-muted-foreground mt-2">Track your bookings and saved trips</p>
             </div>
             <Button variant="outline" size="sm" onClick={fetchBookings}>
               <RefreshCw className="w-4 h-4 mr-2" />
@@ -300,6 +305,19 @@ const MyBookings = () => {
             </Button>
           </div>
 
+          <Tabs defaultValue="bookings" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="bookings" className="gap-2">
+                <Calendar className="w-4 h-4" />
+                My Bookings
+              </TabsTrigger>
+              <TabsTrigger value="wishlist" className="gap-2">
+                <Heart className="w-4 h-4" />
+                Wishlist ({wishlist.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="bookings">
           {/* Bookings List */}
           {bookings.length === 0 ? (
             <div className="text-center py-16 bg-card rounded-2xl border border-border">
@@ -526,6 +544,114 @@ const MyBookings = () => {
               })}
             </div>
           )}
+            </TabsContent>
+
+            {/* Wishlist Tab */}
+            <TabsContent value="wishlist">
+              {wishlistLoading || tripsLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : wishlist.length === 0 ? (
+                <div className="text-center py-16 bg-card rounded-2xl border border-border">
+                  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
+                    <Heart className="w-10 h-10 text-muted-foreground" />
+                  </div>
+                  <h3 className="font-serif text-xl font-bold text-foreground mb-2">No Saved Trips</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Save trips you love and get notified about price drops!
+                  </p>
+                  <Button asChild>
+                    <Link to="/trips">
+                      Browse Trips
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {wishlist.map((item) => {
+                    const trip = trips.find((t) => t.trip_id === item.trip_id);
+                    if (!trip) return null;
+                    const activeBatches = getTripBatches(trip.trip_id);
+                    const priceDropped = hasPriceDropped(trip.trip_id, trip.price_default);
+                    const savedPrice = getSavedPrice(trip.trip_id);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex flex-col sm:flex-row">
+                          <Link to={`/trips/${trip.trip_id}`} className="sm:w-48 h-36 sm:h-auto flex-shrink-0">
+                            <img
+                              src={trip.images[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"}
+                              alt={trip.trip_name}
+                              className="w-full h-full object-cover"
+                            />
+                          </Link>
+                          <div className="flex-1 p-4">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <Link to={`/trips/${trip.trip_id}`} className="font-serif text-lg font-bold text-foreground hover:text-primary transition-colors">
+                                  {trip.trip_name}
+                                </Link>
+                                <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {trip.duration}
+                                  </span>
+                                  {activeBatches.length > 0 && (
+                                    <span className="flex items-center gap-1">
+                                      <Calendar className="w-3 h-3" />
+                                      {activeBatches.length} batch{activeBatches.length !== 1 ? "es" : ""}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => toggleWishlist(trip.trip_id, trip.price_default)}
+                                disabled={isToggling(trip.trip_id)}
+                                className="p-2 rounded-full hover:bg-muted transition-colors flex-shrink-0"
+                              >
+                                <Heart className="w-5 h-5 fill-destructive text-destructive" />
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-3 mt-3">
+                              <span className="text-xl font-bold text-primary">
+                                ₹{trip.price_default.toLocaleString()}
+                              </span>
+                              <span className="text-sm text-muted-foreground">/person</span>
+                              {priceDropped && savedPrice && (
+                                <Badge className="bg-green-500/15 text-green-600 border-green-500/20 text-xs gap-1">
+                                  <TrendingDown className="w-3 h-3" />
+                                  Price Dropped from ₹{savedPrice.toLocaleString()}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between mt-3">
+                              {isTripBookable(trip.trip_id) ? (
+                                <Badge className="bg-primary/15 text-primary border-primary/20">Ready to Book</Badge>
+                              ) : (
+                                <Badge variant="outline">Coming Soon</Badge>
+                              )}
+                              <Link
+                                to={`/trips/${trip.trip_id}`}
+                                className="text-sm text-primary hover:underline flex items-center gap-1"
+                              >
+                                View Details
+                                <ArrowRight className="w-3 h-3" />
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
