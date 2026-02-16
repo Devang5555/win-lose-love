@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Search, Filter, Calendar, User, Activity, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -276,4 +276,4 @@ const AuditLogs = () => {
   );
 };
 
-export default AuditLogs;
+export default memo(AuditLogs);

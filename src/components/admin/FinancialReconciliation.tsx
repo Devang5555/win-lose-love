@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import { format, parseISO } from "date-fns";
 import {
   IndianRupee, AlertTriangle, Download, TrendingUp, TrendingDown,
@@ -701,4 +701,4 @@ const FinancialReconciliation = ({
   );
 };
 
-export default FinancialReconciliation;
+export default memo(FinancialReconciliation);
