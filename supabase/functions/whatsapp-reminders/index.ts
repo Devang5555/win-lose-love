@@ -14,6 +14,20 @@ serve(async (req) => {
   }
 
   try {
+    // Validate cron secret to prevent unauthorized invocation
+    const cronSecret = Deno.env.get("CRON_SECRET");
+    const providedSecret = req.headers.get("x-cron-secret");
+    const authHeader = req.headers.get("Authorization");
+    
+    if (!providedSecret || providedSecret !== cronSecret) {
+      if (!authHeader?.includes(Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "___none___")) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     const WHATSAPP_PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
     const WHATSAPP_ACCESS_TOKEN = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
