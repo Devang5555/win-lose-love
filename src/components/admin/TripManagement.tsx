@@ -6,10 +6,8 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useTrips } from "@/hooks/useTrips";
+import { supabase } from "@/integrations/supabase/client";
 import TripEditor from "./TripEditor";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 interface TripManagementProps {
   onRefresh: () => void;
@@ -67,37 +65,24 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
   };
 
   const handleToggleActive = async (tripId: string, tripName: string, currentStatus: boolean) => {
-    if (!SUPABASE_URL || !SUPABASE_KEY) return;
-
     setUpdating(tripId);
 
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/trips?trip_id=eq.${tripId}`,
-        {
-          method: "PATCH",
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-            "Content-Type": "application/json",
-            Prefer: "return=minimal",
-          },
-          body: JSON.stringify({ is_active: !currentStatus }),
-        }
-      );
+      const { error } = await supabase
+        .from("trips")
+        .update({ is_active: !currentStatus })
+        .eq("trip_id", tripId);
 
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: `${tripName} is now ${!currentStatus ? 'visible' : 'hidden'}`,
-        });
-        refetch();
-        onRefresh();
-      } else {
-        toast({ title: "Error", description: "Failed to update trip visibility", variant: "destructive" });
-      }
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `${tripName} is now ${!currentStatus ? 'visible' : 'hidden'}`,
+      });
+      refetch();
+      onRefresh();
     } catch (error) {
-      toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to update trip visibility", variant: "destructive" });
     }
 
     setUpdating(null);
@@ -106,29 +91,19 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
   const handleDelete = async (tripId: string, tripName: string) => {
     if (!confirm(`Are you sure you want to delete "${tripName}"? This action cannot be undone.`)) return;
 
-    if (!SUPABASE_URL || !SUPABASE_KEY) return;
-
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/trips?trip_id=eq.${tripId}`,
-        {
-          method: "DELETE",
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-          },
-        }
-      );
+      const { error } = await supabase
+        .from("trips")
+        .delete()
+        .eq("trip_id", tripId);
 
-      if (response.ok) {
-        toast({ title: "Success", description: "Trip deleted successfully" });
-        refetch();
-        onRefresh();
-      } else {
-        toast({ title: "Error", description: "Failed to delete trip", variant: "destructive" });
-      }
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Trip deleted successfully" });
+      refetch();
+      onRefresh();
     } catch (error) {
-      toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to delete trip", variant: "destructive" });
     }
   };
 

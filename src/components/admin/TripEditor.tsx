@@ -6,9 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TripFormData {
   trip_id: string;
@@ -62,11 +61,11 @@ const emptyForm: TripFormData = {
 
 const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<TripFormData>(emptyForm);
   
-  // Temp inputs for array fields
   const [newHighlight, setNewHighlight] = useState("");
   const [newInclusion, setNewInclusion] = useState("");
   const [newExclusion, setNewExclusion] = useState("");
@@ -80,75 +79,57 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
   }, [tripId]);
 
   const fetchTrip = async () => {
-    if (!tripId || !SUPABASE_URL || !SUPABASE_KEY) return;
+    if (!tripId) return;
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/trips?trip_id=eq.${tripId}&select=*`,
-        {
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-          },
-        }
-      );
+      const { data, error } = await supabase
+        .from("trips")
+        .select("*")
+        .eq("trip_id", tripId)
+        .maybeSingle();
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          const trip = data[0];
-          setFormData({
-            trip_id: trip.trip_id || "",
-            trip_name: trip.trip_name || "",
-            duration: trip.duration || "",
-            summary: trip.summary || "",
-            price_default: trip.price_default || 0,
-            price_from_pune: trip.price_from_pune,
-            price_from_mumbai: trip.price_from_mumbai,
-            advance_amount: trip.advance_amount || 2000,
-            highlights: trip.highlights || [],
-            inclusions: trip.inclusions || [],
-            exclusions: trip.exclusions || [],
-            locations: trip.locations || [],
-            images: trip.images || [],
-            is_active: trip.is_active ?? true,
-            booking_live: trip.booking_live ?? false,
-            capacity: trip.capacity || 30,
-            contact_phone: trip.contact_phone || "+91-9415026522",
-            contact_email: trip.contact_email || "bhramanbyua@gmail.com",
-            notes: trip.notes || "",
-          });
-        }
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to load trip details",
-          variant: "destructive",
+      if (error) throw error;
+
+      if (data) {
+        setFormData({
+          trip_id: data.trip_id || "",
+          trip_name: data.trip_name || "",
+          duration: data.duration || "",
+          summary: data.summary || "",
+          price_default: data.price_default || 0,
+          price_from_pune: data.price_from_pune,
+          price_from_mumbai: data.price_from_mumbai,
+          advance_amount: data.advance_amount || 2000,
+          highlights: data.highlights || [],
+          inclusions: data.inclusions || [],
+          exclusions: data.exclusions || [],
+          locations: data.locations || [],
+          images: data.images || [],
+          is_active: data.is_active ?? true,
+          booking_live: data.booking_live ?? false,
+          capacity: data.capacity || 30,
+          contact_phone: data.contact_phone || "+91-9415026522",
+          contact_email: data.contact_email || "bhramanbyua@gmail.com",
+          notes: data.notes || "",
         });
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load trip details",
-        variant: "destructive",
-      });
+      console.error("Error loading trip:", error);
+      toast({ title: "Error", description: "Failed to load trip details", variant: "destructive" });
     }
     setLoading(false);
   };
 
   const handleSubmit = async () => {
     if (!formData.trip_id || !formData.trip_name || !formData.duration) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in Trip ID, Name, and Duration",
-        variant: "destructive",
-      });
+      toast({ title: "Validation Error", description: "Please fill in Trip ID, Name, and Duration", variant: "destructive" });
       return;
     }
 
     setSaving(true);
 
+    // Build the complete update payload — replace arrays entirely
     const tripData = {
       trip_id: formData.trip_id,
       trip_name: formData.trip_name,
@@ -158,11 +139,11 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       price_from_pune: formData.price_from_pune,
       price_from_mumbai: formData.price_from_mumbai,
       advance_amount: formData.advance_amount,
-      highlights: formData.highlights,
-      inclusions: formData.inclusions,
-      exclusions: formData.exclusions,
-      locations: formData.locations,
-      images: formData.images,
+      highlights: [...formData.highlights], // replace entire array
+      inclusions: [...formData.inclusions],
+      exclusions: [...formData.exclusions],
+      locations: [...formData.locations],
+      images: [...formData.images],
       is_active: formData.is_active,
       booking_live: formData.booking_live,
       capacity: formData.capacity,
@@ -173,54 +154,50 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
 
     try {
       if (tripId) {
-        // Update existing trip
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/trips?trip_id=eq.${tripId}`,
-          {
-            method: "PATCH",
-            headers: {
-              apikey: SUPABASE_KEY,
-              Authorization: `Bearer ${SUPABASE_KEY}`,
-              "Content-Type": "application/json",
-              Prefer: "return=minimal",
-            },
-            body: JSON.stringify(tripData),
-          }
-        );
+        // Update existing trip using supabase client with auth
+        const { data, error } = await supabase
+          .from("trips")
+          .update(tripData)
+          .eq("trip_id", tripId)
+          .select()
+          .single();
 
-        if (response.ok) {
-          toast({ title: "Success", description: "Trip updated successfully" });
-          onSave();
-        } else {
-          toast({ title: "Error", description: "Failed to update trip", variant: "destructive" });
-        }
+        if (error) throw error;
+
+        console.log("[TripEditor] Update response:", data);
+        toast({ title: "Success", description: "Trip updated successfully" });
       } else {
         // Create new trip
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/trips`,
-          {
-            method: "POST",
-            headers: {
-              apikey: SUPABASE_KEY,
-              Authorization: `Bearer ${SUPABASE_KEY}`,
-              "Content-Type": "application/json",
-              Prefer: "return=minimal",
-            },
-            body: JSON.stringify(tripData),
-          }
-        );
+        const { data, error } = await supabase
+          .from("trips")
+          .insert(tripData)
+          .select()
+          .single();
 
-        if (response.ok) {
-          toast({ title: "Success", description: "Trip created successfully" });
-          onSave();
-        } else if (response.status === 409) {
-          toast({ title: "Error", description: "A trip with this ID already exists", variant: "destructive" });
-        } else {
-          toast({ title: "Error", description: "Failed to create trip", variant: "destructive" });
+        if (error) {
+          if (error.code === "23505") {
+            toast({ title: "Error", description: "A trip with this ID already exists", variant: "destructive" });
+            setSaving(false);
+            return;
+          }
+          throw error;
         }
+
+        console.log("[TripEditor] Create response:", data);
+        toast({ title: "Success", description: "Trip created successfully" });
       }
-    } catch (error) {
-      toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
+
+      // Invalidate all relevant React Query caches
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["trip", tripId] }),
+        queryClient.invalidateQueries({ queryKey: ["trips"] }),
+        queryClient.invalidateQueries({ queryKey: ["destinationTrips"] }),
+      ]);
+
+      onSave();
+    } catch (error: any) {
+      console.error("[TripEditor] Save error:", error);
+      toast({ title: "Error", description: error?.message || "Something went wrong", variant: "destructive" });
     }
 
     setSaving(false);
