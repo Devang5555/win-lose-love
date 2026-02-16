@@ -200,10 +200,11 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
       }
 
       toast({
-        title: "Booking Submitted!",
-        description: "We'll verify your payment and confirm your booking shortly.",
+        title: "Booking Confirmed!",
+        description: "Your spot has been reserved. Redirecting…",
       });
-      setStep(4);
+      handleClose();
+      navigate(`/booking-success/${bookingId}`);
     } catch (error: any) {
       console.error('Booking confirmation error:', error);
       toast({

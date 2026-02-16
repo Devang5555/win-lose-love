@@ -12,6 +12,7 @@ import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
 import MyBookings from "./pages/MyBookings";
 import Admin from "./pages/Admin";
+import BookingSuccess from "./pages/BookingSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/my-bookings" element={<MyBookings />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/booking-success/:bookingId" element={<BookingSuccess />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
