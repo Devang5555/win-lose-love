@@ -446,11 +446,37 @@ const TripDetail = () => {
                       </div>
                     )}
                     <div className="flex items-baseline gap-2">
-                      <span className={`text-4xl font-bold ${isBookable ? 'text-primary' : 'text-muted-foreground'}`}>
-                        {formatPrice(selectedBatch?.price_override ?? displayPrice)}
-                      </span>
+                      {selectedBatch?.dynamicPrice && selectedBatch.dynamicPrice.adjustmentPercent !== 0 ? (
+                        <>
+                          <span className={`text-4xl font-bold ${selectedBatch.dynamicPrice.adjustmentPercent < 0 ? 'text-green-600' : 'text-primary'}`}>
+                            {formatPrice(selectedBatch.dynamicPrice.effectivePrice)}
+                          </span>
+                          <span className="text-lg text-muted-foreground line-through">
+                            {formatPrice(selectedBatch.dynamicPrice.basePrice)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className={`text-4xl font-bold ${isBookable ? 'text-primary' : 'text-muted-foreground'}`}>
+                          {formatPrice(selectedBatch?.dynamicPrice?.effectivePrice ?? selectedBatch?.price_override ?? displayPrice)}
+                        </span>
+                      )}
                       <span className="text-muted-foreground">per person</span>
                     </div>
+                    {selectedBatch?.dynamicPrice?.badges && selectedBatch.dynamicPrice.badges.length > 0 && (
+                      <div className="flex gap-1.5 mt-2">
+                        {selectedBatch.dynamicPrice.badges.map((badge, i) => (
+                          <Badge
+                            key={i}
+                            className={badge.type === "surge"
+                              ? "bg-orange-500/10 text-orange-600 border-orange-500/20 text-xs"
+                              : "bg-green-500/10 text-green-600 border-green-500/20 text-xs"
+                            }
+                          >
+                            {badge.label}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                     {hasPunePrice && (
                       <p className="text-xs text-muted-foreground mt-1">From Mumbai</p>
                     )}
@@ -593,7 +619,8 @@ const TripDetail = () => {
 
       {/* Mobile Sticky Booking Bar */}
       <MobileBookingBar
-        price={selectedBatch?.price_override ?? displayPrice}
+        price={selectedBatch?.dynamicPrice?.effectivePrice ?? selectedBatch?.price_override ?? displayPrice}
+        originalPrice={selectedBatch?.dynamicPrice?.adjustmentPercent !== 0 ? selectedBatch?.dynamicPrice?.basePrice : undefined}
         selectedBatch={selectedBatch}
         isBookable={isBookable}
         loading={loading}

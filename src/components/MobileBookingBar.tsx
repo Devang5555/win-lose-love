@@ -8,6 +8,7 @@ import { BatchInfo } from "@/components/BatchSelector";
 
 interface MobileBookingBarProps {
   price: number;
+  originalPrice?: number;
   selectedBatch: BatchInfo | null;
   isBookable: boolean;
   loading: boolean;
@@ -22,6 +23,7 @@ const formatDate = (dateString: string) =>
 
 const MobileBookingBar = ({
   price,
+  originalPrice,
   selectedBatch,
   isBookable,
   loading,
@@ -69,6 +71,11 @@ const MobileBookingBar = ({
           <p className="text-lg font-bold text-foreground leading-tight">
             {formatPrice(price)}
             <span className="text-xs font-normal text-muted-foreground ml-1">/person</span>
+            {originalPrice && (
+              <span className="text-xs font-normal text-muted-foreground line-through ml-1.5">
+                {formatPrice(originalPrice)}
+              </span>
+            )}
           </p>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
             {selectedBatch && (
