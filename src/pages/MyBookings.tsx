@@ -321,14 +321,42 @@ const MyBookings = () => {
             <div className="space-y-4">
               {bookings.map((booking) => {
                 const balanceAmount = Math.max(0, booking.total_amount - booking.advance_paid);
+                const isOldInitiated = booking.booking_status === "initiated" && 
+                  (Date.now() - new Date(booking.created_at).getTime()) > 30 * 60 * 1000;
                 
                 return (
                   <div
                     key={booking.id}
-                    className="bg-card border border-border rounded-xl p-6 hover:shadow-md transition-shadow"
+                    className={`bg-card border rounded-xl p-6 hover:shadow-md transition-shadow ${
+                      isOldInitiated ? 'border-destructive/50 shadow-destructive/10' : 'border-border'
+                    }`}
                   >
                     <div className="flex flex-col gap-4">
-                      {/* Header */}
+                      {/* Urgent Payment Reminder Banner */}
+                      {isOldInitiated && (
+                        <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/30 flex items-start gap-3 animate-fade-in">
+                          <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-semibold text-destructive">
+                              ⚠️ Payment Overdue — Your seat may be released!
+                            </p>
+                            <p className="text-xs text-destructive/80 mt-1">
+                              This booking was initiated {Math.round((Date.now() - new Date(booking.created_at).getTime()) / 60000)} minutes ago. Please complete your payment soon to avoid losing your spot.
+                            </p>
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              className="mt-2"
+                              asChild
+                            >
+                              <Link to={`/trips/${booking.trip_id}`}>
+                                Complete Payment Now
+                                <ArrowRight className="w-3 h-3 ml-1" />
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                       <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-2">
