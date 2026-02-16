@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MapPin, ArrowLeft, SlidersHorizontal, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrips, DatabaseTrip } from "@/hooks/useTrips";
+import JsonLd from "@/components/JsonLd";
 
 interface DestinationData {
   id: string;
@@ -135,6 +136,33 @@ const DestinationDetail = () => {
     setShowInterestPopup(true);
   };
 
+  // JSON-LD structured data
+  const destinationJsonLd = useMemo(() => {
+    if (!destination) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "TouristDestination",
+      name: destination.name,
+      description: destination.description || "",
+      image: destination.hero_image || "",
+      containedInPlace: {
+        "@type": "AdministrativeArea",
+        name: destination.state,
+      },
+      touristType: "Adventure Travel",
+      includesAttraction: destTrips.map((t) => ({
+        "@type": "TouristTrip",
+        name: t.trip_name,
+        description: t.summary || "",
+        offers: {
+          "@type": "Offer",
+          price: t.price_default,
+          priceCurrency: "INR",
+        },
+      })),
+    };
+  }, [destination, destTrips]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -171,6 +199,7 @@ const DestinationDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {destinationJsonLd && <JsonLd data={destinationJsonLd} />}
       <Navbar />
 
       {/* Hero */}

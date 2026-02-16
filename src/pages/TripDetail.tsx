@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   MapPin, Clock, Users, Calendar, Phone, Mail, 
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getTrip, getTripPrice, formatPrice } from "@/data/trips";
 import { useToast } from "@/hooks/use-toast";
 import { useTrips } from "@/hooks/useTrips";
+import JsonLd from "@/components/JsonLd";
 
 const TripDetail = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -95,8 +96,50 @@ const TripDetail = () => {
     window.open(`https://wa.me/919415026522?text=${message}`, '_blank');
   };
 
+  // JSON-LD structured data
+  const tripJsonLd = useMemo(() => {
+    const schema: Record<string, any> = {
+      "@context": "https://schema.org",
+      "@type": "TouristTrip",
+      name: trip.tripName,
+      description: trip.summary || "",
+      image: trip.images?.[0] || "",
+      touristType: "Adventure",
+      provider: {
+        "@type": "Organization",
+        name: "GoBhraman",
+        url: "https://gobhraman.com",
+      },
+      offers: {
+        "@type": "Offer",
+        price: displayPrice,
+        priceCurrency: "INR",
+        availability: isBookable
+          ? "https://schema.org/InStock"
+          : "https://schema.org/PreOrder",
+        url: window.location.href,
+      },
+      duration: trip.duration,
+    };
+
+    if (trip.itinerary) {
+      schema.itinerary = {
+        "@type": "ItemList",
+        numberOfItems: trip.itinerary.length,
+        itemListElement: trip.itinerary.map((day, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: day.title,
+        })),
+      };
+    }
+
+    return schema;
+  }, [trip, displayPrice, isBookable]);
+
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={tripJsonLd} />
       <Navbar />
 
       {/* Hero */}
