@@ -16,6 +16,7 @@ import BookingSuccess from "./pages/BookingSuccess";
 import NotFound from "./pages/NotFound";
 import Destinations from "./pages/Destinations";
 import DestinationDetail from "./pages/DestinationDetail";
+import SearchPage from "./pages/Search";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/trip/:tripId" element={<TripDetail />} />
             <Route path="/destinations" element={<Destinations />} />
             <Route path="/destinations/:slug" element={<DestinationDetail />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={<Auth />} />

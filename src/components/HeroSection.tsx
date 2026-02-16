@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Compass, Mountain, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import GlobalSearchBar from "@/components/GlobalSearchBar";
 
 const HeroSection = () => {
   return (
@@ -35,6 +36,11 @@ const HeroSection = () => {
         <p className="text-lg md:text-xl text-background/90 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
           Curated journeys across India for explorers who seek culture, adventure, and real connections — not tourist checklists.
         </p>
+
+        {/* Search Bar */}
+        <div className="max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '0.25s' }}>
+          <GlobalSearchBar variant="hero" />
+        </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-slide-up" style={{ animationDelay: '0.3s' }}>
           <Button asChild size="lg" className="text-lg px-8 shadow-lg hover:shadow-xl transition-shadow">
