@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +14,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BatchManagement from "@/components/admin/BatchManagement";
 import TripManagement from "@/components/admin/TripManagement";
+import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import { 
   openWhatsAppAdvanceVerified, 
   openWhatsAppFullyPaid,
@@ -77,6 +78,8 @@ const Admin = () => {
   const [interestedUsers, setInterestedUsers] = useState<InterestedUser[]>([]);
   const [filteredInterested, setFilteredInterested] = useState<InterestedUser[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
+  const [analyticsTrips, setAnalyticsTrips] = useState<{ trip_id: string; trip_name: string; destination_id: string | null }[]>([]);
+  const [analyticsDestinations, setAnalyticsDestinations] = useState<{ id: string; name: string }[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -192,10 +195,12 @@ const Admin = () => {
   }, [selectedBooking]);
 
   const fetchData = async () => {
-    const [bookingsRes, interestedRes, batchesRes] = await Promise.all([
+    const [bookingsRes, interestedRes, batchesRes, tripsRes, destsRes] = await Promise.all([
       supabase.from("bookings").select("*").order("created_at", { ascending: false }),
       supabase.from("interested_users").select("*").order("created_at", { ascending: false }),
       supabase.from("batches").select("*").order("start_date", { ascending: true }),
+      supabase.from("trips").select("trip_id, trip_name, destination_id"),
+      supabase.from("destinations").select("id, name"),
     ]);
 
     if (bookingsRes.error) {
@@ -220,6 +225,13 @@ const Admin = () => {
 
     if (!batchesRes.error) {
       setBatches(batchesRes.data || []);
+    }
+
+    if (!tripsRes.error) {
+      setAnalyticsTrips(tripsRes.data || []);
+    }
+    if (!destsRes.error) {
+      setAnalyticsDestinations(destsRes.data || []);
     }
 
     setLoadingData(false);
@@ -585,7 +597,11 @@ Please re-upload the correct payment proof from your dashboard.
 
           {/* Tabs */}
           <Tabs defaultValue="trips" className="space-y-6">
-            <TabsList className="grid w-full md:w-auto grid-cols-4 md:inline-flex">
+            <TabsList className="grid w-full md:w-auto grid-cols-5 md:inline-flex">
+              <TabsTrigger value="analytics" className="gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Analytics
+              </TabsTrigger>
               <TabsTrigger value="trips" className="gap-2">
                 <MapPin className="w-4 h-4" />
                 Trips
@@ -606,6 +622,16 @@ Please re-upload the correct payment proof from your dashboard.
                 Leads
               </TabsTrigger>
             </TabsList>
+
+            {/* Analytics Tab */}
+            <TabsContent value="analytics">
+              <AdminAnalytics
+                bookings={bookings}
+                batches={batches}
+                trips={analyticsTrips}
+                destinations={analyticsDestinations}
+              />
+            </TabsContent>
 
             {/* Trips Tab */}
             <TabsContent value="trips">
