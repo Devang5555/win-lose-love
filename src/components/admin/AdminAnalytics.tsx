@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+import { calculateDynamicPrice } from "@/lib/dynamicPricing";
+import { formatPrice } from "@/data/trips";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -49,6 +51,14 @@ interface AdminAnalyticsProps {
 const chartConfig = {
   revenue: {
     label: "Revenue",
+    color: "hsl(var(--primary))",
+  },
+  basePrice: {
+    label: "Base Price",
+    color: "hsl(var(--muted-foreground))",
+  },
+  effectivePrice: {
+    label: "Effective Price",
     color: "hsl(var(--primary))",
   },
 };
@@ -146,6 +156,28 @@ const AdminAnalytics = ({ bookings, batches, trips, destinations }: AdminAnalyti
         isFillingFast: occupancy >= 80 && available > 0,
       };
     });
+  }, [batches, tripMap]);
+
+  // Dynamic pricing chart data
+  const pricingChartData = useMemo(() => {
+    return batches
+      .filter(b => b.status === "active")
+      .map(batch => {
+        const available = batch.available_seats ?? (batch.batch_size - batch.seats_booked);
+        const trip = tripMap[batch.trip_id];
+        const tripName = trip?.trip_name || batch.trip_id;
+        const dp = calculateDynamicPrice(0, batch.batch_size, available, batch.start_date);
+        // We need a base price from trips data - use price_override or 0
+        const batchBasePrice = batch.batch_size; // placeholder, we compute from trips
+        return {
+          name: `${batch.batch_name.length > 15 ? batch.batch_name.slice(0, 15) + '…' : batch.batch_name}`,
+          fullName: `${batch.batch_name} (${tripName})`,
+          occupancy: batch.batch_size > 0 ? Math.round(((batch.batch_size - available) / batch.batch_size) * 100) : 0,
+          adjustmentPercent: dp.adjustmentPercent,
+          badges: dp.badges,
+        };
+      })
+      .sort((a, b) => b.adjustmentPercent - a.adjustmentPercent);
   }, [batches, tripMap]);
 
   const formatCurrency = (n: number) => `₹${n.toLocaleString("en-IN")}`;
@@ -301,6 +333,61 @@ const AdminAnalytics = ({ bookings, batches, trips, destinations }: AdminAnalyti
           ) : (
             <div className="h-[200px] flex items-center justify-center text-muted-foreground">
               No confirmed bookings found for the selected filters.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Dynamic Pricing Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            Dynamic Pricing – Active Batches
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {pricingChartData.length > 0 ? (
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
+              <BarChart data={pricingChartData} layout="vertical" margin={{ left: 10, right: 30 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" horizontal={false} />
+                <XAxis type="number" domain={[-20, 25]} tickFormatter={(v) => `${v > 0 ? '+' : ''}${v}%`} className="text-xs" />
+                <YAxis type="category" dataKey="name" width={120} className="text-xs" />
+                <ChartTooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div className="rounded-lg border border-border/50 bg-background px-3 py-2 text-xs shadow-xl space-y-1">
+                        <p className="font-medium">{d.fullName}</p>
+                        <p className="text-muted-foreground">Occupancy: {d.occupancy}%</p>
+                        <p className={d.adjustmentPercent > 0 ? "text-orange-600 font-medium" : d.adjustmentPercent < 0 ? "text-green-600 font-medium" : "text-muted-foreground"}>
+                          Price Adjustment: {d.adjustmentPercent > 0 ? '+' : ''}{d.adjustmentPercent}%
+                        </p>
+                        {d.badges.map((b: { label: string; type: string }, i: number) => (
+                          <span key={i} className={`inline-block mr-1 text-[10px] px-1.5 py-0.5 rounded ${b.type === 'surge' ? 'bg-orange-500/10 text-orange-600' : 'bg-green-500/10 text-green-600'}`}>
+                            {b.label}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  }}
+                />
+                <Bar
+                  dataKey="adjustmentPercent"
+                  radius={[0, 4, 4, 0]}
+                  fill="hsl(var(--primary))"
+                  label={({ x, y, width, height, value }: any) => (
+                    <text x={x + width + 4} y={y + height / 2 + 4} className="fill-foreground text-[10px] font-medium">
+                      {value > 0 ? '+' : ''}{value}%
+                    </text>
+                  )}
+                />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+              No active batches found.
             </div>
           )}
         </CardContent>
