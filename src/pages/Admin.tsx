@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,8 @@ import BatchManagement from "@/components/admin/BatchManagement";
 import TripManagement from "@/components/admin/TripManagement";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import ReviewsManagement from "@/components/admin/ReviewsManagement";
+import AuditLogs from "@/components/admin/AuditLogs";
+import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
   openWhatsAppAdvanceVerified, 
   openWhatsAppFullyPaid,
@@ -86,7 +88,8 @@ interface Batch {
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, roles, loading } = useAuth();
+  const { can, canAny, isStaffRole } = usePermissions(roles);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [interestedUsers, setInterestedUsers] = useState<InterestedUser[]>([]);
@@ -113,7 +116,7 @@ const Admin = () => {
   const [cancelRefundAmount, setCancelRefundAmount] = useState("0");
 
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
+    if (!loading && (!user || (!isAdmin && !isStaffRole))) {
       toast({
         title: "Access Denied",
         description: "You need admin privileges to access this page.",
@@ -121,13 +124,13 @@ const Admin = () => {
       });
       navigate("/auth");
     }
-  }, [user, isAdmin, loading, navigate, toast]);
+  }, [user, isAdmin, isStaffRole, loading, navigate, toast]);
 
   useEffect(() => {
-    if (user && isAdmin) {
+    if (user && (isAdmin || isStaffRole)) {
       fetchData();
     }
-  }, [user, isAdmin]);
+  }, [user, isAdmin, isStaffRole]);
 
   useEffect(() => {
     let filtered = bookings;
@@ -469,11 +472,20 @@ For queries, please contact us.
       toast({ title: "Error", description: "Failed to update refund status", variant: "destructive" });
     } else {
       toast({ title: "Success", description: `Refund marked as ${status}` });
-      // If refund processed, update booking status to refunded
       if (status === "processed") {
         const refund = refunds.find(r => r.id === refundId);
         if (refund) {
           await supabase.from("bookings").update({ booking_status: "refunded" }).eq("id", refund.booking_id);
+          // Audit log
+          if (user) {
+            await supabase.from("audit_logs").insert({
+              user_id: user.id,
+              action_type: "refund_processed",
+              entity_type: "refund",
+              entity_id: refundId,
+              metadata: { booking_id: refund.booking_id, amount: refund.amount, reason: refund.reason },
+            });
+          }
         }
       }
       fetchData();
@@ -555,7 +567,7 @@ For queries, please contact us.
     );
   }
 
-  if (!isAdmin) return null;
+  if (!isAdmin && !isStaffRole) return null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -567,7 +579,15 @@ For queries, please contact us.
           <div className="mb-8 flex items-center justify-between">
             <div>
               <h1 className="font-serif text-3xl font-bold text-foreground">Admin Dashboard</h1>
-              <p className="text-muted-foreground mt-2">Manage bookings, leads, and trips</p>
+              <div className="flex items-center gap-2 mt-2">
+                <p className="text-muted-foreground">Manage bookings, leads, and trips</p>
+                {roles.filter(r => r !== 'user').map(role => (
+                  <Badge key={role} variant="outline" className="text-xs gap-1">
+                    <Shield className="w-3 h-3" />
+                    {getRoleLabel(role)}
+                  </Badge>
+                ))}
+              </div>
             </div>
             <Button variant="outline" size="sm" onClick={fetchData}>
               <RefreshCw className="w-4 h-4 mr-2" />
@@ -733,42 +753,62 @@ For queries, please contact us.
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="trips" className="space-y-6">
-            <TabsList className="grid w-full md:w-auto grid-cols-7 md:inline-flex">
-              <TabsTrigger value="analytics" className="gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Analytics
-              </TabsTrigger>
-              <TabsTrigger value="trips" className="gap-2">
-                <MapPin className="w-4 h-4" />
-                Trips
-              </TabsTrigger>
-              <TabsTrigger value="batches" className="gap-2">
-                <Layers className="w-4 h-4" />
-                Batches
-              </TabsTrigger>
-              <TabsTrigger value="bookings" className="gap-2">
-                <Calendar className="w-4 h-4" />
-                Bookings
-                {pendingRemainingVerification.length > 0 && (
-                  <Badge className="ml-1 bg-blue-500 text-white">{pendingRemainingVerification.length}</Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="refunds" className="gap-2">
-                <DollarSign className="w-4 h-4" />
-                Refunds
-                {refunds.filter(r => r.refund_status === "pending").length > 0 && (
-                  <Badge className="ml-1 bg-amber-500 text-white">{refunds.filter(r => r.refund_status === "pending").length}</Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="reviews" className="gap-2">
-                <Star className="w-4 h-4" />
-                Reviews
-              </TabsTrigger>
-              <TabsTrigger value="leads" className="gap-2">
-                <Users className="w-4 h-4" />
-                Leads
-              </TabsTrigger>
+          <Tabs defaultValue={can('view_analytics') ? "analytics" : can('view_bookings') ? "bookings" : "reviews"} className="space-y-6">
+            <TabsList className="flex flex-wrap md:inline-flex gap-1">
+              {can('view_analytics') && (
+                <TabsTrigger value="analytics" className="gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  Analytics
+                </TabsTrigger>
+              )}
+              {can('manage_trips') && (
+                <TabsTrigger value="trips" className="gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Trips
+                </TabsTrigger>
+              )}
+              {can('manage_batches') && (
+                <TabsTrigger value="batches" className="gap-2">
+                  <Layers className="w-4 h-4" />
+                  Batches
+                </TabsTrigger>
+              )}
+              {can('view_bookings') && (
+                <TabsTrigger value="bookings" className="gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Bookings
+                  {pendingRemainingVerification.length > 0 && (
+                    <Badge className="ml-1 bg-blue-500 text-white">{pendingRemainingVerification.length}</Badge>
+                  )}
+                </TabsTrigger>
+              )}
+              {can('process_refund') && (
+                <TabsTrigger value="refunds" className="gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  Refunds
+                  {refunds.filter(r => r.refund_status === "pending").length > 0 && (
+                    <Badge className="ml-1 bg-amber-500 text-white">{refunds.filter(r => r.refund_status === "pending").length}</Badge>
+                  )}
+                </TabsTrigger>
+              )}
+              {can('view_reviews') && (
+                <TabsTrigger value="reviews" className="gap-2">
+                  <Star className="w-4 h-4" />
+                  Reviews
+                </TabsTrigger>
+              )}
+              {can('view_leads') && (
+                <TabsTrigger value="leads" className="gap-2">
+                  <Users className="w-4 h-4" />
+                  Leads
+                </TabsTrigger>
+              )}
+              {can('view_audit_logs') && (
+                <TabsTrigger value="audit" className="gap-2">
+                  <Activity className="w-4 h-4" />
+                  Audit Logs
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {/* Analytics Tab */}
@@ -1129,6 +1169,13 @@ For queries, please contact us.
                 </div>
               </div>
             </TabsContent>
+
+            {/* Audit Logs Tab */}
+            {can('view_audit_logs') && (
+              <TabsContent value="audit">
+                <AuditLogs />
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </main>
@@ -1562,8 +1609,8 @@ For queries, please contact us.
                   </div>
                 )}
 
-                {/* Cancel Booking Button - show for non-cancelled/non-expired/non-refunded */}
-                {!["cancelled", "expired", "refunded"].includes(selectedBooking.booking_status) && !showCancelModal && (
+                {/* Cancel Booking Button - show for non-cancelled/non-expired/non-refunded, only if user can cancel */}
+                {can('cancel_booking') && !["cancelled", "expired", "refunded"].includes(selectedBooking.booking_status) && !showCancelModal && (
                   <Button
                     variant="destructive"
                     onClick={() => {
