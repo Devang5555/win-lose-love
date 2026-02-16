@@ -380,6 +380,8 @@ Please re-upload the correct payment proof from your dashboard.
         return <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Confirmed</Badge>;
       case "initiated":
         return <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Initiated</Badge>;
+      case "expired":
+        return <Badge className="bg-gray-500/20 text-gray-600 border-gray-500/30">Expired</Badge>;
       case "cancelled":
         return <Badge className="bg-red-500/20 text-red-600 border-red-500/30">Cancelled</Badge>;
       default:
@@ -490,7 +492,7 @@ Please re-upload the correct payment proof from your dashboard.
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-7 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-8 gap-4 mb-8">
             <div className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
@@ -593,6 +595,19 @@ Please re-upload the correct payment proof from your dashboard.
                 </div>
               </div>
             </div>
+            <div className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-500/20 flex items-center justify-center">
+                  <XCircle className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">
+                    {bookings.filter((b) => b.booking_status === "expired").length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Expired</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Tabs */}
@@ -665,6 +680,7 @@ Please re-upload the correct payment proof from your dashboard.
                     <SelectItem value="initiated">Initiated</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
