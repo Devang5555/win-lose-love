@@ -199,6 +199,20 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
         return;
       }
 
+      // Trigger WhatsApp notification (fire-and-forget)
+      try {
+        const { data: notifData } = await supabase.functions.invoke(
+          'send-booking-notification',
+          { body: { booking_id: bookingId } }
+        );
+        // Open admin WhatsApp notification in background
+        if (notifData?.admin_whatsapp_url) {
+          window.open(notifData.admin_whatsapp_url, '_blank');
+        }
+      } catch (notifErr) {
+        console.warn('WhatsApp notification failed (non-blocking):', notifErr);
+      }
+
       toast({
         title: "Booking Confirmed!",
         description: "Your spot has been reserved. Redirecting…",
