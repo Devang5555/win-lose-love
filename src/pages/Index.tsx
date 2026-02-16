@@ -1,23 +1,27 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Star, Shield, Users, Headphones, Sparkles, Compass, Calendar } from "lucide-react";
+import { ArrowRight, Star, Shield, Users, Headphones, Sparkles, Compass, Calendar, MapPin, Mountain } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import TripCard from "@/components/TripCard";
 import InterestPopup from "@/components/InterestPopup";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useTrips } from "@/hooks/useTrips";
+import { useDestinations } from "@/hooks/useDestinations";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
-  const { loading, getBookableTrips, getUpcomingTrips, getPopularDestinations } = useTrips();
+  const { loading, getBookableTrips, getUpcomingTrips } = useTrips();
+  const { destinations, loading: destLoading, getDestinationsByState, getFeaturedDestinations } = useDestinations();
   const [showInterestPopup, setShowInterestPopup] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
 
   const bookableTrips = getBookableTrips();
   const upcomingTrips = getUpcomingTrips();
-  const popularDestinations = getPopularDestinations(6);
+  const featuredDestinations = getFeaturedDestinations(8);
+  const byState = getDestinationsByState();
 
   const handleRegisterInterest = (tripId: string) => {
     setSelectedTripId(tripId);
@@ -133,38 +137,48 @@ const Index = () => {
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">
                 Popular Destinations
               </h2>
-              <p className="text-muted-foreground mt-2">Click to discover trips in your favorite destinations</p>
+              <p className="text-muted-foreground mt-2">Discover trips across India's most extraordinary places</p>
             </div>
             <Button asChild variant="outline" className="font-semibold">
-              <Link to="/trips">
-                View All Trips
+              <Link to="/destinations">
+                All Destinations
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
           </div>
 
-          {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Skeleton key={i} className="aspect-square rounded-2xl" />
+          {destLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
               ))}
             </div>
-          ) : popularDestinations.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {popularDestinations.map((trip) => (
+          ) : featuredDestinations.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {featuredDestinations.map((dest) => (
                 <Link
-                  key={trip.trip_id}
-                  to={`/trips/${trip.trip_id}`}
-                  className="group relative rounded-2xl overflow-hidden aspect-square shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+                  key={dest.id}
+                  to={`/destinations/${dest.slug}`}
+                  className="group relative rounded-2xl overflow-hidden aspect-[4/3] shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
                 >
                   <img
-                    src={trip.images[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"}
-                    alt={trip.trip_name}
+                    src={dest.hero_image || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"}
+                    alt={dest.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  {(dest.trip_count ?? 0) > 0 && (
+                    <Badge className="absolute top-3 right-3 bg-primary/90 text-primary-foreground text-xs font-semibold">
+                      {dest.trip_count} trip{dest.trip_count !== 1 ? "s" : ""}
+                    </Badge>
+                  )}
                   <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="font-serif text-lg font-bold text-white">{trip.trip_name.split(' ')[0]}</h3>
+                    <h3 className="font-serif text-lg font-bold text-white">{dest.name}</h3>
+                    <p className="text-xs text-white/80 flex items-center gap-1 mt-1">
+                      <MapPin className="w-3 h-3" />
+                      {dest.state}
+                    </p>
                   </div>
                 </Link>
               ))}
@@ -176,6 +190,39 @@ const Index = () => {
           )}
         </div>
       </section>
+
+      {/* Explore by State */}
+      {Object.keys(byState).length > 0 && (
+        <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-background to-muted">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <span className="text-primary font-bold text-sm uppercase tracking-wider">PAN India</span>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">
+                Explore by State
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {Object.entries(byState).sort(([a], [b]) => a.localeCompare(b)).map(([state, dests]) => (
+                <Link
+                  key={state}
+                  to={`/destinations?state=${encodeURIComponent(state)}`}
+                  className="group bg-card rounded-2xl p-6 text-center border border-border shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
+                >
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-3">
+                    <Mountain className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="font-serif text-lg font-bold text-card-foreground group-hover:text-primary transition-colors">
+                    {state}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {dests.length} destination{dests.length !== 1 ? "s" : ""}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Upcoming Trips Section */}
       <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-background to-muted">

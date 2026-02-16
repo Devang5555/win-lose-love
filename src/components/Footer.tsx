@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from "lucide-react";
 import logo from "@/assets/logo.jpg";
-import { useTrips } from "@/hooks/useTrips";
+import { useDestinations } from "@/hooks/useDestinations";
 
 const Footer = () => {
-  const { getPopularDestinations } = useTrips();
-  const destinations = getPopularDestinations(6);
+  const { getFeaturedDestinations } = useDestinations();
+  const destinations = getFeaturedDestinations(6);
 
   return (
     <footer className="bg-foreground text-background">
@@ -71,16 +71,24 @@ const Footer = () => {
           <div>
             <h4 className="font-serif text-lg font-semibold mb-4">Destinations</h4>
             <ul className="space-y-3">
-              {destinations.map((trip) => (
-                <li key={trip.trip_id}>
+              {destinations.map((dest) => (
+                <li key={dest.id}>
                   <Link 
-                    to={`/trips/${trip.trip_id}`}
+                    to={`/destinations/${dest.slug}`}
                     className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors"
                   >
-                    {trip.locations?.[0] || trip.trip_name.split(' ')[0]}
+                    {dest.name}
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link 
+                  to="/destinations"
+                  className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors font-semibold"
+                >
+                  View All →
+                </Link>
+              </li>
             </ul>
           </div>
 
