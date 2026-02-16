@@ -599,11 +599,25 @@ const TripDetail = () => {
 
                   <Button 
                     variant="ghost" 
-                    className="w-full"
+                    className="w-full mb-3"
                     onClick={handleShare}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
                     Share Experience
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    className="w-full text-green-600 hover:text-green-700 hover:bg-green-50"
+                    onClick={() => {
+                      const batch = selectedBatch;
+                      const dateInfo = batch ? ` | Departing: ${new Date(batch.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : '';
+                      const shareText = `🌊 *${tripName}*\n\n📍 ${tripLocations?.join(', ') || ''}\n⏱ ${tripDuration} | ₹${displayPrice.toLocaleString()}/person${dateInfo}\n\n${tripSummary}\n\n👉 Book now: ${window.location.href}\n\n– GoBhraman`;
+                      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+                    }}
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Share on WhatsApp
                   </Button>
                 </div>
 

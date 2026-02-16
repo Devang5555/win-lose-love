@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, User, Mail, Phone, Users, Calendar, CreditCard, CheckCircle, Upload } from "lucide-react";
+import { X, User, Mail, Phone, Users, Calendar, CreditCard, CheckCircle, Upload, MessageCircle } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Trip, getTripPrice, formatPrice } from "@/data/trips";
 import { calculateDynamicPrice } from "@/lib/dynamicPricing";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { generateUpiQrString, getMerchantUpiId } from "@/lib/upi";
@@ -49,6 +50,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
     pickupPoint: "mumbai",
     batchId: "",
     upiTransactionId: "",
+    whatsappOptin: false,
   });
 
   // Fetch available batches for this trip
@@ -159,11 +161,22 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
           batch_id: formData.batchId || null,
           payment_status: "pending",
           booking_status: "initiated",
+          whatsapp_optin: formData.whatsappOptin,
         })
         .select("id")
         .single();
 
       if (error) throw error;
+
+      // Save WhatsApp consent if opted in
+      if (formData.whatsappOptin && formData.phone) {
+        await supabase.from("whatsapp_consents").upsert({
+          user_id: user.id,
+          phone: formData.phone,
+          opted_in: true,
+          source: "booking",
+        }, { onConflict: "user_id,phone" }).then(() => {});
+      }
       return data.id;
     } catch (error: any) {
       console.error('Booking creation error:', error);
@@ -293,6 +306,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
       pickupPoint: "mumbai",
       batchId: "",
       upiTransactionId: "",
+      whatsappOptin: false,
     });
     setScreenshotFile(null);
     setScreenshotPreview(null);
@@ -516,6 +530,20 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                         </Select>
                       </div>
                     )}
+                  </div>
+
+                  {/* WhatsApp Opt-in */}
+                  <div className="flex items-start gap-3 p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
+                    <Checkbox
+                      id="whatsapp-optin"
+                      checked={formData.whatsappOptin}
+                      onCheckedChange={(checked) => setFormData({ ...formData, whatsappOptin: !!checked })}
+                      className="mt-0.5"
+                    />
+                    <Label htmlFor="whatsapp-optin" className="text-sm text-muted-foreground cursor-pointer leading-relaxed">
+                      <MessageCircle className="w-4 h-4 inline mr-1 text-green-600" />
+                      Get trip updates & reminders on WhatsApp
+                    </Label>
                   </div>
                 </div>
               )}

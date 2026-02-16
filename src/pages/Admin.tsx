@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,7 @@ import ReviewsManagement from "@/components/admin/ReviewsManagement";
 import AuditLogs from "@/components/admin/AuditLogs";
 import BlogEditor from "@/components/admin/BlogEditor";
 import FinancialReconciliation from "@/components/admin/FinancialReconciliation";
+import WhatsAppBroadcast from "@/components/admin/WhatsAppBroadcast";
 import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
   openWhatsAppAdvanceVerified, 
@@ -829,6 +830,12 @@ For queries, please contact us.
                   Finance
                 </TabsTrigger>
               )}
+              {can('manage_content') && (
+                <TabsTrigger value="broadcast" className="gap-2">
+                  <Send className="w-4 h-4" />
+                  WhatsApp
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {/* Analytics Tab */}
@@ -1214,6 +1221,13 @@ For queries, please contact us.
                   trips={analyticsTrips}
                   destinations={analyticsDestinations}
                 />
+              </TabsContent>
+            )}
+
+            {/* WhatsApp Broadcast Tab */}
+            {can('manage_content') && (
+              <TabsContent value="broadcast">
+                <WhatsAppBroadcast />
               </TabsContent>
             )}
           </Tabs>
