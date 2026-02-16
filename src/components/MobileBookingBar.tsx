@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,14 +27,32 @@ const MobileBookingBar = ({
   loading,
   onBookNow,
 }: MobileBookingBarProps) => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show bar once user scrolls past ~50vh (hero section)
+      const threshold = window.innerHeight * 0.5;
+      setVisible(window.scrollY > threshold);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   if (!isBookable && !loading) return null;
 
   const seats = selectedBatch?.available_seats ?? 0;
   const isSoldOut = selectedBatch ? seats === 0 : false;
 
+  const barClasses = `fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-lg border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] transition-transform duration-300 ease-out ${
+    visible ? "translate-y-0" : "translate-y-full"
+  }`;
+
   if (loading) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] animate-slide-in-bottom">
+      <div className={barClasses}>
         <div className="flex items-center justify-between gap-3">
           <Skeleton className="h-8 w-24" />
           <Skeleton className="h-10 w-32 rounded-xl" />
@@ -43,7 +62,7 @@ const MobileBookingBar = ({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-lg border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] animate-slide-in-bottom">
+    <div className={barClasses}>
       <div className="flex items-center justify-between gap-3">
         {/* Left: Price & info */}
         <div className="flex-1 min-w-0">
