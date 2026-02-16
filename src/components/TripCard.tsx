@@ -5,12 +5,18 @@ import { DatabaseTrip } from "@/hooks/useTrips";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import WishlistButton from "@/components/WishlistButton";
 
 interface TripCardProps {
   trip: Trip | DatabaseTrip;
   featured?: boolean;
   isBookable?: boolean;
   onRegisterInterest?: (tripId: string) => void;
+  wishlistProps?: {
+    isSaved: boolean;
+    isToggling: boolean;
+    onToggle: (tripId: string, currentPrice?: number) => Promise<boolean>;
+  };
 }
 
 // Type guard to check if trip is DatabaseTrip
@@ -18,7 +24,7 @@ const isDatabaseTrip = (trip: Trip | DatabaseTrip): trip is DatabaseTrip => {
   return 'trip_id' in trip;
 };
 
-const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegisterInterest }: TripCardProps) => {
+const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegisterInterest, wishlistProps }: TripCardProps) => {
   // Handle both Trip and DatabaseTrip types
   const tripId = isDatabaseTrip(trip) ? trip.trip_id : trip.tripId;
   const tripName = isDatabaseTrip(trip) ? trip.trip_name : trip.tripName;
@@ -78,9 +84,21 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
           </Badge>
         )}
         
-        <Badge variant="secondary" className="absolute top-4 right-4 z-20 bg-background/90 text-foreground font-semibold">
-          {duration}
-        </Badge>
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          {wishlistProps && (
+            <WishlistButton
+              tripId={tripId}
+              currentPrice={price}
+              isSaved={wishlistProps.isSaved}
+              isToggling={wishlistProps.isToggling}
+              onToggle={wishlistProps.onToggle}
+              size="sm"
+            />
+          )}
+          <Badge variant="secondary" className="bg-background/90 text-foreground font-semibold">
+            {duration}
+          </Badge>
+        </div>
       </div>
 
       {/* Content */}

@@ -10,12 +10,14 @@ import BookingModal from "@/components/BookingModal";
 import InterestPopup from "@/components/InterestPopup";
 import BatchSelector, { BatchInfo } from "@/components/BatchSelector";
 import MobileBookingBar from "@/components/MobileBookingBar";
+import WishlistButton from "@/components/WishlistButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getTrip, getTripPrice, formatPrice } from "@/data/trips";
 import { useToast } from "@/hooks/use-toast";
 import { useTrips } from "@/hooks/useTrips";
+import { useWishlist } from "@/hooks/useWishlist";
 import JsonLd from "@/components/JsonLd";
 import SeoMeta from "@/components/SeoMeta";
 
@@ -29,6 +31,7 @@ const TripDetail = () => {
   const [isInterestOpen, setIsInterestOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<BatchInfo | null>(null);
   const { toast } = useToast();
+  const { isInWishlist, isToggling, toggleWishlist } = useWishlist();
 
   // Use database price if available, otherwise fall back to static
   const displayPrice = dbTrip?.price_default ?? (trip ? getTripPrice(trip) : 0);
@@ -196,9 +199,21 @@ const TripDetail = () => {
                 </Badge>
               )}
             </div>
-            <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4">
-              {trip.tripName}
-            </h1>
+            <div className="flex items-start gap-3">
+              <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4 flex-1">
+                {trip.tripName}
+              </h1>
+              {tripId && (
+                <WishlistButton
+                  tripId={tripId}
+                  currentPrice={displayPrice}
+                  isSaved={isInWishlist(tripId)}
+                  isToggling={isToggling(tripId)}
+                  onToggle={toggleWishlist}
+                  className="mt-1 flex-shrink-0"
+                />
+              )}
+            </div>
             <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl">
               {trip.summary}
             </p>

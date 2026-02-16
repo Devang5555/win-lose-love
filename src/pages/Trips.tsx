@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTrips } from "@/hooks/useTrips";
+import { useWishlist } from "@/hooks/useWishlist";
 
 const Trips = () => {
   const { trips, loading, isTripBookable } = useTrips();
+  const { isInWishlist, isToggling, toggleWishlist } = useWishlist();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
@@ -149,7 +151,17 @@ const Trips = () => {
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                     {filteredBookable.map((trip) => (
-                      <TripCard key={trip.trip_id} trip={trip} featured isBookable={isTripBookable(trip.trip_id)} />
+                      <TripCard
+                        key={trip.trip_id}
+                        trip={trip}
+                        featured
+                        isBookable={isTripBookable(trip.trip_id)}
+                        wishlistProps={{
+                          isSaved: isInWishlist(trip.trip_id),
+                          isToggling: isToggling(trip.trip_id),
+                          onToggle: toggleWishlist,
+                        }}
+                      />
                     ))}
                   </div>
                 </div>
@@ -171,7 +183,16 @@ const Trips = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredUpcoming.map((trip) => (
-                      <TripCard key={trip.trip_id} trip={trip} isBookable={isTripBookable(trip.trip_id)} />
+                      <TripCard
+                        key={trip.trip_id}
+                        trip={trip}
+                        isBookable={isTripBookable(trip.trip_id)}
+                        wishlistProps={{
+                          isSaved: isInWishlist(trip.trip_id),
+                          isToggling: isToggling(trip.trip_id),
+                          onToggle: toggleWishlist,
+                        }}
+                      />
                     ))}
                   </div>
                 </div>
