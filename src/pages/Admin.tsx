@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ import AuditLogs from "@/components/admin/AuditLogs";
 import BlogEditor from "@/components/admin/BlogEditor";
 import FinancialReconciliation from "@/components/admin/FinancialReconciliation";
 import WhatsAppBroadcast from "@/components/admin/WhatsAppBroadcast";
+import LeadsCaptureManagement from "@/components/admin/LeadsCaptureManagement";
 import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
   openWhatsAppAdvanceVerified, 
@@ -836,6 +837,12 @@ For queries, please contact us.
                   WhatsApp
                 </TabsTrigger>
               )}
+              {can('manage_content') && (
+                <TabsTrigger value="lead-capture" className="gap-2">
+                  <Gift className="w-4 h-4" />
+                  Lead Capture
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {/* Analytics Tab */}
@@ -1228,6 +1235,13 @@ For queries, please contact us.
             {can('manage_content') && (
               <TabsContent value="broadcast">
                 <WhatsAppBroadcast />
+              </TabsContent>
+            )}
+
+            {/* Lead Capture Tab */}
+            {can('manage_content') && (
+              <TabsContent value="lead-capture">
+                <LeadsCaptureManagement />
               </TabsContent>
             )}
           </Tabs>
