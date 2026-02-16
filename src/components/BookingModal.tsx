@@ -20,6 +20,7 @@ interface Batch {
   end_date: string;
   batch_size: number;
   seats_booked: number;
+  available_seats: number | null;
   status: string;
 }
 
@@ -38,6 +39,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [bookingId, setBookingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -59,14 +61,15 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
         .order("start_date", { ascending: true });
       
       if (data) {
-        // Filter out full batches
-        const availableBatches = data.filter(b => b.seats_booked < b.batch_size);
+        // Filter out full batches using available_seats
+        const availableBatches = data.filter(b => (b.available_seats ?? (b.batch_size - b.seats_booked)) > 0);
         setBatches(availableBatches);
       }
     };
 
     if (isOpen) {
       fetchBatches();
+      setBookingId(null);
     }
   }, [trip.tripId, isOpen]);
 
@@ -117,8 +120,100 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
       return null;
     }
 
-    // Store just the file path - signed URLs will be generated when viewing
     return fileName;
+  };
+
+  // Step 1 → 2: Create booking record with 'initiated' status before showing payment
+  const createBookingRecord = async (): Promise<string | null> => {
+    if (!user) return null;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .insert({
+          user_id: user.id,
+          trip_id: trip.tripId,
+          full_name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          pickup_location: formData.pickupPoint,
+          num_travelers: parseInt(formData.travelers),
+          total_amount: totalPrice,
+          advance_paid: 0,
+          batch_id: formData.batchId || null,
+          payment_status: "pending",
+          booking_status: "initiated",
+        })
+        .select("id")
+        .single();
+
+      if (error) throw error;
+      return data.id;
+    } catch (error: any) {
+      console.error('Booking creation error:', error);
+      toast({
+        title: "Booking Failed",
+        description: error?.message || "Could not create booking. Please try again.",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 3: After screenshot upload, confirm booking via RPC
+  const confirmBookingWithPayment = async () => {
+    if (!bookingId) return;
+    setLoading(true);
+    try {
+      // Upload screenshot first
+      const screenshotUrl = await uploadScreenshot();
+
+      // Update booking with screenshot and advance info
+      const { error: updateError } = await supabase
+        .from("bookings")
+        .update({
+          advance_paid: totalAdvance,
+          advance_screenshot_url: screenshotUrl,
+          payment_status: "pending_advance",
+          notes: formData.upiTransactionId ? `UPI: ${formData.upiTransactionId}` : null,
+        })
+        .eq("id", bookingId);
+
+      if (updateError) throw updateError;
+
+      // Call RPC to atomically confirm booking and deduct seats
+      const { error: rpcError } = await supabase.rpc(
+        'confirm_booking_after_payment',
+        { p_booking_id: bookingId }
+      );
+
+      if (rpcError) {
+        console.error('RPC error:', rpcError);
+        toast({
+          title: "Seats Unavailable",
+          description: "Seats sold out or unavailable. Please try a different batch.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Booking Submitted!",
+        description: "We'll verify your payment and confirm your booking shortly.",
+      });
+      setStep(4);
+    } catch (error: any) {
+      console.error('Booking confirmation error:', error);
+      toast({
+        title: "Booking Failed",
+        description: error?.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -134,11 +229,16 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
         navigate("/auth");
         return;
       }
+
+      // Create booking record before proceeding to payment
+      const newBookingId = await createBookingRecord();
+      if (!newBookingId) return;
+      setBookingId(newBookingId);
       setStep(2);
     } else if (step === 2) {
       setStep(3);
     } else {
-      // Step 3: Submit booking with screenshot
+      // Step 3: Submit screenshot and confirm via RPC
       if (!screenshotFile) {
         toast({
           title: "Screenshot Required",
@@ -148,60 +248,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
         return;
       }
 
-      setLoading(true);
-
-      try {
-        const screenshotUrl = await uploadScreenshot();
-
-        const selectedBatch = batches.find(b => b.id === formData.batchId);
-        
-        const { error } = await supabase.from("bookings").insert({
-          user_id: user!.id,
-          trip_id: trip.tripId,
-          full_name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          pickup_location: formData.pickupPoint,
-          num_travelers: parseInt(formData.travelers),
-          total_amount: totalPrice,
-          advance_paid: totalAdvance,
-          batch_id: formData.batchId || null,
-          payment_status: "pending_advance",
-          booking_status: "pending",
-          advance_screenshot_url: screenshotUrl,
-          notes: formData.upiTransactionId ? `UPI: ${formData.upiTransactionId}` : null,
-        });
-
-        if (error) throw error;
-
-        // Update batch seats_booked count using atomic RPC to prevent race conditions
-        if (formData.batchId) {
-          const travelersCount = parseInt(formData.travelers);
-          const { error: batchError } = await supabase.rpc(
-            'increment_seats_booked',
-            { batch_id_param: formData.batchId, seats_count: travelersCount }
-          );
-          
-          if (batchError) {
-            console.error('Failed to update batch seats:', batchError);
-          }
-        }
-
-        toast({
-          title: "Booking Submitted!",
-          description: "We'll verify your payment and confirm your booking shortly.",
-        });
-        setStep(4);
-      } catch (error) {
-        console.error('Booking error:', error);
-        toast({
-          title: "Booking Failed",
-          description: "Something went wrong. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
+      await confirmBookingWithPayment();
     }
   };
 
@@ -218,6 +265,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
     });
     setScreenshotFile(null);
     setScreenshotPreview(null);
+    setBookingId(null);
     onClose();
   };
 
@@ -359,7 +407,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                         value={formData.batchId}
                         onValueChange={(value) => {
                           const selectedBatch = batches.find(b => b.id === value);
-                          const availableSeats = selectedBatch ? selectedBatch.batch_size - selectedBatch.seats_booked : 10;
+                          const availableSeats = selectedBatch ? (selectedBatch.available_seats ?? (selectedBatch.batch_size - selectedBatch.seats_booked)) : 10;
                           // Reset travelers to 1 if current selection exceeds available seats
                           const newTravelers = parseInt(formData.travelers) > availableSeats ? "1" : formData.travelers;
                           setFormData({ ...formData, batchId: value, travelers: newTravelers });
@@ -371,7 +419,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                         <SelectContent>
                           {batches.map((batch) => (
                             <SelectItem key={batch.id} value={batch.id}>
-                              {batch.batch_name} ({formatBatchDate(batch.start_date)} - {formatBatchDate(batch.end_date)}) - {batch.batch_size - batch.seats_booked} seats left
+                              {batch.batch_name} ({formatBatchDate(batch.start_date)} - {formatBatchDate(batch.end_date)}) - {batch.available_seats ?? (batch.batch_size - batch.seats_booked)} seats left
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -388,7 +436,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                       {(() => {
                         const selectedBatch = batches.find(b => b.id === formData.batchId);
                         const maxTravelers = selectedBatch 
-                          ? Math.min(10, selectedBatch.batch_size - selectedBatch.seats_booked)
+                          ? Math.min(10, selectedBatch.available_seats ?? (selectedBatch.batch_size - selectedBatch.seats_booked))
                           : 10;
                         return (
                           <Select
@@ -410,7 +458,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                       })()}
                       {formData.batchId && (() => {
                         const selectedBatch = batches.find(b => b.id === formData.batchId);
-                        const availableSeats = selectedBatch ? selectedBatch.batch_size - selectedBatch.seats_booked : 0;
+                        const availableSeats = selectedBatch ? (selectedBatch.available_seats ?? (selectedBatch.batch_size - selectedBatch.seats_booked)) : 0;
                         return availableSeats <= 3 && (
                           <p className="text-xs text-amber-600 mt-1">Only {availableSeats} seat{availableSeats !== 1 ? 's' : ''} left!</p>
                         );
