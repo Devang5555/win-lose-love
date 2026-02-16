@@ -155,6 +155,13 @@ const MyBookings = () => {
             Confirmed
           </Badge>
         );
+      case "initiated":
+        return (
+          <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">
+            <Clock className="w-3 h-3 mr-1" />
+            Payment Pending
+          </Badge>
+        );
       case "cancelled":
         return (
           <Badge className="bg-red-500/20 text-red-600 border-red-500/30">
@@ -176,6 +183,8 @@ const MyBookings = () => {
     if (status === "fully_paid" || status === "paid") return "bg-green-500/20 text-green-600 border-green-500/30";
     if (status === "balance_pending") return "bg-blue-500/20 text-blue-600 border-blue-500/30";
     if (status === "advance_verified" || status === "partial") return "bg-teal-500/20 text-teal-600 border-teal-500/30";
+    if (status === "pending_advance") return "bg-amber-500/20 text-amber-600 border-amber-500/30";
+    if (status === "pending") return "bg-muted text-muted-foreground border-border";
     return "bg-amber-500/20 text-amber-600 border-amber-500/30";
   };
 
@@ -188,11 +197,13 @@ const MyBookings = () => {
       case "advance_verified":
         return "Advance Verified";
       case "pending_advance":
-        return "Advance Under Verification";
+        return "Advance Under Review";
       case "paid":
         return "Fully Paid";
       case "partial":
         return "Advance Paid";
+      case "pending":
+        return "Awaiting Payment";
       default:
         return "Pending";
     }
@@ -414,10 +425,28 @@ const MyBookings = () => {
                       </div>
                       
                       {/* Status Messages */}
+                      {booking.booking_status === "initiated" && (
+                        <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                          <p className="text-sm text-blue-700 dark:text-blue-400">
+                            Booking initiated — please complete your payment to reserve your spot.
+                          </p>
+                        </div>
+                      )}
+
                       {booking.booking_status === "pending" && (
                         <div className="p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                           <p className="text-sm text-yellow-700 dark:text-yellow-400">
                             Your payment is being verified. We'll confirm your booking shortly.
+                          </p>
+                        </div>
+                      )}
+
+                      {booking.booking_status === "confirmed" && booking.payment_status === "pending_advance" && (
+                        <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                          <p className="text-sm text-amber-700 dark:text-amber-400">
+                            Your advance payment is under review. We'll verify it within 2-4 hours.
                           </p>
                         </div>
                       )}
