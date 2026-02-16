@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrips, DatabaseTrip } from "@/hooks/useTrips";
 import JsonLd from "@/components/JsonLd";
+import SeoMeta from "@/components/SeoMeta";
 
 interface DestinationData {
   id: string;
@@ -199,6 +200,12 @@ const DestinationDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SeoMeta
+        title={`${destination.name}, ${destination.state} - GoBhraman`}
+        description={destination.description || `Explore trips in ${destination.name}`}
+        image={destination.hero_image || undefined}
+        url={window.location.href}
+      />
       {destinationJsonLd && <JsonLd data={destinationJsonLd} />}
       <Navbar />
 
