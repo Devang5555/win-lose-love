@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
 import InterestPopup from "@/components/InterestPopup";
 import BatchSelector, { BatchInfo } from "@/components/BatchSelector";
+import MobileBookingBar from "@/components/MobileBookingBar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -548,6 +549,15 @@ const TripDetail = () => {
       <InterestPopup 
         isOpen={isInterestOpen}
         onClose={() => setIsInterestOpen(false)}
+      />
+
+      {/* Mobile Sticky Booking Bar */}
+      <MobileBookingBar
+        price={selectedBatch?.price_override ?? displayPrice}
+        selectedBatch={selectedBatch}
+        isBookable={isBookable}
+        loading={loading}
+        onBookNow={handleBookingClick}
       />
     </div>
   );
