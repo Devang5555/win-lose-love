@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
-import { Calendar, Users, AlertTriangle } from "lucide-react";
+import { Calendar, Users, AlertTriangle, TrendingUp, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/trips";
+import { calculateDynamicPrice, DynamicPriceResult } from "@/lib/dynamicPricing";
 
 export interface BatchInfo {
   id: string;
   batch_name: string;
   start_date: string;
   end_date: string;
+  batch_size: number;
   available_seats: number;
   price_override: number | null;
   status: string;
+  dynamicPrice?: DynamicPriceResult;
 }
 
 interface BatchSelectorProps {
@@ -70,7 +73,7 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
 
       const { data, error: fetchError } = await supabase
         .from("batches")
-        .select("id, batch_name, start_date, end_date, available_seats, price_override, status")
+        .select("id, batch_name, start_date, end_date, batch_size, available_seats, price_override, status")
         .eq("trip_id", tripId)
         .eq("status", "active")
         .order("start_date", { ascending: true });
@@ -79,10 +82,16 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
         setError("Could not load departure dates. Please try again.");
         console.error("Batch fetch error:", fetchError);
       } else {
-        const batchList = (data || []).map((b) => ({
-          ...b,
-          available_seats: b.available_seats ?? 0,
-        }));
+        const batchList: BatchInfo[] = (data || []).map((b) => {
+          const availableSeats = b.available_seats ?? 0;
+          const batchBasePrice = b.price_override ?? basePrice;
+          const dp = calculateDynamicPrice(batchBasePrice, b.batch_size, availableSeats, b.start_date);
+          return {
+            ...b,
+            available_seats: availableSeats,
+            dynamicPrice: dp,
+          };
+        });
         setBatches(batchList);
 
         // Auto-select first available batch if none selected
@@ -135,7 +144,9 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
       {batches.map((batch) => {
         const isSoldOut = batch.available_seats === 0;
         const isSelected = selectedBatchId === batch.id;
-        const price = batch.price_override ?? basePrice;
+        const dp = batch.dynamicPrice!;
+        const hasSurge = dp.adjustmentPercent > 0;
+        const hasDiscount = dp.adjustmentPercent < 0;
 
         return (
           <button
@@ -155,16 +166,42 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
               <span className="font-semibold text-sm text-card-foreground">
                 {batch.batch_name}
               </span>
-              {getSeatBadge(batch.available_seats)}
+              <div className="flex items-center gap-1.5">
+                {dp.badges.map((badge, i) => (
+                  <Badge
+                    key={i}
+                    className={
+                      badge.type === "surge"
+                        ? "bg-orange-500/10 text-orange-600 border-orange-500/20 text-[10px] px-1.5 py-0 h-4"
+                        : "bg-green-500/10 text-green-600 border-green-500/20 text-[10px] px-1.5 py-0 h-4"
+                    }
+                  >
+                    {badge.type === "surge" ? (
+                      <TrendingUp className="w-2.5 h-2.5 mr-0.5" />
+                    ) : (
+                      <Sparkles className="w-2.5 h-2.5 mr-0.5" />
+                    )}
+                    {badge.label}
+                  </Badge>
+                ))}
+                {getSeatBadge(batch.available_seats)}
+              </div>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
                 {formatDate(batch.start_date)} – {formatDate(batch.end_date)}
               </span>
-              <span className="text-sm font-bold text-primary">
-                {formatPrice(price)}
-              </span>
+              <div className="flex items-center gap-1.5">
+                {(hasSurge || hasDiscount) && (
+                  <span className="text-xs text-muted-foreground line-through">
+                    {formatPrice(dp.basePrice)}
+                  </span>
+                )}
+                <span className={`text-sm font-bold ${hasDiscount ? "text-green-600" : "text-primary"}`}>
+                  {formatPrice(dp.effectivePrice)}
+                </span>
+              </div>
             </div>
             {!isSoldOut && (
               <div className="flex items-center gap-1.5 mt-1.5">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit, Trash2, Users, Calendar, Save, X } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Calendar, Save, X, TrendingUp, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { trips } from "@/data/trips";
+import { trips, formatPrice } from "@/data/trips";
+import { calculateDynamicPrice } from "@/lib/dynamicPricing";
 
 interface Batch {
   id: string;
@@ -260,6 +261,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
                   <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Batch Name</th>
                   <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Dates</th>
                   <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Seats</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Effective Price</th>
                   <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Status</th>
                   <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Actions</th>
                 </tr>
@@ -268,6 +270,9 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
                 {tripBatches.map((batch) => {
                   const remainingSeats = batch.batch_size - batch.seats_booked;
                   const isFull = remainingSeats <= 0;
+                  const tripData = trips.find(t => t.tripId === batch.trip_id);
+                  const batchBasePrice = tripData ? (typeof tripData.price === 'object' ? tripData.price.default : tripData.price) : 0;
+                  const dp = calculateDynamicPrice(batchBasePrice, batch.batch_size, remainingSeats, batch.start_date);
 
                   return (
                     <tr key={batch.id} className="hover:bg-muted/30 transition-colors">
@@ -286,6 +291,21 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
                           </span>
                           {isFull && (
                             <Badge className="bg-red-500/20 text-red-600 text-xs">Full</Badge>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-foreground">{formatPrice(dp.effectivePrice)}</span>
+                          {dp.adjustmentPercent !== 0 && (
+                            <>
+                              <span className="text-xs text-muted-foreground line-through">{formatPrice(dp.basePrice)}</span>
+                              {dp.adjustmentPercent > 0 ? (
+                                <TrendingUp className="w-3.5 h-3.5 text-orange-500" />
+                              ) : (
+                                <Sparkles className="w-3.5 h-3.5 text-green-500" />
+                              )}
+                            </>
                           )}
                         </div>
                       </td>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { X, User, Mail, Phone, Users, Calendar, CreditCard, CheckCircle, Upload } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Trip, getTripPrice, formatPrice } from "@/data/trips";
+import { calculateDynamicPrice } from "@/lib/dynamicPricing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,10 +77,25 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
   if (!isOpen) return null;
 
   const hasMultiplePrices = typeof trip.price === 'object' && trip.price.fromPune;
-  const selectedPrice = hasMultiplePrices && typeof trip.price === 'object'
+  const selectedBasePrice = hasMultiplePrices && typeof trip.price === 'object'
     ? (formData.pickupPoint === 'pune' ? trip.price.fromPune! : trip.price.default)
     : getTripPrice(trip);
   
+  // Calculate dynamic price if a batch is selected
+  const selectedBatch = batches.find(b => b.id === formData.batchId);
+  const selectedPrice = (() => {
+    if (selectedBatch) {
+      const dp = calculateDynamicPrice(
+        selectedBasePrice,
+        selectedBatch.batch_size,
+        selectedBatch.available_seats ?? (selectedBatch.batch_size - selectedBatch.seats_booked),
+        selectedBatch.start_date,
+      );
+      return dp.effectivePrice;
+    }
+    return selectedBasePrice;
+  })();
+
   const totalPrice = selectedPrice * parseInt(formData.travelers);
   const advanceAmount = trip.booking?.advance || 2000;
   const totalAdvance = advanceAmount * parseInt(formData.travelers);
