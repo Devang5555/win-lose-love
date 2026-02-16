@@ -6,6 +6,7 @@ export type Permission =
   | 'view_bookings'
   | 'cancel_booking'
   | 'process_refund'
+  | 'verify_payments'
   | 'manage_trips'
   | 'manage_batches'
   | 'manage_seats'
@@ -22,7 +23,7 @@ export type Permission =
 
 const ROLE_PERMISSIONS: Record<string, Permission[]> = {
   super_admin: [
-    'view_bookings', 'cancel_booking', 'process_refund',
+    'view_bookings', 'cancel_booking', 'process_refund', 'verify_payments',
     'manage_trips', 'manage_batches', 'manage_seats',
     'manage_destinations', 'manage_content',
     'view_financial_data', 'view_analytics',
@@ -31,7 +32,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'view_audit_logs', 'manage_roles',
   ],
   admin: [
-    'view_bookings', 'cancel_booking', 'process_refund',
+    'view_bookings', 'cancel_booking', 'process_refund', 'verify_payments',
     'manage_trips', 'manage_batches', 'manage_seats',
     'manage_destinations', 'manage_content',
     'view_financial_data', 'view_analytics',
@@ -50,6 +51,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
   finance_manager: [
     'view_bookings',
     'process_refund',
+    'verify_payments',
     'view_financial_data',
     'view_analytics',
   ],

@@ -300,9 +300,145 @@ const Admin = () => {
     }
   };
 
+  // Verify advance payment with audit logging
+  const verifyAdvancePayment = async (booking: Booking) => {
+    if (!user) return;
+    if (!advanceScreenshotUrl) {
+      toast({ title: "Error", description: "No advance payment screenshot uploaded. Cannot verify.", variant: "destructive" });
+      return;
+    }
+    setProcessingAction(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({
+          booking_status: "confirmed",
+          payment_status: "advance_verified",
+          verified_by_admin_id: user.id,
+        })
+        .eq("id", booking.id);
+
+      if (error) throw error;
+
+      // Audit log
+      await supabase.rpc("create_audit_log", {
+        p_user_id: user.id,
+        p_action_type: "advance_verified",
+        p_entity_type: "booking",
+        p_entity_id: booking.id,
+        p_metadata: { trip_id: booking.trip_id, advance_paid: booking.advance_paid, customer: booking.full_name },
+      });
+
+      toast({ title: "Advance Verified", description: "Advance payment has been verified and booking confirmed." });
+
+      // Notify user via WhatsApp
+      const bookingDetails: BookingDetails = {
+        userName: booking.full_name,
+        tripName: booking.trip_id,
+        advanceAmount: booking.advance_paid,
+        remainingAmount: booking.total_amount - booking.advance_paid,
+        bookingId: booking.id,
+        phone: booking.phone,
+      };
+      openWhatsAppAdvanceVerified(booking.phone, bookingDetails);
+
+      fetchData();
+      setSelectedBooking(null);
+    } catch (error) {
+      console.error("Error verifying advance:", error);
+      toast({ title: "Error", description: "Failed to verify advance payment", variant: "destructive" });
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  // Reject advance payment
+  const rejectAdvancePayment = async (booking: Booking, reason: string) => {
+    if (!reason.trim() || !user) return;
+    setProcessingAction(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({
+          payment_status: "pending",
+          rejection_reason: reason,
+        })
+        .eq("id", booking.id);
+
+      if (error) throw error;
+
+      await supabase.rpc("create_audit_log", {
+        p_user_id: user.id,
+        p_action_type: "advance_rejected",
+        p_entity_type: "booking",
+        p_entity_id: booking.id,
+        p_metadata: { reason, trip_id: booking.trip_id },
+      });
+
+      toast({ title: "Advance Rejected", description: "User has been notified to re-upload." });
+
+      const message = `❌ Advance Payment Rejected\n\nHi ${booking.full_name},\n\nYour advance payment for *${booking.trip_id}* could not be verified.\n\nReason: ${reason}\n\nPlease re-upload the correct payment proof.\n\n– Team GoBhraman`;
+      window.open(getWhatsAppUserLink(booking.phone, message), '_blank');
+
+      fetchData();
+      setSelectedBooking(null);
+      setShowRejectModal(false);
+      setRejectionReason("");
+    } catch (error) {
+      console.error("Error rejecting advance:", error);
+      toast({ title: "Error", description: "Failed to reject advance payment", variant: "destructive" });
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  // Send balance reminder via WhatsApp
+  const sendBalanceReminder = async (booking: Booking) => {
+    if (!user) return;
+    setProcessingAction(true);
+    try {
+      const balanceAmount = booking.total_amount - booking.advance_paid;
+      const batch = batches.find(b => b.id === booking.batch_id);
+      const dueDate = batch ? new Date(batch.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'your trip date';
+
+      const message = `⏰ Payment Reminder – GoBhraman\n\nHi ${booking.full_name},\n\nYour remaining ₹${balanceAmount.toLocaleString()} for *${booking.trip_id}* is pending. Please complete payment before *${dueDate}*.\n\nUpload your payment proof from your dashboard:\n${window.location.origin}/my-bookings\n\n– Team GoBhraman`;
+
+      // Log the reminder
+      await supabase.from("payment_reminders").insert({
+        booking_id: booking.id,
+        sent_by: user.id,
+        channel: "whatsapp",
+        message: message,
+      });
+
+      // Audit log
+      await supabase.rpc("create_audit_log", {
+        p_user_id: user.id,
+        p_action_type: "reminder_sent",
+        p_entity_type: "booking",
+        p_entity_id: booking.id,
+        p_metadata: { channel: "whatsapp", balance_amount: balanceAmount, trip_id: booking.trip_id },
+      });
+
+      window.open(getWhatsAppUserLink(booking.phone, message), '_blank');
+
+      toast({ title: "Reminder Sent", description: "Balance payment reminder sent via WhatsApp." });
+    } catch (error) {
+      console.error("Error sending reminder:", error);
+      toast({ title: "Error", description: "Failed to send reminder", variant: "destructive" });
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
   // Verify remaining payment
   const verifyRemainingPayment = async (booking: Booking) => {
     if (!user) return;
+    // Prevent double-marking
+    if (booking.payment_status === "fully_paid") {
+      toast({ title: "Already Paid", description: "This booking is already marked as fully paid.", variant: "destructive" });
+      return;
+    }
     setProcessingAction(true);
 
     try {
@@ -318,6 +454,15 @@ const Admin = () => {
         .eq("id", booking.id);
 
       if (error) throw error;
+
+      // Audit log
+      await supabase.rpc("create_audit_log", {
+        p_user_id: user.id,
+        p_action_type: "balance_verified",
+        p_entity_type: "booking",
+        p_entity_id: booking.id,
+        p_metadata: { trip_id: booking.trip_id, balance_amount: booking.total_amount - booking.advance_paid, customer: booking.full_name },
+      });
 
       toast({
         title: "Payment Verified",
@@ -1494,7 +1639,9 @@ For queries, please contact us.
               {/* Rejection Reason Input */}
               {showRejectModal && (
                 <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-                  <h4 className="font-medium text-red-700 dark:text-red-400 mb-2">Reject Remaining Payment</h4>
+                  <h4 className="font-medium text-red-700 dark:text-red-400 mb-2">
+                    {selectedBooking.payment_status === "pending_advance" ? "Reject Advance Payment" : "Reject Remaining Payment"}
+                  </h4>
                   <p className="text-sm text-red-600 dark:text-red-300 mb-3">
                     Please provide a reason for rejection. This will be shown to the user.
                   </p>
@@ -1507,7 +1654,13 @@ For queries, please contact us.
                   <div className="flex gap-2">
                     <Button
                       variant="destructive"
-                      onClick={() => rejectRemainingPayment(selectedBooking, rejectionReason)}
+                      onClick={() => {
+                        if (selectedBooking.payment_status === "pending_advance") {
+                          rejectAdvancePayment(selectedBooking, rejectionReason);
+                        } else {
+                          rejectRemainingPayment(selectedBooking, rejectionReason);
+                        }
+                      }}
                       disabled={!rejectionReason.trim() || processingAction}
                     >
                       {processingAction ? "Processing..." : "Confirm Rejection"}
@@ -1525,158 +1678,214 @@ For queries, please contact us.
                 </div>
               )}
 
-              {/* Admin Action Buttons */}
-              <div className="flex flex-wrap gap-3 pt-4">
-                {/* Pending Advance - Verify Advance Payment */}
-                {selectedBooking.booking_status === "pending" && selectedBooking.payment_status === "pending_advance" && (
-                  <>
-                    <Button
-                      onClick={() => {
-                        if (!advanceScreenshotUrl) {
-                          toast({
-                            title: "Warning",
-                            description: "No advance payment screenshot uploaded. Please verify payment manually.",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-                        updateBookingStatus(selectedBooking.id, "confirmed", "advance_verified");
-                      }}
-                      className="flex-1"
-                      disabled={!advanceScreenshotUrl}
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Verify Advance & Confirm
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => updateBookingStatus(selectedBooking.id, "cancelled")}
-                      className="flex-1"
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Reject
-                    </Button>
-                  </>
-                )}
+              {/* Payment Control Panel - visible to super_admin, finance_manager, admin */}
+              {can('verify_payments') && (
+                <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                  <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-primary" />
+                    Payment Control Panel
+                  </h4>
 
-                {/* Legacy pending status */}
-                {selectedBooking.booking_status === "pending" && selectedBooking.payment_status === "pending" && (
-                  <>
-                    <Button
-                      onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "advance_verified")}
-                      className="flex-1"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Confirm Booking
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => updateBookingStatus(selectedBooking.id, "cancelled")}
-                      className="flex-1"
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </>
-                )}
+                  {/* Payment Progress Visual */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                      selectedBooking.advance_paid > 0 ? 'bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {selectedBooking.advance_paid > 0 ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                      Advance {selectedBooking.advance_paid > 0 ? '✓' : 'Pending'}
+                    </div>
+                    <div className="w-4 h-px bg-border" />
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                      ['advance_verified', 'balance_pending', 'fully_paid'].includes(selectedBooking.payment_status) 
+                        ? 'bg-green-500/20 text-green-700 dark:text-green-400' 
+                        : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {['advance_verified', 'balance_pending', 'fully_paid'].includes(selectedBooking.payment_status)
+                        ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                      Advance Verified
+                    </div>
+                    <div className="w-4 h-px bg-border" />
+                    {(() => {
+                      const balanceAmount = selectedBooking.total_amount - selectedBooking.advance_paid;
+                      const batch = batches.find(b => b.id === selectedBooking.batch_id);
+                      const daysUntilTrip = batch ? Math.ceil((new Date(batch.start_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+                      const isUrgent = daysUntilTrip !== null && daysUntilTrip <= 3 && daysUntilTrip > 0;
+                      return (
+                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                          selectedBooking.payment_status === 'fully_paid'
+                            ? 'bg-green-500/20 text-green-700 dark:text-green-400'
+                            : isUrgent
+                              ? 'bg-red-500/20 text-red-700 dark:text-red-400'
+                              : balanceAmount > 0
+                                ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400'
+                                : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {selectedBooking.payment_status === 'fully_paid' ? <CheckCircle className="w-3 h-3" /> : <Wallet className="w-3 h-3" />}
+                          {selectedBooking.payment_status === 'fully_paid' ? 'Fully Paid ✓' : `Balance ₹${balanceAmount.toLocaleString()}`}
+                          {isUrgent && selectedBooking.payment_status !== 'fully_paid' && ` (${daysUntilTrip}d left!)`}
+                        </div>
+                      );
+                    })()}
+                  </div>
 
-                {/* Advance Verified - Wait for balance or mark fully paid */}
-                {selectedBooking.booking_status === "confirmed" && 
-                 selectedBooking.payment_status === "advance_verified" && 
-                 selectedBooking.remaining_payment_status !== "uploaded" && (
-                  <>
-                    <Button
-                      onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "balance_pending")}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      <Clock className="w-4 h-4 mr-2" />
-                      Request Balance Payment
-                    </Button>
-                    <Button
-                      onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "fully_paid")}
-                      className="flex-1"
-                    >
-                      <Wallet className="w-4 h-4 mr-2" />
-                      Mark Fully Paid
-                    </Button>
-                  </>
-                )}
+                  <div className="flex flex-wrap gap-3">
+                    {/* Pending Advance - Verify Advance Payment */}
+                    {(selectedBooking.booking_status === "pending" || selectedBooking.booking_status === "confirmed") && 
+                     selectedBooking.payment_status === "pending_advance" && (
+                      <>
+                        <Button
+                          onClick={() => verifyAdvancePayment(selectedBooking)}
+                          className="flex-1"
+                          disabled={!advanceScreenshotUrl || processingAction}
+                        >
+                          {processingAction ? "Processing..." : (
+                            <><CheckCircle className="w-4 h-4 mr-2" />Verify Advance & Confirm</>
+                          )}
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => setShowRejectModal(true)}
+                          className="flex-1"
+                          disabled={processingAction}
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Reject Advance
+                        </Button>
+                      </>
+                    )}
 
-                {/* Remaining Payment Uploaded - Verify or Reject */}
-                {selectedBooking.remaining_payment_status === "uploaded" && !showRejectModal && (
-                  <>
-                    <Button
-                      onClick={() => {
-                        if (!remainingScreenshotUrl) {
-                          toast({
-                            title: "Warning",
-                            description: "No remaining payment screenshot found. Cannot verify.",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-                        verifyRemainingPayment(selectedBooking);
-                      }}
-                      className="flex-1"
-                      disabled={!remainingScreenshotUrl || processingAction}
-                    >
-                      {processingAction ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Processing...
-                        </>
-                      ) : (
-                        <>
+                    {/* Legacy pending status */}
+                    {selectedBooking.booking_status === "pending" && selectedBooking.payment_status === "pending" && (
+                      <>
+                        <Button
+                          onClick={() => verifyAdvancePayment(selectedBooking)}
+                          className="flex-1"
+                          disabled={processingAction}
+                        >
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          Verify & Mark Fully Paid
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => setShowRejectModal(true)}
-                      className="flex-1"
-                      disabled={processingAction}
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Reject Payment
-                    </Button>
-                  </>
-                )}
+                          Confirm Booking
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => updateBookingStatus(selectedBooking.id, "cancelled")}
+                          className="flex-1"
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Cancel
+                        </Button>
+                      </>
+                    )}
 
-                {/* Balance Pending but no screenshot uploaded yet */}
-                {selectedBooking.booking_status === "confirmed" && 
-                 selectedBooking.payment_status === "balance_pending" && 
-                 selectedBooking.remaining_payment_status === "pending" && (
-                  <div className="w-full p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                    <p className="text-sm text-blue-700 dark:text-blue-400">
-                      Waiting for user to upload remaining payment screenshot.
-                    </p>
+                    {/* Advance Verified - Wait for balance or mark fully paid */}
+                    {selectedBooking.booking_status === "confirmed" && 
+                     selectedBooking.payment_status === "advance_verified" && 
+                     selectedBooking.remaining_payment_status !== "uploaded" && (
+                      <>
+                        <Button
+                          onClick={() => sendBalanceReminder(selectedBooking)}
+                          variant="outline"
+                          className="flex-1"
+                          disabled={processingAction}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Send Balance Reminder
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            // Prevent double-marking
+                            if (selectedBooking.payment_status === "fully_paid") {
+                              toast({ title: "Already Paid", description: "This booking is already fully paid.", variant: "destructive" });
+                              return;
+                            }
+                            updateBookingStatus(selectedBooking.id, "confirmed", "fully_paid");
+                          }}
+                          className="flex-1"
+                        >
+                          <Wallet className="w-4 h-4 mr-2" />
+                          Mark Fully Paid
+                        </Button>
+                      </>
+                    )}
+
+                    {/* Remaining Payment Uploaded - Verify or Reject */}
+                    {selectedBooking.remaining_payment_status === "uploaded" && !showRejectModal && (
+                      <>
+                        <Button
+                          onClick={() => {
+                            if (!remainingScreenshotUrl) {
+                              toast({ title: "Warning", description: "No remaining payment screenshot found. Cannot verify.", variant: "destructive" });
+                              return;
+                            }
+                            verifyRemainingPayment(selectedBooking);
+                          }}
+                          className="flex-1"
+                          disabled={!remainingScreenshotUrl || processingAction}
+                        >
+                          {processingAction ? (
+                            <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>Processing...</>
+                          ) : (
+                            <><CheckCircle className="w-4 h-4 mr-2" />Verify & Mark Fully Paid</>
+                          )}
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => setShowRejectModal(true)}
+                          className="flex-1"
+                          disabled={processingAction}
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Reject Payment
+                        </Button>
+                      </>
+                    )}
+
+                    {/* Balance Pending but no screenshot uploaded yet */}
+                    {selectedBooking.booking_status === "confirmed" && 
+                     selectedBooking.payment_status === "balance_pending" && 
+                     selectedBooking.remaining_payment_status === "pending" && (
+                      <div className="w-full flex gap-3">
+                        <div className="flex-1 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                          <p className="text-sm text-blue-700 dark:text-blue-400">
+                            Waiting for user to upload remaining payment screenshot.
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => sendBalanceReminder(selectedBooking)}
+                          variant="outline"
+                          disabled={processingAction}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Send Reminder
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Legacy partial status */}
+                    {selectedBooking.booking_status === "confirmed" && selectedBooking.payment_status === "partial" && (
+                      <Button
+                        onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "fully_paid")}
+                        className="flex-1"
+                      >
+                        <Wallet className="w-4 h-4 mr-2" />
+                        Mark as Fully Paid
+                      </Button>
+                    )}
+
+                    {/* Fully Paid */}
+                    {selectedBooking.payment_status === "fully_paid" && (
+                      <div className="w-full p-3 bg-green-500/10 rounded-lg border border-green-500/20 flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <p className="text-sm text-green-700 dark:text-green-400">
+                          This booking is fully paid and confirmed.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Legacy partial status */}
-                {selectedBooking.booking_status === "confirmed" && selectedBooking.payment_status === "partial" && (
-                  <Button
-                    onClick={() => updateBookingStatus(selectedBooking.id, "confirmed", "fully_paid")}
-                    className="flex-1"
-                  >
-                    <Wallet className="w-4 h-4 mr-2" />
-                    Mark as Fully Paid
-                  </Button>
-                )}
-
-                {/* Fully Paid */}
-                {selectedBooking.payment_status === "fully_paid" && (
-                  <div className="w-full p-3 bg-green-500/10 rounded-lg border border-green-500/20 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <p className="text-sm text-green-700 dark:text-green-400">
-                      This booking is fully paid and confirmed.
-                    </p>
-                  </div>
-                )}
-
+              {/* General Action Buttons */}
+              <div className="flex flex-wrap gap-3 pt-4">
                 {/* Cancel Booking Button - show for non-cancelled/non-expired/non-refunded, only if user can cancel */}
                 {can('cancel_booking') && !["cancelled", "expired", "refunded"].includes(selectedBooking.booking_status) && !showCancelModal && (
                   <Button

@@ -413,6 +413,44 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_reminders: {
+        Row: {
+          booking_id: string
+          channel: string
+          created_at: string
+          id: string
+          message: string | null
+          sent_at: string
+          sent_by: string
+        }
+        Insert: {
+          booking_id: string
+          channel?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          sent_at?: string
+          sent_by: string
+        }
+        Update: {
+          booking_id?: string
+          channel?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          sent_at?: string
+          sent_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
