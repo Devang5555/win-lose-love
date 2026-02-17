@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send, Gift, Trash2, ArchiveX, Plane } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send, Gift, Trash2, ArchiveX, Plane, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1122,6 +1122,12 @@ For queries, please contact us.
                   Departure Ops
                 </TabsTrigger>
               )}
+              {can('view_analytics') && (
+                <TabsTrigger value="advanced-analytics" className="gap-2">
+                  <TrendingDown className="w-4 h-4" />
+                  Deep Analytics
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {/* Analytics Tab */}
@@ -1551,6 +1557,18 @@ For queries, please contact us.
                   bookings={bookings}
                   batches={batches}
                   trips={analyticsTrips}
+                />
+              </TabsContent>
+            )}
+
+            {/* Advanced Analytics Tab */}
+            {can('view_analytics') && (
+              <TabsContent value="advanced-analytics">
+                <AdvancedAnalytics
+                  bookings={bookings}
+                  trips={analyticsTrips}
+                  destinations={analyticsDestinations}
+                  leads={leads}
                 />
               </TabsContent>
             )}

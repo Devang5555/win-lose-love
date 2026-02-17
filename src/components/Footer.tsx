@@ -55,8 +55,18 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/stories" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  Traveler Stories
+                </Link>
+              </li>
+              <li>
                 <Link to="/about" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
                   Our Story
+                </Link>
+              </li>
+              <li>
+                <Link to="/faq" className="text-sm opacity-80 hover:opacity-100 hover:text-primary transition-colors">
+                  FAQs
                 </Link>
               </li>
               <li>
@@ -131,15 +141,18 @@ const Footer = () => {
             <p className="text-sm opacity-70">
               © {new Date().getFullYear()} GoBhraman. Travel with meaning.
             </p>
-            <div className="flex gap-6">
-              <Link to="/privacy" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
+            <div className="flex gap-6 flex-wrap">
+              <Link to="/policy" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
+              <Link to="/policy" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
                 Terms & Conditions
               </Link>
               <Link to="/cancellation" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
                 Cancellation Policy
+              </Link>
+              <Link to="/faq" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
+                FAQs
               </Link>
             </div>
           </div>

@@ -510,20 +510,35 @@ const MyBookings = () => {
                       )}
 
                       {/* Actions */}
-                      <div className="flex items-center justify-between">
-                        {/* Write Review Button */}
-                        {booking.booking_status === "confirmed" && !reviewedBookings.has(booking.id) && reviewingBooking !== booking.id && (
-                          <Button variant="outline" size="sm" onClick={() => setReviewingBooking(booking.id)} className="gap-1">
-                            <Star className="w-4 h-4" />
-                            Write a Review
-                          </Button>
-                        )}
-                        {reviewedBookings.has(booking.id) && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3 text-green-500" /> Reviewed
-                          </span>
-                        )}
-                        {!booking.booking_status.match(/confirmed/) && !reviewedBookings.has(booking.id) && <span />}
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {/* Write Review Button */}
+                          {booking.booking_status === "confirmed" && !reviewedBookings.has(booking.id) && reviewingBooking !== booking.id && (
+                            <Button variant="outline" size="sm" onClick={() => setReviewingBooking(booking.id)} className="gap-1">
+                              <Star className="w-4 h-4" />
+                              Write a Review
+                            </Button>
+                          )}
+                          {reviewedBookings.has(booking.id) && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <CheckCircle className="w-3 h-3 text-green-500" /> Reviewed
+                            </span>
+                          )}
+                          {/* Download Invoice Button */}
+                          {booking.booking_status === "confirmed" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1"
+                              onClick={() => {
+                                const invoiceWindow = window.open(`/invoice/${booking.id}`, '_blank');
+                              }}
+                            >
+                              <CreditCard className="w-4 h-4" />
+                              View Invoice
+                            </Button>
+                          )}
+                        </div>
                         <Link
                           to={`/trips/${booking.trip_id}`}
                           className="text-sm text-primary hover:underline flex items-center gap-1"
