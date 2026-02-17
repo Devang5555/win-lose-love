@@ -104,7 +104,10 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Role-Aware Welcome Widget */}
+      {/* Role-Aware Welcome Widget - inline on mobile, floating on desktop */}
+      <div className="relative z-10 flex justify-center mt-8 md:hidden animate-slide-up" style={{ animationDelay: '0.5s' }}>
+        {renderWelcomeWidget()}
+      </div>
       <div className="absolute bottom-20 right-6 z-10 animate-slide-up hidden md:block" style={{ animationDelay: '0.5s' }}>
         {renderWelcomeWidget()}
       </div>
