@@ -360,7 +360,7 @@ const Admin = () => {
       const { error } = await supabase
         .from("bookings")
         .update({
-          payment_status: "pending",
+          payment_status: "advance_pending",
           rejection_reason: reason,
         })
         .eq("id", booking.id);
@@ -1791,18 +1791,61 @@ For queries, please contact us.
                           Send Balance Reminder
                         </Button>
                         <Button
-                          onClick={() => {
-                            // Prevent double-marking
+                          onClick={async () => {
                             if (selectedBooking.payment_status === "fully_paid") {
                               toast({ title: "Already Paid", description: "This booking is already fully paid.", variant: "destructive" });
                               return;
                             }
-                            updateBookingStatus(selectedBooking.id, "confirmed", "fully_paid");
+                            const balanceAmt = selectedBooking.total_amount - selectedBooking.advance_paid;
+                            if (balanceAmt <= 0) {
+                              toast({ title: "No Balance", description: "Balance is already zero.", variant: "destructive" });
+                              return;
+                            }
+                            setProcessingAction(true);
+                            try {
+                              const { error } = await supabase
+                                .from("bookings")
+                                .update({
+                                  booking_status: "confirmed",
+                                  payment_status: "fully_paid",
+                                  remaining_payment_status: "verified",
+                                  remaining_payment_verified_at: new Date().toISOString(),
+                                  verified_by_admin_id: user!.id,
+                                })
+                                .eq("id", selectedBooking.id);
+                              if (error) throw error;
+                              await supabase.rpc("create_audit_log", {
+                                p_user_id: user!.id,
+                                p_action_type: "balance_marked_paid",
+                                p_entity_type: "booking",
+                                p_entity_id: selectedBooking.id,
+                                p_metadata: { trip_id: selectedBooking.trip_id, balance_amount: balanceAmt, customer: selectedBooking.full_name },
+                              });
+                              toast({ title: "Marked Fully Paid", description: "Booking is now fully paid." });
+                              const bookingDetails: BookingDetails = {
+                                userName: selectedBooking.full_name,
+                                tripName: selectedBooking.trip_id,
+                                advanceAmount: selectedBooking.advance_paid,
+                                remainingAmount: balanceAmt,
+                                bookingId: selectedBooking.id,
+                                phone: selectedBooking.phone,
+                              };
+                              openWhatsAppFullyPaid(selectedBooking.phone, bookingDetails);
+                              fetchData();
+                              setSelectedBooking(null);
+                            } catch (err) {
+                              console.error("Error marking fully paid:", err);
+                              toast({ title: "Error", description: "Failed to mark as fully paid", variant: "destructive" });
+                            } finally {
+                              setProcessingAction(false);
+                            }
                           }}
                           className="flex-1"
+                          disabled={processingAction}
                         >
-                          <Wallet className="w-4 h-4 mr-2" />
-                          Mark Fully Paid
+                          {processingAction ? "Processing..." : (
+                            <><Wallet className="w-4 h-4 mr-2" />Mark Fully Paid</>
+                          )}
                         </Button>
                       </>
                     )}
