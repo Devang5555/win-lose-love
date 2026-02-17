@@ -165,9 +165,12 @@ export type Database = {
           cancellation_reason: string | null
           cancelled_at: string | null
           created_at: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           email: string
           full_name: string
           id: string
+          is_deleted: boolean
           notes: string | null
           num_travelers: number
           payment_status: string
@@ -195,9 +198,12 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           email: string
           full_name: string
           id?: string
+          is_deleted?: boolean
           notes?: string | null
           num_travelers?: number
           payment_status?: string
@@ -225,9 +231,12 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           email?: string
           full_name?: string
           id?: string
+          is_deleted?: boolean
           notes?: string | null
           num_travelers?: number
           payment_status?: string
