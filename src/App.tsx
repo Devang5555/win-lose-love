@@ -25,6 +25,7 @@ const BlogPostPage = lazy(() => import("./pages/BlogPost"));
 const Policy = lazy(() => import("./pages/Policy"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Stories = lazy(() => import("./pages/Stories"));
+const InvoicePage = lazy(() => import("./pages/Invoice"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/cancellation" element={<Policy />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/stories" element={<Stories />} />
+              <Route path="/invoice/:bookingId" element={<InvoicePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
