@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, User, Mail, Phone, Users, Calendar, CreditCard, CheckCircle, Upload, MessageCircle } from "lucide-react";
+import { X, User, Mail, Phone, Users, Calendar, CreditCard, CheckCircle, Upload, MessageCircle, AlertTriangle } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Trip, getTripPrice, formatPrice } from "@/data/trips";
 import { calculateDynamicPrice } from "@/lib/dynamicPricing";
@@ -15,33 +15,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateUpiQrString, getMerchantUpiId } from "@/lib/upi";
 import { useWallet } from "@/hooks/useWallet";
 import { Switch } from "@/components/ui/switch";
-
-interface Batch {
-  id: string;
-  trip_id: string;
-  batch_name: string;
-  start_date: string;
-  end_date: string;
-  batch_size: number;
-  seats_booked: number;
-  available_seats: number | null;
-  status: string;
-}
+import { Badge } from "@/components/ui/badge";
+import { BatchInfo } from "@/components/BatchSelector";
 
 interface BookingModalProps {
   trip: Trip;
   isOpen: boolean;
   onClose: () => void;
+  selectedBatch: BatchInfo | null;
 }
 
-const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
+const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const { balance, applyWalletCredit, creditReferral } = useWallet();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [batches, setBatches] = useState<Batch[]>([]);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
@@ -51,54 +41,34 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
     phone: "",
     travelers: "1",
     pickupPoint: "mumbai",
-    batchId: "",
     upiTransactionId: "",
     whatsappOptin: false,
     referralCode: "",
   });
   const [useWalletCredits, setUseWalletCredits] = useState(false);
 
-  // Fetch available batches for this trip
-  useEffect(() => {
-    const fetchBatches = async () => {
-      const { data } = await supabase
-        .from("batches")
-        .select("*")
-        .eq("trip_id", trip.tripId)
-        .eq("status", "active")
-        .order("start_date", { ascending: true });
-      
-      if (data) {
-        // Filter out full batches using available_seats
-        const availableBatches = data.filter(b => (b.available_seats ?? (b.batch_size - b.seats_booked)) > 0);
-        setBatches(availableBatches);
-      }
-    };
-
-    if (isOpen) {
-      fetchBatches();
-      setBookingId(null);
-    }
-  }, [trip.tripId, isOpen]);
-
   if (!isOpen) return null;
+
+  const formatBatchDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   const hasMultiplePrices = typeof trip.price === 'object' && trip.price.fromPune;
   const selectedBasePrice = hasMultiplePrices && typeof trip.price === 'object'
     ? (formData.pickupPoint === 'pune' ? trip.price.fromPune! : trip.price.default)
     : getTripPrice(trip);
   
-  // Calculate dynamic price if a batch is selected
-  const selectedBatch = batches.find(b => b.id === formData.batchId);
+  // Use dynamic price from the batch passed in via props
   const selectedPrice = (() => {
-    if (selectedBatch) {
-      const dp = calculateDynamicPrice(
-        selectedBasePrice,
-        selectedBatch.batch_size,
-        selectedBatch.available_seats ?? (selectedBatch.batch_size - selectedBatch.seats_booked),
-        selectedBatch.start_date,
-      );
-      return dp.effectivePrice;
+    if (selectedBatch?.dynamicPrice) {
+      return selectedBatch.dynamicPrice.effectivePrice;
+    }
+    if (selectedBatch?.price_override) {
+      return selectedBatch.price_override;
     }
     return selectedBasePrice;
   })();
@@ -165,7 +135,7 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
           num_travelers: parseInt(formData.travelers),
           total_amount: totalPrice,
           advance_paid: 0,
-          batch_id: formData.batchId || null,
+          batch_id: selectedBatch?.id || null,
           payment_status: "pending",
           booking_status: "initiated",
           whatsapp_optin: formData.whatsappOptin,
@@ -319,6 +289,15 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
         return;
       }
 
+      if (!selectedBatch) {
+        toast({
+          title: "No Departure Selected",
+          description: "Please select a departure date on the trip page first.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Create booking record before proceeding to payment
       const newBookingId = await createBookingRecord();
       if (!newBookingId) return;
@@ -349,7 +328,6 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
       phone: "",
       travelers: "1",
       pickupPoint: "mumbai",
-      batchId: "",
       upiTransactionId: "",
       whatsappOptin: false,
       referralCode: "",
@@ -359,14 +337,6 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
     setBookingId(null);
     setUseWalletCredits(false);
     onClose();
-  };
-
-  const formatBatchDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
   };
 
   return (
@@ -488,34 +458,26 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                     />
                   </div>
 
-                  {/* Batch Selection - moved before travelers */}
-                  {batches.length > 0 && (
-                    <div>
-                      <Label className="flex items-center gap-2 mb-2">
-                        <Calendar className="w-4 h-4 text-primary" />
-                        Select Batch
-                      </Label>
-                      <Select
-                        value={formData.batchId}
-                        onValueChange={(value) => {
-                          const selectedBatch = batches.find(b => b.id === value);
-                          const availableSeats = selectedBatch ? (selectedBatch.available_seats ?? (selectedBatch.batch_size - selectedBatch.seats_booked)) : 10;
-                          // Reset travelers to 1 if current selection exceeds available seats
-                          const newTravelers = parseInt(formData.travelers) > availableSeats ? "1" : formData.travelers;
-                          setFormData({ ...formData, batchId: value, travelers: newTravelers });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose your travel dates" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {batches.map((batch) => (
-                            <SelectItem key={batch.id} value={batch.id}>
-                              {batch.batch_name} ({formatBatchDate(batch.start_date)} - {formatBatchDate(batch.end_date)}) - {batch.available_seats ?? (batch.batch_size - batch.seats_booked)} seats left
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  {/* Selected Batch Summary (read-only) */}
+                  {selectedBatch ? (
+                    <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
+                      <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">Selected Departure</p>
+                      <p className="font-semibold text-card-foreground">{selectedBatch.batch_name}</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        <Calendar className="w-3.5 h-3.5 inline mr-1" />
+                        {formatBatchDate(selectedBatch.start_date)} – {formatBatchDate(selectedBatch.end_date)}
+                      </p>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-sm font-bold text-primary">{formatPrice(selectedPrice)}/person</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {selectedBatch.available_seats} seat{selectedBatch.available_seats !== 1 ? 's' : ''} left
+                        </Badge>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 flex items-center gap-3">
+                      <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
+                      <p className="text-sm text-destructive">Please select a departure date on the trip page first.</p>
                     </div>
                   )}
 
@@ -526,9 +488,8 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                         Travelers
                       </Label>
                       {(() => {
-                        const selectedBatch = batches.find(b => b.id === formData.batchId);
                         const maxTravelers = selectedBatch 
-                          ? Math.min(10, selectedBatch.available_seats ?? (selectedBatch.batch_size - selectedBatch.seats_booked))
+                          ? Math.min(10, selectedBatch.available_seats)
                           : 10;
                         return (
                           <Select
@@ -548,13 +509,9 @@ const BookingModal = ({ trip, isOpen, onClose }: BookingModalProps) => {
                           </Select>
                         );
                       })()}
-                      {formData.batchId && (() => {
-                        const selectedBatch = batches.find(b => b.id === formData.batchId);
-                        const availableSeats = selectedBatch ? (selectedBatch.available_seats ?? (selectedBatch.batch_size - selectedBatch.seats_booked)) : 0;
-                        return availableSeats <= 3 && (
-                          <p className="text-xs text-amber-600 mt-1">Only {availableSeats} seat{availableSeats !== 1 ? 's' : ''} left!</p>
-                        );
-                      })()}
+                      {selectedBatch && selectedBatch.available_seats <= 3 && (
+                        <p className="text-xs text-destructive mt-1">Only {selectedBatch.available_seats} seat{selectedBatch.available_seats !== 1 ? 's' : ''} left!</p>
+                      )}
                     </div>
 
                     {hasMultiplePrices && (

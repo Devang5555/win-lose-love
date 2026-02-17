@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Users, AlertTriangle, TrendingUp, Sparkles } from "lucide-react";
+import { Calendar, Users, AlertTriangle, TrendingUp, Sparkles, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,16 +154,17 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
             type="button"
             disabled={isSoldOut}
             onClick={() => onSelectBatch(batch)}
-            className={`w-full text-left rounded-xl border-2 p-4 transition-all ${
+            className={`w-full text-left rounded-xl border-2 p-4 transition-all duration-300 ${
               isSoldOut
                 ? "opacity-50 cursor-not-allowed border-border bg-muted"
                 : isSelected
-                ? "border-primary bg-primary/5 shadow-md"
+                ? "border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20 scale-[1.02]"
                 : "border-border bg-card hover:border-primary/40 hover:shadow-sm"
             }`}
           >
             <div className="flex items-center justify-between gap-2 mb-1.5">
-              <span className="font-semibold text-sm text-card-foreground">
+              <span className="font-semibold text-sm text-card-foreground flex items-center gap-2">
+                {isSelected && <CheckCircle className="w-4 h-4 text-primary animate-in zoom-in-50 duration-200" />}
                 {batch.batch_name}
               </span>
               <div className="flex items-center gap-1.5">
