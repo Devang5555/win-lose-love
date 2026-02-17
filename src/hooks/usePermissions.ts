@@ -19,7 +19,9 @@ export type Permission =
   | 'view_reviews'
   | 'manage_reviews'
   | 'view_audit_logs'
-  | 'manage_roles';
+  | 'manage_roles'
+  | 'delete_booking'
+  | 'force_delete_booking';
 
 const ROLE_PERMISSIONS: Record<string, Permission[]> = {
   super_admin: [
@@ -30,6 +32,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'view_leads', 'manage_leads',
     'view_reviews', 'manage_reviews',
     'view_audit_logs', 'manage_roles',
+    'delete_booking', 'force_delete_booking',
   ],
   admin: [
     'view_bookings', 'cancel_booking', 'process_refund', 'verify_payments',
@@ -39,6 +42,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'view_leads', 'manage_leads',
     'view_reviews', 'manage_reviews',
     'view_audit_logs', 'manage_roles',
+    'delete_booking',
   ],
   operations_manager: [
     'view_bookings',

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send, Gift } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send, Gift, Trash2, ArchiveX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +54,9 @@ interface Booking {
   rejection_reason: string | null;
   cancellation_reason: string | null;
   cancelled_at: string | null;
+  is_deleted: boolean;
+  deleted_at: string | null;
+  deleted_by: string | null;
 }
 
 interface Refund {
@@ -86,6 +89,7 @@ interface Batch {
   end_date: string;
   batch_size: number;
   seats_booked: number;
+  available_seats: number | null;
   status: string;
 }
 
@@ -118,6 +122,8 @@ const Admin = () => {
   const [payments, setPayments] = useState<any[]>([]);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<"soft" | "force" | null>(null);
   const [cancelRefundAmount, setCancelRefundAmount] = useState("0");
 
   useEffect(() => {
@@ -140,6 +146,11 @@ const Admin = () => {
   useEffect(() => {
     let filtered = bookings;
     
+    // Filter soft-deleted unless toggle is on
+    if (!showDeleted) {
+      filtered = filtered.filter((b) => !b.is_deleted);
+    }
+    
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -160,7 +171,7 @@ const Admin = () => {
     }
     
     setFilteredBookings(filtered);
-  }, [bookings, searchTerm, statusFilter, paymentStatusFilter]);
+  }, [bookings, searchTerm, statusFilter, paymentStatusFilter, showDeleted]);
 
   useEffect(() => {
     let filtered = interestedUsers;
@@ -647,6 +658,115 @@ For queries, please contact us.
     }
   };
 
+  // Soft delete booking
+  const softDeleteBooking = async (booking: Booking) => {
+    if (!user) return;
+    
+    // Safety: warn if fully_paid
+    if (booking.payment_status === "fully_paid") {
+      if (!confirm("⚠️ This booking is FULLY PAID. Are you sure you want to delete it?")) return;
+    }
+    
+    // Safety: warn if older than 30 days
+    const daysSinceBooking = Math.ceil((Date.now() - new Date(booking.created_at).getTime()) / (1000 * 60 * 60 * 24));
+    if (daysSinceBooking > 30) {
+      if (!confirm(`⚠️ This booking is ${daysSinceBooking} days old. Are you sure you want to delete it?`)) return;
+    }
+
+    setProcessingAction(true);
+    try {
+      // Release seats if confirmed
+      if (booking.booking_status === "confirmed" && booking.batch_id) {
+        await supabase.rpc("cancel_booking_with_seat_release", {
+          p_booking_id: booking.id,
+          p_reason: "Soft deleted by admin",
+          p_refund_amount: 0,
+        });
+      }
+
+      const { error } = await supabase
+        .from("bookings")
+        .update({
+          is_deleted: true,
+          deleted_at: new Date().toISOString(),
+          deleted_by: user.id,
+        })
+        .eq("id", booking.id);
+
+      if (error) throw error;
+
+      await supabase.rpc("create_audit_log", {
+        p_user_id: user.id,
+        p_action_type: "booking_soft_deleted",
+        p_entity_type: "booking",
+        p_entity_id: booking.id,
+        p_metadata: { trip_id: booking.trip_id, customer: booking.full_name, previous_status: booking.booking_status },
+      });
+
+      toast({ title: "Booking Deleted", description: "Booking has been soft deleted." });
+      fetchData();
+      setSelectedBooking(null);
+      setShowDeleteConfirm(null);
+    } catch (err: any) {
+      console.error("Error soft deleting:", err);
+      toast({ title: "Error", description: err.message || "Failed to delete booking", variant: "destructive" });
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  // Force delete booking (super_admin only)
+  const forceDeleteBooking = async (booking: Booking) => {
+    if (!user) return;
+    
+    if (booking.payment_status === "fully_paid") {
+      if (!confirm("⚠️ DANGER: This booking is FULLY PAID. Permanently deleting it will remove all records. Continue?")) return;
+    }
+
+    setProcessingAction(true);
+    try {
+      // Delete related records first
+      await supabase.from("payment_reminders").delete().eq("booking_id", booking.id);
+      await supabase.from("refunds").delete().eq("booking_id", booking.id);
+      await supabase.from("payments").delete().eq("booking_id", booking.id);
+      await supabase.from("reviews").delete().eq("booking_id", booking.id);
+      await supabase.from("referral_earnings").delete().eq("booking_id", booking.id);
+
+      // Release seats if confirmed
+      if (booking.booking_status === "confirmed" && booking.batch_id) {
+        const batch = batches.find(b => b.id === booking.batch_id);
+        if (batch) {
+          await supabase.from("batches").update({
+            available_seats: (batch.available_seats || 0) + booking.num_travelers,
+            seats_booked: Math.max(0, batch.seats_booked - booking.num_travelers),
+          }).eq("id", batch.id);
+        }
+      }
+
+      // Audit log before deletion
+      await supabase.rpc("create_audit_log", {
+        p_user_id: user.id,
+        p_action_type: "booking_force_deleted",
+        p_entity_type: "booking",
+        p_entity_id: booking.id,
+        p_metadata: { trip_id: booking.trip_id, customer: booking.full_name, total_amount: booking.total_amount, advance_paid: booking.advance_paid },
+      });
+
+      // Delete the booking
+      const { error } = await supabase.from("bookings").delete().eq("id", booking.id);
+      if (error) throw error;
+
+      toast({ title: "Permanently Deleted", description: "Booking and all related records have been removed." });
+      fetchData();
+      setSelectedBooking(null);
+      setShowDeleteConfirm(null);
+    } catch (err: any) {
+      console.error("Error force deleting:", err);
+      toast({ title: "Error", description: err.message || "Failed to permanently delete booking", variant: "destructive" });
+    } finally {
+      setProcessingAction(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -1049,6 +1169,17 @@ For queries, please contact us.
                     <SelectItem value="fully_paid">Fully Paid</SelectItem>
                   </SelectContent>
                 </Select>
+                {can('delete_booking') && (
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={showDeleted}
+                      onChange={(e) => setShowDeleted(e.target.checked)}
+                      className="rounded border-border"
+                    />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">Show Deleted</span>
+                  </label>
+                )}
               </div>
 
               {/* Bookings Table */}
@@ -1076,7 +1207,7 @@ For queries, please contact us.
                       ) : (
                         filteredBookings.map((booking) => (
                           <tr key={booking.id} className={`hover:bg-muted/30 transition-colors ${
-                            booking.remaining_payment_status === "uploaded" ? "bg-blue-500/5" : ""
+                            booking.is_deleted ? "opacity-50 bg-red-500/5" : booking.remaining_payment_status === "uploaded" ? "bg-blue-500/5" : ""
                           }`}>
                             <td className="px-4 py-3">
                               <div>
@@ -1108,7 +1239,16 @@ For queries, please contact us.
                                 )}
                               </div>
                             </td>
-                            <td className="px-4 py-3">{getStatusBadge(booking.booking_status)}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex flex-col gap-1">
+                                {getStatusBadge(booking.booking_status)}
+                                {booking.is_deleted && (
+                                  <Badge className="bg-red-500/20 text-red-600 border-red-500/30 text-xs">
+                                    <Trash2 className="w-3 h-3 mr-1" />Deleted
+                                  </Badge>
+                                )}
+                              </div>
+                            </td>
                             <td className="px-4 py-3">
                               <Button
                                 variant={booking.remaining_payment_status === "uploaded" ? "default" : "outline"}
@@ -1405,6 +1545,7 @@ For queries, please contact us.
               setShowCancelModal(false);
               setCancelReason("");
               setCancelRefundAmount("0");
+              setShowDeleteConfirm(null);
             }}
           />
           <div className="relative w-full max-w-3xl bg-card rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
@@ -1418,6 +1559,7 @@ For queries, please contact us.
                   setShowCancelModal(false);
                   setCancelReason("");
                   setCancelRefundAmount("0");
+                  setShowDeleteConfirm(null);
                 }}
                 className="p-2 rounded-full hover:bg-muted transition-colors"
               >
@@ -1929,8 +2071,8 @@ For queries, please contact us.
 
               {/* General Action Buttons */}
               <div className="flex flex-wrap gap-3 pt-4">
-                {/* Cancel Booking Button - show for non-cancelled/non-expired/non-refunded, only if user can cancel */}
-                {can('cancel_booking') && !["cancelled", "expired", "refunded"].includes(selectedBooking.booking_status) && !showCancelModal && (
+                {/* Cancel Booking Button */}
+                {can('cancel_booking') && !["cancelled", "expired", "refunded"].includes(selectedBooking.booking_status) && !showCancelModal && !selectedBooking.is_deleted && (
                   <Button
                     variant="destructive"
                     onClick={() => {
@@ -1943,6 +2085,30 @@ For queries, please contact us.
                   </Button>
                 )}
 
+                {/* Soft Delete */}
+                {can('delete_booking') && !selectedBooking.is_deleted && !showDeleteConfirm && (
+                  <Button
+                    variant="outline"
+                    className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-950"
+                    onClick={() => setShowDeleteConfirm("soft")}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Booking
+                  </Button>
+                )}
+
+                {/* Force Delete (Super Admin Only) */}
+                {can('force_delete_booking') && !showDeleteConfirm && (
+                  <Button
+                    variant="outline"
+                    className="text-red-700 border-red-400 hover:bg-red-100 dark:hover:bg-red-950"
+                    onClick={() => setShowDeleteConfirm("force")}
+                  >
+                    <ArchiveX className="w-4 h-4 mr-2" />
+                    Permanently Delete
+                  </Button>
+                )}
+
                 <Button
                   variant="outline"
                   onClick={() => window.open(`https://wa.me/${selectedBooking.phone}`, '_blank')}
@@ -1951,6 +2117,43 @@ For queries, please contact us.
                   WhatsApp
                 </Button>
               </div>
+
+              {/* Delete Confirmation */}
+              {showDeleteConfirm && (
+                <div className={`rounded-lg p-4 border ${showDeleteConfirm === "force" ? "bg-red-600/10 border-red-600/30" : "bg-red-500/10 border-red-500/30"}`}>
+                  <h4 className="font-medium text-red-700 dark:text-red-400 mb-2 flex items-center gap-2">
+                    {showDeleteConfirm === "force" ? <ArchiveX className="w-4 h-4" /> : <Trash2 className="w-4 h-4" />}
+                    {showDeleteConfirm === "force" ? "Permanently Delete Booking" : "Soft Delete Booking"}
+                  </h4>
+                  <p className="text-sm text-red-600 dark:text-red-300 mb-3">
+                    {showDeleteConfirm === "force"
+                      ? "⚠️ This will PERMANENTLY delete the booking and all related records (payments, refunds, reviews). This CANNOT be undone."
+                      : "This will mark the booking as deleted. It can still be viewed with 'Show Deleted' toggle. Confirmed bookings will have their seats released."
+                    }
+                  </p>
+                  {selectedBooking.is_deleted && showDeleteConfirm === "soft" && (
+                    <p className="text-sm text-amber-600 mb-3">This booking is already soft-deleted.</p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        if (showDeleteConfirm === "force") {
+                          forceDeleteBooking(selectedBooking);
+                        } else {
+                          softDeleteBooking(selectedBooking);
+                        }
+                      }}
+                      disabled={processingAction || (showDeleteConfirm === "soft" && selectedBooking.is_deleted)}
+                    >
+                      {processingAction ? "Processing..." : showDeleteConfirm === "force" ? "Confirm Permanent Delete" : "Confirm Delete"}
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowDeleteConfirm(null)}>
+                      Go Back
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {/* Cancel Booking Modal */}
               {showCancelModal && (
