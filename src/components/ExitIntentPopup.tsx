@@ -1,20 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
-import { X, Gift, Sparkles, MapPin } from "lucide-react";
+import { X, Gift, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useDestinations } from "@/hooks/useDestinations";
 
 const SESSION_KEY = "gb_exit_popup_shown";
 
 const ExitIntentPopup = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { destinations } = useDestinations();
   const [isOpen, setIsOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -22,7 +19,6 @@ const ExitIntentPopup = () => {
     name: "",
     email: "",
     phone: "",
-    destination: "",
   });
 
   const showPopup = useCallback(() => {
@@ -92,7 +88,7 @@ const ExitIntentPopup = () => {
         email: formData.email.trim().toLowerCase().slice(0, 255),
         phone: formData.phone.trim().slice(0, 15) || null,
         source: "popup",
-        destination_interest: formData.destination || null,
+        destination_interest: null,
         user_id: user?.id || null,
       });
 
@@ -190,22 +186,6 @@ const ExitIntentPopup = () => {
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+91 98765 43210"
                 />
-              </div>
-              <div>
-                <Label className="text-sm font-medium flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-primary" />
-                  Preferred Destination <span className="text-muted-foreground">(optional)</span>
-                </Label>
-                <Select value={formData.destination} onValueChange={(v) => setFormData({ ...formData, destination: v })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a destination" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {destinations.map((d) => (
-                      <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? "Submitting..." : "Claim ₹300 Credit"}

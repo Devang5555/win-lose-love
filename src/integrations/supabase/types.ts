@@ -388,6 +388,42 @@ export type Database = {
         }
         Relationships: []
       }
+      fraud_flags: {
+        Row: {
+          created_at: string
+          flagged_at: string
+          id: string
+          notes: string | null
+          reason: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          flagged_at?: string
+          id?: string
+          notes?: string | null
+          reason: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          flagged_at?: string
+          id?: string
+          notes?: string | null
+          reason?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       interested_users: {
         Row: {
           created_at: string | null
@@ -846,8 +882,13 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          created_by: string | null
           description: string | null
+          expired_at: string | null
+          expires_at: string | null
           id: string
+          is_expired: boolean
+          reason: string | null
           reference_id: string | null
           type: string
           user_id: string
@@ -856,8 +897,13 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          created_by?: string | null
           description?: string | null
+          expired_at?: string | null
+          expires_at?: string | null
           id?: string
+          is_expired?: boolean
+          reason?: string | null
           reference_id?: string | null
           type: string
           user_id: string
@@ -866,8 +912,13 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          created_by?: string | null
           description?: string | null
+          expired_at?: string | null
+          expires_at?: string | null
           id?: string
+          is_expired?: boolean
+          reason?: string | null
           reference_id?: string | null
           type?: string
           user_id?: string
@@ -887,7 +938,10 @@ export type Database = {
         Row: {
           balance: number
           created_at: string
+          frozen_at: string | null
+          frozen_by: string | null
           id: string
+          is_frozen: boolean
           total_earned: number
           total_spent: number
           updated_at: string
@@ -896,7 +950,10 @@ export type Database = {
         Insert: {
           balance?: number
           created_at?: string
+          frozen_at?: string | null
+          frozen_by?: string | null
           id?: string
+          is_frozen?: boolean
           total_earned?: number
           total_spent?: number
           updated_at?: string
@@ -905,7 +962,10 @@ export type Database = {
         Update: {
           balance?: number
           created_at?: string
+          frozen_at?: string | null
+          frozen_by?: string | null
           id?: string
+          is_frozen?: boolean
           total_earned?: number
           total_spent?: number
           updated_at?: string
@@ -1028,6 +1088,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_wallet_adjust: {
+        Args: {
+          p_amount: number
+          p_expires_at?: string
+          p_notes?: string
+          p_reason?: string
+          p_target_user_id: string
+          p_type: string
+        }
+        Returns: boolean
+      }
       apply_wallet_to_booking: {
         Args: { p_amount: number; p_booking_id: string; p_user_id: string }
         Returns: boolean
@@ -1072,6 +1143,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      expire_wallet_credits: { Args: never; Returns: number }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_user_roles: {
         Args: { _user_id: string }
@@ -1094,6 +1166,10 @@ export type Database = {
       increment_seats_booked: {
         Args: { batch_id_param: string; seats_count: number }
         Returns: undefined
+      }
+      toggle_wallet_freeze: {
+        Args: { p_freeze: boolean; p_user_id: string }
+        Returns: boolean
       }
     }
     Enums: {

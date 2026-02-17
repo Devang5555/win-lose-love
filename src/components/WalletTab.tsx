@@ -4,7 +4,7 @@ import { useWallet } from "@/hooks/useWallet";
 import ReferralCard from "@/components/ReferralCard";
 
 const WalletTab = () => {
-  const { wallet, balance, transactions, referralEarnings, walletLoading } = useWallet();
+  const { wallet, balance, transactions, referralEarnings, walletLoading, isFrozen } = useWallet();
 
   if (walletLoading) {
     return (
@@ -59,6 +59,11 @@ const WalletTab = () => {
             <p className="text-xl font-semibold">₹{(wallet?.total_spent ?? 0).toLocaleString()}</p>
           </div>
         </div>
+        {isFrozen && (
+          <div className="mt-4 bg-primary-foreground/20 rounded-lg p-3 text-sm flex items-center gap-2">
+            ❄️ Wallet temporarily restricted. Contact support.
+          </div>
+        )}
       </div>
 
       {/* Referral Card */}
