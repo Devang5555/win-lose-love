@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.trip-reminders]
 verify_jwt = false
+
+[functions.expire-wallet-credits]
+verify_jwt = false

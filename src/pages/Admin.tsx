@@ -24,6 +24,7 @@ import FinancialReconciliation from "@/components/admin/FinancialReconciliation"
 import WhatsAppBroadcast from "@/components/admin/WhatsAppBroadcast";
 import LeadsCaptureManagement from "@/components/admin/LeadsCaptureManagement";
 import DepartureOps from "@/components/admin/DepartureOps";
+import WalletManagement from "@/components/admin/WalletManagement";
 import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
   openWhatsAppAdvanceVerified, 
@@ -1145,6 +1146,12 @@ For queries, please contact us.
                   Deep Analytics
                 </TabsTrigger>
               )}
+              {canAny('view_financial_data', 'verify_payments') && (
+                <TabsTrigger value="wallet-mgmt" className="gap-2">
+                  <Wallet className="w-4 h-4" />
+                  Wallets
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {/* Analytics Tab */}
@@ -1587,6 +1594,13 @@ For queries, please contact us.
                   destinations={analyticsDestinations}
                   leads={leads}
                 />
+              </TabsContent>
+            )}
+
+            {/* Wallet Management Tab */}
+            {canAny('view_financial_data', 'verify_payments') && (
+              <TabsContent value="wallet-mgmt">
+                <WalletManagement />
               </TabsContent>
             )}
           </Tabs>

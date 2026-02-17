@@ -8,6 +8,7 @@ export interface WalletData {
   balance: number;
   total_earned: number;
   total_spent: number;
+  is_frozen: boolean;
 }
 
 export interface WalletTransaction {
@@ -113,6 +114,7 @@ export const useWallet = () => {
   };
 
   const balance = wallet?.balance ?? 0;
+  const isFrozen = wallet?.is_frozen ?? false;
 
   const getReferralLink = () => {
     if (!referralCode) return "";
@@ -122,6 +124,7 @@ export const useWallet = () => {
   return {
     wallet,
     balance,
+    isFrozen,
     walletLoading,
     referralCode,
     transactions: transactions || [],

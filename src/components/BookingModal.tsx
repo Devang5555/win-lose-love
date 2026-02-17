@@ -29,7 +29,7 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { balance, applyWalletCredit, creditReferral } = useWallet();
+  const { balance, isFrozen, applyWalletCredit, creditReferral } = useWallet();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
@@ -74,7 +74,7 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
   })();
 
   const totalPrice = selectedPrice * parseInt(formData.travelers);
-  const walletApplicable = useWalletCredits ? Math.min(balance, totalPrice) : 0;
+  const walletApplicable = (useWalletCredits && !isFrozen) ? Math.min(balance, totalPrice) : 0;
   const effectiveTotalPrice = totalPrice - walletApplicable;
   const advanceAmount = trip.booking?.advance || 2000;
   const totalAdvance = Math.max(0, advanceAmount * parseInt(formData.travelers) - walletApplicable);
