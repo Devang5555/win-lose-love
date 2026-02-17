@@ -581,16 +581,31 @@ const TripDetail = () => {
                   )}
 
                   {isBookable ? (
-                    <Button 
-                      className="w-full mb-3 h-12 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity" 
-                      size="lg"
-                      onClick={handleBookingClick}
-                      disabled={!!selectedBatch && selectedBatch.available_seats === 0}
-                    >
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      {selectedBatch && selectedBatch.available_seats === 0 ? "Sold Out" : "Reserve Your Spot"}
-                      {!(selectedBatch && selectedBatch.available_seats === 0) && <ChevronRight className="w-5 h-5 ml-1" />}
-                    </Button>
+                    selectedBatch ? (
+                      <Button 
+                        className="w-full mb-3 h-12 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity" 
+                        size="lg"
+                        onClick={handleBookingClick}
+                        disabled={selectedBatch.available_seats === 0}
+                      >
+                        <Sparkles className="w-5 h-5 mr-2" />
+                        {selectedBatch.available_seats === 0 ? "Sold Out" : "Reserve Your Spot"}
+                        {selectedBatch.available_seats > 0 && <ChevronRight className="w-5 h-5 ml-1" />}
+                      </Button>
+                    ) : (
+                      <div className="space-y-2 mb-3">
+                        <Button 
+                          className="w-full h-12 text-lg font-bold opacity-50 cursor-not-allowed" 
+                          size="lg"
+                          disabled
+                        >
+                          Reserve Your Spot
+                        </Button>
+                        <p className="text-xs text-center text-muted-foreground">
+                          ☝️ Please select a departure date above first
+                        </p>
+                      </div>
+                    )
                   ) : (
                     <Button 
                       className="w-full mb-3 h-12 text-lg font-bold bg-sunset hover:bg-sunset/90" 
@@ -677,6 +692,7 @@ const TripDetail = () => {
           trip={trip}
           isOpen={isBookingOpen}
           onClose={() => setIsBookingOpen(false)}
+          selectedBatch={selectedBatch}
         />
       )}
 
