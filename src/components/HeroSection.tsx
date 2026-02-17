@@ -2,8 +2,36 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Compass, Mountain, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
+import { useAuth } from "@/hooks/useAuth";
 
 const HeroSection = () => {
+  const { user, roles } = useAuth();
+
+  const renderWelcomeWidget = () => {
+    if (user && roles?.includes("super_admin")) {
+      return (
+        <div className="bg-gradient-to-r from-indigo-700 to-purple-700 text-white p-4 md:p-6 rounded-2xl shadow-xl backdrop-blur-md max-w-sm">
+          <h3 className="text-lg md:text-xl font-semibold">Command Center Activated ⚡</h3>
+          <p className="text-sm opacity-90 mt-1">You don't just manage trips — you command growth, revenue, and movement.</p>
+        </div>
+      );
+    }
+    if (user && roles?.some(r => ["admin", "operations_manager", "finance_manager"].includes(r)) && !roles?.includes("super_admin")) {
+      return (
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-4 md:p-6 rounded-2xl shadow-xl max-w-sm">
+          <h3 className="text-lg md:text-xl font-semibold">Welcome back, Admin 🚀</h3>
+          <p className="text-sm opacity-90 mt-1">Control the experience. Manage the movement. Scale the adventure.</p>
+        </div>
+      );
+    }
+    return (
+      <div className="bg-background/80 backdrop-blur-md p-4 md:p-6 rounded-2xl shadow-md max-w-sm">
+        <h3 className="text-lg font-semibold text-foreground">Welcome back, explorer!</h3>
+        <p className="text-sm text-muted-foreground">Ready for your next journey.</p>
+      </div>
+    );
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -74,6 +102,11 @@ const HeroSection = () => {
             <span className="text-sm text-background font-medium">Local Experiences</span>
           </div>
         </div>
+      </div>
+
+      {/* Role-Aware Welcome Widget */}
+      <div className="absolute bottom-20 right-6 z-10 animate-slide-up hidden md:block" style={{ animationDelay: '0.5s' }}>
+        {renderWelcomeWidget()}
       </div>
 
       {/* Scroll Indicator */}
