@@ -1,11 +1,30 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Compass, Mountain, Utensils } from "lucide-react";
+import { ArrowRight, Compass, Mountain, Utensils, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 import { useAuth } from "@/hooks/useAuth";
 
+const WELCOME_SHOWN_KEY = "gb_welcome_shown";
+
 const HeroSection = () => {
   const { user, roles } = useAuth();
+  const [showWelcome, setShowWelcome] = useState(false);
+  const prevUserRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // Show popup only when user transitions from logged-out to logged-in
+    if (user && prevUserRef.current === null) {
+      const lastShown = sessionStorage.getItem(WELCOME_SHOWN_KEY);
+      if (!lastShown) {
+        setShowWelcome(true);
+        sessionStorage.setItem(WELCOME_SHOWN_KEY, "1");
+        const timer = setTimeout(() => setShowWelcome(false), 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+    prevUserRef.current = user?.id ?? null;
+  }, [user]);
 
   const renderWelcomeWidget = () => {
     if (user && roles?.includes("super_admin")) {
@@ -104,13 +123,20 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Role-Aware Welcome Widget - inline on mobile, floating on desktop */}
-      <div className="relative z-10 flex justify-center mt-8 md:hidden animate-slide-up" style={{ animationDelay: '0.5s' }}>
-        {renderWelcomeWidget()}
-      </div>
-      <div className="absolute bottom-20 right-6 z-10 animate-slide-up hidden md:block" style={{ animationDelay: '0.5s' }}>
-        {renderWelcomeWidget()}
-      </div>
+      {/* Welcome Popup - shows temporarily after login */}
+      {showWelcome && user && (
+        <div className="fixed bottom-6 right-6 z-50 animate-slide-up">
+          <div className="relative">
+            <button
+              onClick={() => setShowWelcome(false)}
+              className="absolute -top-2 -right-2 p-1 rounded-full bg-muted hover:bg-muted/80 transition-colors z-10"
+            >
+              <X className="w-3 h-3 text-muted-foreground" />
+            </button>
+            {renderWelcomeWidget()}
+          </div>
+        </div>
+      )}
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
