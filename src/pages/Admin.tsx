@@ -878,7 +878,24 @@ For queries, please contact us.
             </Button>
           </div>
 
-          {/* Pending Remaining Payment Verification Alert */}
+          {/* Role-Aware Hero Widget */}
+          {user && roles?.includes("super_admin") ? (
+            <div className="mb-6 bg-gradient-to-r from-indigo-700 to-purple-700 text-white p-6 rounded-2xl shadow-xl">
+              <h3 className="text-xl font-semibold">Command Center Activated ⚡</h3>
+              <p className="text-sm opacity-90 mt-1">You don't just manage trips — you command growth, revenue, and movement.</p>
+            </div>
+          ) : user && roles?.some(r => ["admin", "operations_manager", "finance_manager"].includes(r)) ? (
+            <div className="mb-6 bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-6 rounded-2xl shadow-xl">
+              <h3 className="text-xl font-semibold">Welcome back, Admin 🚀</h3>
+              <p className="text-sm opacity-90 mt-1">Control the experience. Manage the movement. Scale the adventure.</p>
+            </div>
+          ) : (
+            <div className="mb-6 bg-background/80 backdrop-blur-md p-6 rounded-2xl shadow-md border border-border">
+              <h3 className="text-lg font-semibold text-foreground">Welcome back, explorer!</h3>
+              <p className="text-sm text-muted-foreground">Ready for your next journey.</p>
+            </div>
+          )}
+
           {pendingRemainingVerification.length > 0 && (
             <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
               <div className="flex items-center gap-3">
