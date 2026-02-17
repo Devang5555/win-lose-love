@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.balance-reminders]
 verify_jwt = false
+
+[functions.trip-reminders]
+verify_jwt = false

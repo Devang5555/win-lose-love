@@ -156,6 +156,47 @@ export type Database = {
           },
         ]
       }
+      booking_notifications: {
+        Row: {
+          booking_id: string
+          channel: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          sent_at: string
+          status: string
+          type: string
+        }
+        Insert: {
+          booking_id: string
+          channel: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          sent_at?: string
+          status?: string
+          type: string
+        }
+        Update: {
+          booking_id?: string
+          channel?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          sent_at?: string
+          status?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_notifications_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           advance_paid: number
@@ -170,6 +211,8 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          invoice_generated_at: string | null
+          invoice_number: string | null
           is_deleted: boolean
           notes: string | null
           num_travelers: number
@@ -203,6 +246,8 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          invoice_generated_at?: string | null
+          invoice_number?: string | null
           is_deleted?: boolean
           notes?: string | null
           num_travelers?: number
@@ -236,6 +281,8 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          invoice_generated_at?: string | null
+          invoice_number?: string | null
           is_deleted?: boolean
           notes?: string | null
           num_travelers?: number

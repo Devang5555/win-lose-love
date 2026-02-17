@@ -16,6 +16,7 @@ import Footer from "@/components/Footer";
 import BatchManagement from "@/components/admin/BatchManagement";
 import TripManagement from "@/components/admin/TripManagement";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
+import AdvancedAnalytics from "@/components/admin/AdvancedAnalytics";
 import ReviewsManagement from "@/components/admin/ReviewsManagement";
 import AuditLogs from "@/components/admin/AuditLogs";
 import BlogEditor from "@/components/admin/BlogEditor";
@@ -106,6 +107,7 @@ const Admin = () => {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [analyticsTrips, setAnalyticsTrips] = useState<{ trip_id: string; trip_name: string; destination_id: string | null }[]>([]);
   const [analyticsDestinations, setAnalyticsDestinations] = useState<{ id: string; name: string }[]>([]);
+  const [leads, setLeads] = useState<{ id: string; status: string; source: string }[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -233,7 +235,7 @@ const Admin = () => {
   }, [selectedBooking]);
 
   const fetchData = async () => {
-    const [bookingsRes, interestedRes, batchesRes, tripsRes, destsRes, refundsRes, paymentsRes] = await Promise.all([
+    const [bookingsRes, interestedRes, batchesRes, tripsRes, destsRes, refundsRes, paymentsRes, leadsRes] = await Promise.all([
       supabase.from("bookings").select("*").order("created_at", { ascending: false }),
       supabase.from("interested_users").select("*").order("created_at", { ascending: false }),
       supabase.from("batches").select("*").order("start_date", { ascending: true }),
@@ -241,6 +243,7 @@ const Admin = () => {
       supabase.from("destinations").select("id, name"),
       supabase.from("refunds").select("*").order("created_at", { ascending: false }),
       supabase.from("payments").select("*").order("created_at", { ascending: false }),
+      supabase.from("leads").select("id, status, source"),
     ]);
 
     if (bookingsRes.error) {
@@ -280,6 +283,10 @@ const Admin = () => {
 
     if (!paymentsRes.error) {
       setPayments(paymentsRes.data || []);
+    }
+
+    if (!leadsRes.error) {
+      setLeads(leadsRes.data || []);
     }
 
     setLoadingData(false);
