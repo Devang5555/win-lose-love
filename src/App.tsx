@@ -24,6 +24,8 @@ const SearchPage = lazy(() => import("./pages/Search"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPostPage = lazy(() => import("./pages/BlogPost"));
 const Policy = lazy(() => import("./pages/Policy"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Stories = lazy(() => import("./pages/Stories"));
 const InvoicePage = lazy(() => import("./pages/Invoice"));
@@ -69,6 +71,8 @@ const App = () => (
               <Route path="/booking-success/:bookingId" element={<BookingSuccess />} />
               <Route path="/policy" element={<Policy />} />
               <Route path="/cancellation" element={<Policy />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/stories" element={<Stories />} />
               <Route path="/invoice/:bookingId" element={<InvoicePage />} />
