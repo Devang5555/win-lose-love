@@ -69,28 +69,27 @@ const Trips = () => {
       </section>
 
       {/* Filters */}
-      <section className="py-6 bg-card border-b border-border sticky top-16 md:top-20 z-40 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center">
+      <section className="py-3 md:py-6 bg-card border-b border-border sticky top-16 md:top-20 z-40 shadow-sm">
+        <div className="container mx-auto px-3 md:px-4">
+          <div className="flex flex-col md:flex-row gap-3 items-center">
             {/* Search */}
             <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
               <Input
-                placeholder="Search destinations, experiences..."
+                placeholder="Search destinations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 text-base"
+                className="pl-10 h-10 md:h-12 text-sm md:text-base"
               />
             </div>
 
             {/* Duration Filter */}
-            <div className="flex items-center gap-2 flex-wrap justify-center">
+            <div className="flex items-center gap-1.5 md:gap-2 flex-wrap justify-center overflow-x-auto w-full md:w-auto">
               <SlidersHorizontal className="w-4 h-4 text-muted-foreground hidden md:block" />
               
-              {/* Bookable Only Toggle */}
               <Badge
                 variant={showBookableOnly ? "default" : "outline"}
-                className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors font-semibold"
+                className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors font-semibold text-xs whitespace-nowrap"
                 onClick={() => setShowBookableOnly(!showBookableOnly)}
               >
                 <Sparkles className="w-3 h-3 mr-1" />
@@ -101,15 +100,15 @@ const Trips = () => {
                 <Badge
                   key={duration}
                   variant={selectedDuration === duration ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors text-xs whitespace-nowrap"
                   onClick={() => setSelectedDuration(selectedDuration === duration ? null : duration)}
                 >
                   {duration}
                 </Badge>
               ))}
               {(searchQuery || selectedDuration || showBookableOnly) && (
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="font-semibold">
-                  <X className="w-4 h-4 mr-1" />
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="font-semibold text-xs px-2">
+                  <X className="w-3.5 h-3.5 mr-0.5" />
                   Clear
                 </Button>
               )}

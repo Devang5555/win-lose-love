@@ -857,25 +857,25 @@ For queries, please contact us.
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="pt-24 pb-16 px-4">
+      <main className="pt-20 md:pt-24 pb-16 px-3 md:px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h1 className="font-serif text-3xl font-bold text-foreground">Admin Dashboard</h1>
-              <div className="flex items-center gap-2 mt-2">
-                <p className="text-muted-foreground">Manage bookings, leads, and trips</p>
+          <div className="mb-6 md:mb-8 flex items-start md:items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground">Admin Dashboard</h1>
+              <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                <p className="text-sm text-muted-foreground">Manage bookings & trips</p>
                 {roles.filter(r => r !== 'user').map(role => (
-                  <Badge key={role} variant="outline" className="text-xs gap-1">
-                    <Shield className="w-3 h-3" />
+                  <Badge key={role} variant="outline" className="text-[10px] gap-0.5 px-1.5 py-0">
+                    <Shield className="w-2.5 h-2.5" />
                     {getRoleLabel(role)}
                   </Badge>
                 ))}
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={fetchData}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
+            <Button variant="outline" size="sm" onClick={fetchData} className="flex-shrink-0">
+              <RefreshCw className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">Refresh</span>
             </Button>
           </div>
 
@@ -922,134 +922,32 @@ For queries, please contact us.
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-8 gap-4 mb-8">
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-blue-500" />
+          <div className="overflow-x-auto -mx-4 px-4 pb-2 mb-8">
+            <div className="flex gap-3 min-w-max md:grid md:grid-cols-5 lg:grid-cols-10 md:min-w-0">
+              {[
+                { icon: Clock, color: "text-blue-500", bg: "bg-blue-500/20", label: "Initiated", value: bookings.filter((b) => b.booking_status === "initiated").length },
+                { icon: Wallet, color: "text-amber-500", bg: "bg-amber-500/20", label: "Pending Advance", value: bookings.filter((b) => b.payment_status === "pending_advance").length },
+                { icon: Clock, color: "text-primary", bg: "bg-primary/20", label: "Pending", value: bookings.filter((b) => b.booking_status === "pending").length },
+                { icon: CheckCircle, color: "text-green-500", bg: "bg-green-500/20", label: "Confirmed", value: bookings.filter((b) => b.booking_status === "confirmed").length },
+                { icon: Wallet, color: "text-blue-500", bg: "bg-blue-500/20", label: "Balance Review", value: pendingRemainingVerification.length },
+                { icon: Wallet, color: "text-amber-500", bg: "bg-amber-500/20", label: "Fully Paid", value: bookings.filter((b) => b.payment_status === "fully_paid").length },
+                { icon: Users, color: "text-purple-500", bg: "bg-purple-500/20", label: "Leads", value: interestedUsers.length },
+                { icon: Filter, color: "text-accent", bg: "bg-accent/20", label: "Total", value: bookings.length },
+                { icon: XCircle, color: "text-gray-500", bg: "bg-gray-500/20", label: "Expired", value: bookings.filter((b) => b.booking_status === "expired").length },
+                { icon: Ban, color: "text-red-500", bg: "bg-red-500/20", label: "Cancelled", value: bookings.filter((b) => b.booking_status === "cancelled").length },
+              ].map((stat, i) => (
+                <div key={i} className="bg-card border border-border rounded-xl p-3 min-w-[120px] md:min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-full ${stat.bg} flex items-center justify-center flex-shrink-0`}>
+                      <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold text-foreground leading-tight">{stat.value}</p>
+                      <p className="text-[11px] text-muted-foreground leading-tight">{stat.label}</p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {bookings.filter((b) => b.booking_status === "initiated").length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Initiated</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <Wallet className="w-5 h-5 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {bookings.filter((b) => b.payment_status === "pending_advance").length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Pending Advance</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {bookings.filter((b) => b.booking_status === "pending").length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {bookings.filter((b) => b.booking_status === "confirmed").length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Confirmed</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Wallet className="w-5 h-5 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {pendingRemainingVerification.length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Balance Review</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <Wallet className="w-5 h-5 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {bookings.filter((b) => b.payment_status === "fully_paid").length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Fully Paid</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-purple-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {interestedUsers.length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Leads</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Filter className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{bookings.length}</p>
-                  <p className="text-sm text-muted-foreground">Total</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-500/20 flex items-center justify-center">
-                  <XCircle className="w-5 h-5 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {bookings.filter((b) => b.booking_status === "expired").length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Expired</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
-                  <Ban className="w-5 h-5 text-red-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    {bookings.filter((b) => b.booking_status === "cancelled").length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Cancelled</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 

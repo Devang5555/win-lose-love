@@ -64,7 +64,7 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
       {/* Image */}
       <div className={cn(
         "relative overflow-hidden",
-        featured ? "lg:w-1/2 h-64 lg:h-auto" : "h-56"
+        featured ? "lg:w-1/2 h-48 sm:h-64 lg:h-auto" : "h-44 sm:h-56"
       )}>
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent z-10" />
         <img
@@ -107,7 +107,7 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
 
       {/* Content */}
       <div className={cn(
-        "p-6",
+        "p-4 sm:p-6",
         featured && "lg:w-1/2 lg:p-8 lg:flex lg:flex-col lg:justify-center"
       )}>
         <h3 className={cn(
@@ -165,7 +165,7 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
         )}
 
         {/* Price & CTA */}
-        <div className="flex items-end justify-between pt-4 border-t border-border">
+        <div className="flex items-end justify-between pt-3 sm:pt-4 border-t border-border gap-2">
           <div>
             {hasMultiplePrices && punePrice && (
               <p className="text-xs text-muted-foreground mb-1">
