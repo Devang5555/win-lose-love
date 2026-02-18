@@ -142,11 +142,11 @@ const Footer = () => {
               © {new Date().getFullYear()} GoBhraman. Travel with meaning.
             </p>
             <div className="flex gap-3 md:gap-6 flex-wrap justify-center">
-              <Link to="/policy" className="text-xs md:text-sm opacity-70 hover:opacity-100 transition-opacity">
+              <Link to="/privacy" className="text-xs md:text-sm opacity-70 hover:opacity-100 transition-opacity">
                 Privacy Policy
               </Link>
-              <Link to="/policy" className="text-xs md:text-sm opacity-70 hover:opacity-100 transition-opacity">
-                Terms & Conditions
+              <Link to="/terms" className="text-xs md:text-sm opacity-70 hover:opacity-100 transition-opacity">
+                Terms of Service
               </Link>
               <Link to="/cancellation" className="text-xs md:text-sm opacity-70 hover:opacity-100 transition-opacity">
                 Cancellation
