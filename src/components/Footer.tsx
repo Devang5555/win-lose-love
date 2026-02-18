@@ -9,7 +9,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-foreground text-background">
-      <div className="container mx-auto px-4 py-12 md:py-16">
+      <div className="container mx-auto px-3 md:px-4 py-10 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="lg:col-span-1">
@@ -137,21 +137,21 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-background/20">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm opacity-70">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-3">
+            <p className="text-xs md:text-sm opacity-70">
               © {new Date().getFullYear()} GoBhraman. Travel with meaning.
             </p>
-            <div className="flex gap-6 flex-wrap">
-              <Link to="/policy" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
+            <div className="flex gap-3 md:gap-6 flex-wrap justify-center">
+              <Link to="/policy" className="text-xs md:text-sm opacity-70 hover:opacity-100 transition-opacity">
                 Privacy Policy
               </Link>
-              <Link to="/policy" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
+              <Link to="/policy" className="text-xs md:text-sm opacity-70 hover:opacity-100 transition-opacity">
                 Terms & Conditions
               </Link>
-              <Link to="/cancellation" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
-                Cancellation Policy
+              <Link to="/cancellation" className="text-xs md:text-sm opacity-70 hover:opacity-100 transition-opacity">
+                Cancellation
               </Link>
-              <Link to="/faq" className="text-sm opacity-70 hover:opacity-100 transition-opacity">
+              <Link to="/faq" className="text-xs md:text-sm opacity-70 hover:opacity-100 transition-opacity">
                 FAQs
               </Link>
             </div>

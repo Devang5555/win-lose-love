@@ -348,10 +348,10 @@ const TripDetail = () => {
 
               {/* Tabs */}
               <Tabs defaultValue="itinerary" className="w-full">
-                <TabsList className="w-full justify-start mb-6 bg-muted h-auto p-1.5 flex-wrap rounded-xl">
-                  <TabsTrigger value="itinerary" className="flex-1 md:flex-none rounded-lg font-semibold">Itinerary</TabsTrigger>
-                  <TabsTrigger value="inclusions" className="flex-1 md:flex-none rounded-lg font-semibold">What's Included</TabsTrigger>
-                  <TabsTrigger value="policy" className="flex-1 md:flex-none rounded-lg font-semibold">Policies</TabsTrigger>
+                <TabsList className="w-full justify-start mb-6 bg-muted h-auto p-1 md:p-1.5 rounded-xl">
+                  <TabsTrigger value="itinerary" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Itinerary</TabsTrigger>
+                  <TabsTrigger value="inclusions" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Included</TabsTrigger>
+                  <TabsTrigger value="policy" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Policies</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="itinerary" className="space-y-6">
