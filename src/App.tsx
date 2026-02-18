@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import BottomNav from "@/components/BottomNav";
 import Index from "./pages/Index";
 
 // Route-level code splitting — heavy pages loaded on demand
@@ -74,6 +75,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          <BottomNav />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
