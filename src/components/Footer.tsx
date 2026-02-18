@@ -8,7 +8,7 @@ const Footer = () => {
   const destinations = getFeaturedDestinations(6);
 
   return (
-    <footer className="bg-foreground text-background">
+    <footer className="bg-foreground text-background pb-16 md:pb-0">
       <div className="container mx-auto px-3 md:px-4 py-10 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand */}
