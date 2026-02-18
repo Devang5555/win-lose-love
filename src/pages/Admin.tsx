@@ -1055,104 +1055,106 @@ For queries, please contact us.
 
           {/* Tabs */}
           <Tabs defaultValue={can('view_analytics') ? "analytics" : can('view_bookings') ? "bookings" : "reviews"} className="space-y-6">
-            <TabsList className="flex flex-wrap md:inline-flex gap-1">
-              {can('view_analytics') && (
-                <TabsTrigger value="analytics" className="gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Analytics
-                </TabsTrigger>
-              )}
-              {can('manage_trips') && (
-                <TabsTrigger value="trips" className="gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Trips
-                </TabsTrigger>
-              )}
-              {can('manage_batches') && (
-                <TabsTrigger value="batches" className="gap-2">
-                  <Layers className="w-4 h-4" />
-                  Batches
-                </TabsTrigger>
-              )}
-              {can('view_bookings') && (
-                <TabsTrigger value="bookings" className="gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Bookings
-                  {pendingRemainingVerification.length > 0 && (
-                    <Badge className="ml-1 bg-blue-500 text-white">{pendingRemainingVerification.length}</Badge>
-                  )}
-                </TabsTrigger>
-              )}
-              {can('process_refund') && (
-                <TabsTrigger value="refunds" className="gap-2">
-                  <DollarSign className="w-4 h-4" />
-                  Refunds
-                  {refunds.filter(r => r.refund_status === "pending").length > 0 && (
-                    <Badge className="ml-1 bg-amber-500 text-white">{refunds.filter(r => r.refund_status === "pending").length}</Badge>
-                  )}
-                </TabsTrigger>
-              )}
-              {can('view_reviews') && (
-                <TabsTrigger value="reviews" className="gap-2">
-                  <Star className="w-4 h-4" />
-                  Reviews
-                </TabsTrigger>
-              )}
-              {can('view_leads') && (
-                <TabsTrigger value="leads" className="gap-2">
-                  <Users className="w-4 h-4" />
-                  Leads
-                </TabsTrigger>
-              )}
-              {can('view_audit_logs') && (
-                <TabsTrigger value="audit" className="gap-2">
-                  <Activity className="w-4 h-4" />
-                  Audit Logs
-                </TabsTrigger>
-              )}
-              {can('manage_content') && (
-                <TabsTrigger value="blog" className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  Blog
-                </TabsTrigger>
-              )}
-              {can('view_financial_data') && (
-                <TabsTrigger value="finance" className="gap-2">
-                  <IndianRupee className="w-4 h-4" />
-                  Finance
-                </TabsTrigger>
-              )}
-              {can('manage_content') && (
-                <TabsTrigger value="broadcast" className="gap-2">
-                  <Send className="w-4 h-4" />
-                  WhatsApp
-                </TabsTrigger>
-              )}
-              {can('manage_content') && (
-                <TabsTrigger value="lead-capture" className="gap-2">
-                  <Gift className="w-4 h-4" />
-                  Lead Capture
-                </TabsTrigger>
-              )}
-              {can('manage_operations') && (
-                <TabsTrigger value="departure-ops" className="gap-2">
-                  <Plane className="w-4 h-4" />
-                  Departure Ops
-                </TabsTrigger>
-              )}
-              {can('view_analytics') && (
-                <TabsTrigger value="advanced-analytics" className="gap-2">
-                  <TrendingDown className="w-4 h-4" />
-                  Deep Analytics
-                </TabsTrigger>
-              )}
-              {canAny('view_financial_data', 'verify_payments') && (
-                <TabsTrigger value="wallet-mgmt" className="gap-2">
-                  <Wallet className="w-4 h-4" />
-                  Wallets
-                </TabsTrigger>
-              )}
-            </TabsList>
+            <div className="overflow-x-auto -mx-4 px-4 pb-2">
+              <TabsList className="inline-flex w-auto min-w-full md:min-w-0 h-auto p-1.5 gap-1 bg-muted/60 backdrop-blur-sm rounded-xl border border-border/50">
+                {can('view_analytics') && (
+                  <TabsTrigger value="analytics" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <BarChart3 className="w-3.5 h-3.5" />
+                    Analytics
+                  </TabsTrigger>
+                )}
+                {can('manage_trips') && (
+                  <TabsTrigger value="trips" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <MapPin className="w-3.5 h-3.5" />
+                    Trips
+                  </TabsTrigger>
+                )}
+                {can('manage_batches') && (
+                  <TabsTrigger value="batches" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Layers className="w-3.5 h-3.5" />
+                    Batches
+                  </TabsTrigger>
+                )}
+                {can('view_bookings') && (
+                  <TabsTrigger value="bookings" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Bookings
+                    {pendingRemainingVerification.length > 0 && (
+                      <Badge className="ml-0.5 bg-blue-500 text-white text-[10px] px-1.5 py-0">{pendingRemainingVerification.length}</Badge>
+                    )}
+                  </TabsTrigger>
+                )}
+                {can('process_refund') && (
+                  <TabsTrigger value="refunds" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <DollarSign className="w-3.5 h-3.5" />
+                    Refunds
+                    {refunds.filter(r => r.refund_status === "pending").length > 0 && (
+                      <Badge className="ml-0.5 bg-amber-500 text-white text-[10px] px-1.5 py-0">{refunds.filter(r => r.refund_status === "pending").length}</Badge>
+                    )}
+                  </TabsTrigger>
+                )}
+                {can('view_reviews') && (
+                  <TabsTrigger value="reviews" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Star className="w-3.5 h-3.5" />
+                    Reviews
+                  </TabsTrigger>
+                )}
+                {can('view_leads') && (
+                  <TabsTrigger value="leads" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Users className="w-3.5 h-3.5" />
+                    Leads
+                  </TabsTrigger>
+                )}
+                {can('view_audit_logs') && (
+                  <TabsTrigger value="audit" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Activity className="w-3.5 h-3.5" />
+                    Audit Logs
+                  </TabsTrigger>
+                )}
+                {can('manage_content') && (
+                  <TabsTrigger value="blog" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <FileText className="w-3.5 h-3.5" />
+                    Blog
+                  </TabsTrigger>
+                )}
+                {can('view_financial_data') && (
+                  <TabsTrigger value="finance" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <IndianRupee className="w-3.5 h-3.5" />
+                    Finance
+                  </TabsTrigger>
+                )}
+                {can('manage_content') && (
+                  <TabsTrigger value="broadcast" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Send className="w-3.5 h-3.5" />
+                    WhatsApp
+                  </TabsTrigger>
+                )}
+                {can('manage_content') && (
+                  <TabsTrigger value="lead-capture" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Gift className="w-3.5 h-3.5" />
+                    Lead Capture
+                  </TabsTrigger>
+                )}
+                {can('manage_operations') && (
+                  <TabsTrigger value="departure-ops" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Plane className="w-3.5 h-3.5" />
+                    Departure Ops
+                  </TabsTrigger>
+                )}
+                {can('view_analytics') && (
+                  <TabsTrigger value="advanced-analytics" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <TrendingDown className="w-3.5 h-3.5" />
+                    Deep Analytics
+                  </TabsTrigger>
+                )}
+                {canAny('view_financial_data', 'verify_payments') && (
+                  <TabsTrigger value="wallet-mgmt" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Wallet className="w-3.5 h-3.5" />
+                    Wallets
+                  </TabsTrigger>
+                )}
+              </TabsList>
+            </div>
 
             {/* Analytics Tab */}
             <TabsContent value="analytics">
