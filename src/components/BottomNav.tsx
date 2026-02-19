@@ -7,7 +7,7 @@ const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/trips", label: "Trips", icon: Compass },
   { href: "/my-bookings", label: "Bookings", icon: Calendar },
-  { href: "/auth", label: "Profile", icon: User, authHref: "/my-bookings" },
+  { href: "/auth", label: "Profile", icon: User, authHref: "/profile" },
 ];
 
 const BottomNav = () => {
