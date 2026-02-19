@@ -108,6 +108,12 @@ const Navbar = () => {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                      <User className="w-4 h-4" />
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to="/my-bookings" className="flex items-center gap-2 cursor-pointer">
                       <Calendar className="w-4 h-4" />
                       My Bookings
