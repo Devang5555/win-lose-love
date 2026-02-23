@@ -31,6 +31,9 @@ const Stories = lazy(() => import("./pages/Stories"));
 const InvoicePage = lazy(() => import("./pages/Invoice"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SissuItinerary = lazy(() => import("./pages/SissuItinerary"));
+const GoaItinerary = lazy(() => import("./pages/GoaItinerary"));
+const ManaliItinerary = lazy(() => import("./pages/ManaliItinerary"));
+const RishikeshItinerary = lazy(() => import("./pages/RishikeshItinerary"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,6 +83,9 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/invoice/:bookingId" element={<InvoicePage />} />
               <Route path="/itinerary/delhi-to-sissu" element={<SissuItinerary />} />
+              <Route path="/itinerary/goa-beach-bliss" element={<GoaItinerary />} />
+              <Route path="/itinerary/manali-snow-adventure" element={<ManaliItinerary />} />
+              <Route path="/itinerary/rishikesh-adventure" element={<RishikeshItinerary />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

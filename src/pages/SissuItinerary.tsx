@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Clock, MapPin, Route, Users, Calendar, Fuel, Banknote, Signal, Shirt, AlertTriangle,
   Home, ChevronRight, Mountain, Star, Phone, MessageCircle, Download, Heart, Sun, Moon,
@@ -11,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoMeta from "@/components/SeoMeta";
 import JsonLd from "@/components/JsonLd";
+import ScrollReveal from "@/components/ScrollReveal";
 
 import heroImg from "@/assets/sissu-hero.jpg";
 import waterfallImg from "@/assets/sissu-waterfall.jpg";
@@ -164,12 +164,13 @@ const SissuItinerary = () => {
       {/* OVERVIEW */}
       <section className="py-16 md:py-20 bg-background">
         <div className="container max-w-5xl px-4">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
+          <ScrollReveal><h2 className="font-serif text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
             Trip Overview
-          </h2>
+          </h2></ScrollReveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {overviewItems.map((item) => (
-              <Card key={item.label} className="border-border/50 shadow-card hover:shadow-card-hover transition-shadow duration-300">
+            {overviewItems.map((item, i) => (
+              <ScrollReveal key={item.label} delay={i * 0.1}>
+              <Card className="border-border/50 shadow-card hover:shadow-card-hover transition-shadow duration-300">
                 <CardContent className="flex items-start gap-4 p-5">
                   <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
                     <item.icon className="h-5 w-5" />
@@ -180,6 +181,7 @@ const SissuItinerary = () => {
                   </div>
                 </CardContent>
               </Card>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -188,12 +190,13 @@ const SissuItinerary = () => {
       {/* DAY-WISE ITINERARY */}
       <section className="py-16 md:py-20 bg-muted/30">
         <div className="container max-w-3xl px-4">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
+          <ScrollReveal><h2 className="font-serif text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
             Day-Wise Itinerary
-          </h2>
+          </h2></ScrollReveal>
           <Accordion type="single" collapsible defaultValue="day-1" className="space-y-3">
             {itinerary.map((day) => (
-              <AccordionItem key={day.day} value={`day-${day.day}`} className="bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden px-0">
+              <ScrollReveal key={day.day} delay={day.day * 0.1}>
+              <AccordionItem value={`day-${day.day}`} className="bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden px-0">
                 <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-muted/40 transition-colors [&[data-state=open]]:bg-primary/5">
                   <div className="flex items-center gap-3 text-left">
                     <span className="flex items-center justify-center h-9 w-9 rounded-full bg-primary text-primary-foreground text-sm font-bold shrink-0">
@@ -230,6 +233,7 @@ const SissuItinerary = () => {
                   </ul>
                 </AccordionContent>
               </AccordionItem>
+              </ScrollReveal>
             ))}
           </Accordion>
         </div>
@@ -238,25 +242,22 @@ const SissuItinerary = () => {
       {/* PLACES COVERED */}
       <section className="py-16 md:py-20 bg-background">
         <div className="container max-w-6xl px-4">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
+          <ScrollReveal><h2 className="font-serif text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
             Places You'll Explore
-          </h2>
+          </h2></ScrollReveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {places.map((place) => (
-              <Card key={place.name} className="overflow-hidden border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300 group">
+            {places.map((place, i) => (
+              <ScrollReveal key={place.name} delay={i * 0.1}>
+              <Card className="overflow-hidden border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300 group">
                 <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                    src={place.img}
-                    alt={place.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                  <img src={place.img} alt={place.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
                 <CardContent className="p-5">
                   <h3 className="font-serif font-semibold text-lg text-foreground mb-1">{place.name}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{place.desc}</p>
                 </CardContent>
               </Card>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -265,17 +266,17 @@ const SissuItinerary = () => {
       {/* TRAVEL NOTES */}
       <section className="py-16 md:py-20 bg-muted/30">
         <div className="container max-w-3xl px-4">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold text-center text-foreground mb-10">
+          <ScrollReveal><h2 className="font-serif text-3xl md:text-4xl font-bold text-center text-foreground mb-10">
             Important Travel Notes
-          </h2>
+          </h2></ScrollReveal>
           <div className="space-y-4">
             {travelNotes.map((note, i) => (
-              <div key={i} className="flex items-start gap-4 bg-card rounded-xl p-4 border border-border/50 shadow-sm">
-                <div className="p-2 rounded-lg bg-accent/10 text-accent shrink-0">
-                  <note.icon className="h-5 w-5" />
-                </div>
+              <ScrollReveal key={i} delay={i * 0.1}>
+              <div className="flex items-start gap-4 bg-card rounded-xl p-4 border border-border/50 shadow-sm">
+                <div className="p-2 rounded-lg bg-accent/10 text-accent shrink-0"><note.icon className="h-5 w-5" /></div>
                 <p className="text-sm text-foreground/85 leading-relaxed pt-1">{note.text}</p>
               </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
