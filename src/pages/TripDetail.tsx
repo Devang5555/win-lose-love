@@ -60,8 +60,35 @@ const TripDetail = () => {
 
   // Prefer live DB data, fall back to useTrips hook, then static
   const dbTrip = liveDbTrip || (tripId ? getDbTrip(tripId) : undefined);
-  // Use static trip data for itinerary/stayDetails/activities/cancellationPolicy (not in DB)
-  const trip = staticTrip;
+  // Build a Trip object from DB data if static trip is missing
+  const trip = staticTrip || (dbTrip ? {
+    tripId: dbTrip.trip_id,
+    tripName: dbTrip.trip_name,
+    price: {
+      default: dbTrip.price_default,
+      fromPune: dbTrip.price_from_pune ?? undefined,
+      fromMumbai: dbTrip.price_from_mumbai ?? undefined,
+    },
+    duration: dbTrip.duration,
+    summary: dbTrip.summary || "",
+    highlights: dbTrip.highlights || [],
+    inclusions: dbTrip.inclusions || [],
+    exclusions: dbTrip.exclusions || [],
+    locations: dbTrip.locations || [],
+    images: dbTrip.images || [],
+    isActive: dbTrip.is_active ?? true,
+    tripStatus: dbTrip.booking_live ? "active" as const : "upcoming" as const,
+    capacity: dbTrip.capacity || 30,
+    booking: {
+      advance: dbTrip.advance_amount || 2000,
+      paymentMethods: ["upi"],
+    },
+    contact: {
+      phone: dbTrip.contact_phone || "",
+      email: dbTrip.contact_email || "",
+    },
+    notes: dbTrip.notes || "",
+  } as import("@/data/trips").Trip : undefined);
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isInterestOpen, setIsInterestOpen] = useState(false);
