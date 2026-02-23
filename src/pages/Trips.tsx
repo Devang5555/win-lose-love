@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
-import { Search, SlidersHorizontal, X, Sparkles, ArrowRight, MapPinned } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Search, SlidersHorizontal, X, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TripCard from "@/components/TripCard";
@@ -202,32 +202,6 @@ const Trips = () => {
                 {filteredBookable.length > 0 && ` (${filteredBookable.length} ready to join)`}
               </p>
 
-              {/* Itineraries Section */}
-              <div className="mt-16 pt-12 border-t border-border">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <MapPinned className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">Travel Itineraries</h2>
-                    <p className="text-sm text-muted-foreground">Detailed day-by-day travel guides</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
-                    { href: "/itinerary/delhi-to-sissu", title: "Delhi → Sissu", duration: "5 Days", tag: "Lahaul" },
-                    { href: "/itinerary/goa-beach-bliss", title: "Goa Beach Bliss", duration: "3 Days", tag: "Beach" },
-                    { href: "/itinerary/manali-snow-adventure", title: "Manali Snow Adventure", duration: "4 Days", tag: "Mountains" },
-                    { href: "/itinerary/rishikesh-adventure", title: "Rishikesh Adventure", duration: "3 Days", tag: "Spiritual" },
-                  ].map((it) => (
-                    <Link key={it.href} to={it.href} className="group block p-5 rounded-xl border border-border/50 bg-card shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">{it.tag} • {it.duration}</span>
-                      <h3 className="font-serif font-semibold text-foreground mt-1 group-hover:text-primary transition-colors">{it.title}</h3>
-                      <span className="text-xs text-muted-foreground mt-2 flex items-center gap-1">View itinerary <ArrowRight className="w-3 h-3" /></span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
             </>
           )}
         </div>

@@ -28,6 +28,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
+import TripItinerarySection from "@/components/TripItinerarySection";
+import { getTripItinerary } from "@/data/tripItineraries";
 
 const TripDetail = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -346,14 +348,26 @@ const TripDetail = () => {
               {/* Reviews Section */}
               {tripId && <TripReviews tripId={tripId} />}
 
+              {/* Detailed Itinerary Section (from tripItineraries data) */}
+              {(() => {
+                const itineraryData = tripId ? getTripItinerary(tripId) : null;
+                if (itineraryData) {
+                  return <TripItinerarySection data={itineraryData} />;
+                }
+                return null;
+              })()}
+
               {/* Tabs */}
-              <Tabs defaultValue="itinerary" className="w-full">
+              <Tabs defaultValue={tripId && getTripItinerary(tripId) ? "inclusions" : "itinerary"} className="w-full">
                 <TabsList className="w-full justify-start mb-6 bg-muted h-auto p-1 md:p-1.5 rounded-xl">
-                  <TabsTrigger value="itinerary" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Itinerary</TabsTrigger>
+                  {!(tripId && getTripItinerary(tripId)) && (
+                    <TabsTrigger value="itinerary" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Itinerary</TabsTrigger>
+                  )}
                   <TabsTrigger value="inclusions" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Included</TabsTrigger>
                   <TabsTrigger value="policy" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Policies</TabsTrigger>
                 </TabsList>
 
+                {!(tripId && getTripItinerary(tripId)) && (
                 <TabsContent value="itinerary" className="space-y-6">
                   {trip?.itinerary ? (
                     trip.itinerary.map((day) => (
@@ -390,6 +404,7 @@ const TripDetail = () => {
                     </div>
                   )}
                 </TabsContent>
+                )}
 
                 <TabsContent value="inclusions" className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

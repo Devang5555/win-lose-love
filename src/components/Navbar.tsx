@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, User, LogOut, Calendar, Shield, Wallet, MapPinned, ChevronDown } from "lucide-react";
+import { Menu, X, Phone, User, LogOut, Calendar, Shield, Wallet } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -29,13 +29,6 @@ const Navbar = () => {
     { href: "/blog", label: "Blog" },
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
-  ];
-
-  const itineraryLinks = [
-    { href: "/itinerary/delhi-to-sissu", label: "Delhi → Sissu (5 Days)" },
-    { href: "/itinerary/goa-beach-bliss", label: "Goa Beach Bliss (3 Days)" },
-    { href: "/itinerary/manali-snow-adventure", label: "Manali Snow Adventure (4 Days)" },
-    { href: "/itinerary/rishikesh-adventure", label: "Rishikesh Adventure (3 Days)" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -81,27 +74,6 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-1",
-                  location.pathname.startsWith("/itinerary")
-                    ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}>
-                  <MapPinned className="w-3.5 h-3.5" />
-                  Itineraries
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                {itineraryLinks.map((link) => (
-                  <DropdownMenuItem key={link.href} asChild>
-                    <Link to={link.href} className="cursor-pointer">{link.label}</Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
 
           {/* Desktop CTA */}
@@ -202,12 +174,6 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <div className="px-4 py-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5"><MapPinned className="w-3 h-3" />Itineraries</p>
-                {itineraryLinks.map((link) => (
-                  <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">{link.label}</Link>
-                ))}
-              </div>
               
               {user ? (
                 <>
