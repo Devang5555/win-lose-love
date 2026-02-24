@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft, ArrowRight } from "lucide-react";
+import DOMPurify from "dompurify";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoMeta from "@/components/SeoMeta";
@@ -136,7 +137,12 @@ const BlogPost = () => {
           {/* Content */}
           <div
             className="prose prose-lg max-w-none text-foreground prose-headings:font-serif prose-headings:text-foreground prose-a:text-primary prose-img:rounded-xl"
-            dangerouslySetInnerHTML={{ __html: post.content || "" }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(post.content || "", {
+                ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'code', 'pre', 'span', 'div', 'table', 'thead', 'tbody', 'tr', 'th', 'td'],
+                ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'target', 'rel', 'width', 'height', 'style'],
+              })
+            }}
           />
         </article>
 
