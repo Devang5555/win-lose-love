@@ -247,7 +247,7 @@ const TripDetail = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative h-[55vh] md:h-[70vh]">
+      <section className="relative h-[55vh] md:h-[70vh] overflow-hidden">
         <img
           src={tripImages[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80"}
           alt={tripName}
@@ -255,16 +255,19 @@ const TripDetail = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
 
+        {/* Back button - fixed at top of hero, below navbar */}
+        <div className="absolute top-20 md:top-24 left-4 md:left-8 z-20">
+          <button 
+            onClick={() => navigate("/trips")}
+            className="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors bg-white/15 backdrop-blur-md px-4 py-2 rounded-full cursor-pointer border border-white/20 shadow-lg"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm font-medium">Back to Journeys</span>
+          </button>
+        </div>
+
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 lg:p-12">
           <div className="container mx-auto">
-            {/* Back button - clearly separated above title */}
-            <button 
-              onClick={() => navigate("/trips")}
-              className="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors bg-white/15 backdrop-blur-md px-4 py-2 rounded-full mb-4 cursor-pointer border border-white/20"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm font-medium">Back to Journeys</span>
-            </button>
 
             <div className="flex items-center justify-between mb-3">
               <div className="flex flex-wrap gap-1.5 md:gap-2 flex-1 pr-2">
