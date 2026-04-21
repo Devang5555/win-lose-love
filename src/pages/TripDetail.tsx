@@ -247,7 +247,7 @@ const TripDetail = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative h-[50vh] md:h-[65vh]">
+      <section className="relative h-[55vh] md:h-[70vh]">
         <img
           src={tripImages[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80"}
           alt={tripName}
