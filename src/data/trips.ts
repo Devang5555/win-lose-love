@@ -463,6 +463,104 @@ export const trips: Trip[] = [
     }
   },
   {
+    tripId: "manali-shimla-kasol-amritsar-015",
+    tripName: "Manali Trip – Shimla, Kasol & Amritsar Experience",
+    price: { default: 14999 },
+    duration: "8D/7N",
+    summary: "Escape the chaos of city life and explore the breathtaking beauty of Himachal. From Shimla's charming streets to Solang Valley's snowy adventures, Kasol's peaceful vibes, and the spiritual serenity of the Golden Temple in Amritsar.",
+    highlights: [
+      "❄️ Snow & adventure at Solang Valley",
+      "🏔️ Scenic Himalayan road trip",
+      "🧘 Kasol & Manikaran experience",
+      "🛕 Golden Temple visit",
+      "👨‍👩‍👧 Family & group friendly",
+      "💰 Budget-friendly premium trip"
+    ],
+    itinerary: [
+      { day: 1, title: "Chandigarh → Shimla", schedule: [
+        { time: "06:00", activity: "Depart Chandigarh in private vehicle" },
+        { time: "08:00", activity: "Refreshing stop at Pinjore Gardens" },
+        { time: "14:00", activity: "Arrive Shimla, check into hotel" },
+        { time: "17:00", activity: "Explore Mall Road & Ridge" },
+        { time: "18:30", activity: "Visit Christ Church & evening stroll" }
+      ]},
+      { day: 2, title: "Shimla & Kufri Exploration", schedule: [
+        { time: "08:00", activity: "Breakfast & head to Kufri" },
+        { time: "10:00", activity: "Horse riding & nature walks at Kufri" },
+        { time: "13:00", activity: "Return to Shimla for lunch" },
+        { time: "16:00", activity: "Visit Jakhu Temple" },
+        { time: "17:30", activity: "Shopping at Lakkar Bazaar & Scandal Point" }
+      ]},
+      { day: 3, title: "Shimla → Manali (Scenic Drive)", schedule: [
+        { time: "07:00", activity: "Early departure for Manali via Mandi & Kullu" },
+        { time: "12:00", activity: "Lunch break en route with valley views" },
+        { time: "17:00", activity: "Arrive Manali, check in" },
+        { time: "19:00", activity: "Explore Old Manali cafés or relax" }
+      ]},
+      { day: 4, title: "Manali Local Sightseeing", schedule: [
+        { time: "09:00", activity: "Visit Hadimba Devi Temple" },
+        { time: "11:00", activity: "Explore Manu Temple & Club House" },
+        { time: "14:00", activity: "Relax at Vashisht Hot Springs" },
+        { time: "17:00", activity: "Mall Road walk, local food & shopping" }
+      ]},
+      { day: 5, title: "Solang Valley & Rohtang Adventure", schedule: [
+        { time: "07:00", activity: "Head to Solang Valley after breakfast" },
+        { time: "09:00", activity: "Ropeway rides, snow play & photography" },
+        { time: "12:00", activity: "Proceed to Rohtang Pass (if permits available)" },
+        { time: "16:00", activity: "Return to Manali, rest & dinner" }
+      ]},
+      { day: 6, title: "Kasol & Manikaran Day Trip", schedule: [
+        { time: "08:00", activity: "Drive to Parvati Valley & Kasol" },
+        { time: "10:00", activity: "Riverside cafés & Kasol local markets" },
+        { time: "13:00", activity: "Visit Manikaran Sahib — hot springs & gurudwara" },
+        { time: "17:00", activity: "Return to Manali" }
+      ]},
+      { day: 7, title: "Manali → Amritsar", schedule: [
+        { time: "06:00", activity: "Early departure for Amritsar" },
+        { time: "16:00", activity: "Arrive Amritsar, check in & relax" },
+        { time: "19:00", activity: "Visit Golden Temple — night ceremony & langar" }
+      ]},
+      { day: 8, title: "Amritsar Sightseeing & Departure", schedule: [
+        { time: "05:00", activity: "Early morning Golden Temple visit" },
+        { time: "09:00", activity: "Jallianwala Bagh & Partition Museum" },
+        { time: "14:00", activity: "Lunch & shopping" },
+        { time: "16:30", activity: "Wagah Border retreat ceremony" },
+        { time: "19:00", activity: "Trip concludes — unforgettable memories" }
+      ]}
+    ],
+    inclusions: [
+      "Private vehicle (Chandigarh circuit)",
+      "Hotel accommodation on twin/triple sharing",
+      "7 breakfasts, 7 dinners",
+      "All sightseeing as per itinerary",
+      "Experienced trip leader",
+      "First aid kit & support",
+      "All toll taxes & parking charges"
+    ],
+    exclusions: [
+      "Rohtang Pass permit & charges (₹999 add-on)",
+      "Adventure activities at Solang Valley (₹1,499 add-on)",
+      "Hotel upgrade to deluxe rooms (₹2,000 add-on)",
+      "Lunches during the trip",
+      "Personal expenses & shopping",
+      "Entry fees not mentioned",
+      "Tips and gratuities",
+      "Travel insurance"
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&q=80",
+      "https://images.unsplash.com/photo-1571401835393-8c5f35328320?w=800&q=80",
+      "https://images.unsplash.com/photo-1514222134-b57cbb8ce073?w=800&q=80"
+    ],
+    isActive: true,
+    tripStatus: 'upcoming',
+    locations: ["Chandigarh", "Shimla", "Kufri", "Manali", "Solang Valley", "Kasol", "Manikaran", "Amritsar"],
+    contact: {
+      phone: "+91-9415026522",
+      email: "bhramanbyua@gmail.com"
+    }
+  },
+  {
     tripId: "goa-beach-bliss-010",
     tripName: "Goa Beach Bliss — Sun, Sand & Vibes",
     price: { default: 11999 },

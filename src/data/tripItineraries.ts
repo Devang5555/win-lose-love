@@ -125,6 +125,34 @@ const tripItineraries: Record<string, TripItineraryData> = {
     ],
   },
 
+  // ——— MANALI SHIMLA KASOL AMRITSAR ———
+  "manali-shimla-kasol-amritsar-015": {
+    bestTime: "Oct–June (Snow: Dec–Feb)",
+    overview: [
+      { icon: Calendar, label: "Duration", value: "8 Days / 7 Nights" },
+      { icon: Route, label: "Distance", value: "~1,200 km circuit" },
+      { icon: Moon, label: "Start Point", value: "Chandigarh" },
+      { icon: Landmark, label: "Route", value: "Chandigarh → Shimla → Manali → Kasol → Amritsar" },
+    ],
+    itinerary: [
+      { day: 1, title: "Chandigarh → Shimla (Journey Begins)", icon: Route, stay: "Shimla", items: ["Early morning departure from Chandigarh", "Refreshing stop at Pinjore Gardens", "Arrive Shimla by afternoon & check in", "Explore the famous Mall Road & Ridge", "Visit the iconic Christ Church", "Enjoy the cool mountain evening"] },
+      { day: 2, title: "Shimla & Kufri Exploration", icon: Mountain, stay: "Shimla", items: ["Head to Kufri for scenic views", "Horse riding & nature walks", "Return to Shimla for lunch", "Visit Jakhu Temple", "Shopping at Lakkar Bazaar & Scandal Point"] },
+      { day: 3, title: "Shimla → Manali (Scenic Drive)", icon: Route, stay: "Manali", items: ["Beautiful road journey via Mandi & Kullu valleys", "Witness rivers, forests & stunning mountain views", "Breaks for meals & photography", "Arrive Manali by evening", "Explore Old Manali cafés or relax"] },
+      { day: 4, title: "Manali Local Sightseeing", icon: Sun, stay: "Manali", items: ["Visit Hadimba Devi Temple in cedar forests", "Explore Manu Temple & cultural sites", "Club House visit & Vashisht Hot Springs", "Mall Road walk — local food & shopping"] },
+      { day: 5, title: "Solang Valley & Rohtang Adventure", icon: Mountain, stay: "Manali", items: ["Head to Solang Valley — adventure hub", "Ropeway rides, snow play & scenic photography", "Rohtang Pass for breathtaking snow landscapes (permit required)", "Return to Manali by evening & relax"] },
+      { day: 6, title: "Kasol & Manikaran Day Trip", icon: Camera, stay: "Manali", items: ["Drive to beautiful Parvati Valley", "Explore Kasol — riverside cafés & local markets", "Visit Manikaran Sahib — hot springs & gurudwara", "Return to Manali by evening"] },
+      { day: 7, title: "Manali → Amritsar (Cultural Shift)", icon: Landmark, stay: "Amritsar", items: ["Early departure for comfortable drive to Amritsar", "Check in to hotel & relax", "Evening visit to Golden Temple", "Experience peaceful atmosphere & night ceremony"] },
+      { day: 8, title: "Amritsar Sightseeing & Departure", icon: Sun, stay: null, items: ["Early morning Golden Temple for serene experience", "Visit Jallianwala Bagh & Partition Museum", "Head to Wagah Border for retreat ceremony", "Trip concludes with unforgettable memories"] },
+    ],
+    travelNotes: [
+      { icon: Shirt, text: "Pack warm layers — temperatures vary across Shimla, Manali & passes" },
+      { icon: AlertTriangle, text: "Rohtang Pass requires advance online permit — seasonal availability" },
+      { icon: Banknote, text: "Carry cash — ATMs are sparse beyond Kullu & in Kasol" },
+      { icon: Fuel, text: "Long drives on Day 3 & 7 — comfortable vehicle with breaks" },
+      { icon: UtensilsCrossed, text: "Try Himachali siddu, Amritsari kulcha & Golden Temple langar" },
+    ],
+  },
+
   // ——— RISHIKESH ———
   "rishikesh-adventure-012": {
     bestTime: "Sept–June",
