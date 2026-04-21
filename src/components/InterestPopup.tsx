@@ -65,7 +65,7 @@ const InterestPopup = ({ isOpen, onClose, preselectedTripId }: InterestPopupProp
 
   // Auto-close countdown timer
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
     if (showSuccess && countdown > 0) {
       timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
     } else if (showSuccess && countdown === 0) {
