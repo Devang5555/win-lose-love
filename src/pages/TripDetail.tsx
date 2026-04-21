@@ -301,7 +301,7 @@ const TripDetail = () => {
                 />
               )}
             </div>
-            <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl">
+            <p className="text-base md:text-lg text-white/85 max-w-2xl leading-relaxed">
               {tripSummary}
             </p>
             {reviewStats.totalReviews > 0 && (

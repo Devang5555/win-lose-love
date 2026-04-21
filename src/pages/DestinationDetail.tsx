@@ -216,27 +216,27 @@ const DestinationDetail = () => {
           alt={destination.name}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
 
-        <button
-          onClick={() => window.history.back()}
-          className="absolute top-20 md:top-24 left-4 md:left-8 z-20 flex items-center gap-2 text-white hover:text-white/80 transition-colors bg-black/40 backdrop-blur-md px-4 py-2 rounded-full shadow-lg cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm font-medium">All Destinations</span>
-        </button>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-12">
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 lg:p-12">
           <div className="container mx-auto">
-            <Badge variant="secondary" className="bg-background/30 text-white border-0 backdrop-blur-sm mb-3">
+            <button
+              onClick={() => window.history.back()}
+              className="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors bg-white/15 backdrop-blur-md px-4 py-2 rounded-full mb-4 cursor-pointer border border-white/20"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">All Destinations</span>
+            </button>
+
+            <Badge variant="secondary" className="bg-white/20 text-white border-0 backdrop-blur-sm mb-3">
               <MapPin className="w-3 h-3 mr-1" />
               {destination.state}
             </Badge>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-3">
+            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 drop-shadow-lg leading-tight">
               {destination.name}
             </h1>
             {destination.description && (
-              <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl">
+              <p className="text-base md:text-lg text-white/85 max-w-2xl leading-relaxed">
                 {destination.description}
               </p>
             )}
