@@ -256,7 +256,7 @@ const TripDetail = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
 
         {/* Flex overlay: back button at top, content at bottom */}
-        <div className="absolute inset-0 flex flex-col justify-between pt-20 md:pt-24 p-4 md:p-8 lg:p-12">
+        <div className="absolute inset-0 flex flex-col justify-between pt-24 md:pt-28 pb-4 px-4 md:pb-8 md:px-8 lg:pb-12 lg:px-12">
           {/* Back button */}
           <div>
             <button 
