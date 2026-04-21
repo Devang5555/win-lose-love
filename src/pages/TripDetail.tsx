@@ -247,29 +247,35 @@ const TripDetail = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative h-[50vh] md:h-[65vh]">
+      <section className="relative h-[55vh] md:h-[70vh] overflow-hidden">
         <img
           src={tripImages[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80"}
           alt={tripName}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/40 to-transparent" />
-        
-        <button 
-          onClick={() => navigate("/trips")}
-          className="absolute top-20 md:top-24 left-4 md:left-8 z-20 flex items-center gap-2 text-white hover:text-white/80 transition-colors bg-black/40 backdrop-blur-md px-4 py-2 rounded-full shadow-lg cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm font-medium">Back to Journeys</span>
-        </button>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-12">
+        {/* Flex overlay: back button at top, content at bottom */}
+        <div className="absolute inset-0 flex flex-col justify-between pt-24 md:pt-28 pb-4 px-4 md:pb-8 md:px-8 lg:pb-12 lg:px-12">
+          {/* Back button */}
+          <div>
+            <button 
+              onClick={() => navigate("/trips")}
+              className="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors bg-white/15 backdrop-blur-md px-4 py-2 rounded-full cursor-pointer border border-white/20 shadow-lg"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Back to Journeys</span>
+            </button>
+          </div>
+
+          {/* Bottom content */}
           <div className="container mx-auto">
+
             <div className="flex items-center justify-between mb-3">
               <div className="flex flex-wrap gap-1.5 md:gap-2 flex-1 pr-2">
                 <Badge className="bg-primary text-primary-foreground font-semibold text-xs md:text-sm">{tripDuration}</Badge>
                 {tripLocations?.slice(0, 2).map((loc) => (
-                  <Badge key={loc} variant="secondary" className="bg-background/30 text-primary-foreground border-0 backdrop-blur-sm text-xs md:text-sm hidden sm:inline-flex">
+                  <Badge key={loc} variant="secondary" className="bg-white/20 text-white border-0 backdrop-blur-sm text-xs md:text-sm hidden sm:inline-flex">
                     {loc}
                   </Badge>
                 ))}
@@ -286,7 +292,7 @@ const TripDetail = () => {
               )}
             </div>
             <div className="flex items-start gap-3">
-              <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4 flex-1">
+              <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 flex-1 drop-shadow-lg leading-tight">
                 {tripName}
               </h1>
               {tripId && (
@@ -300,7 +306,7 @@ const TripDetail = () => {
                 />
               )}
             </div>
-            <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl">
+            <p className="text-base md:text-lg text-white/85 max-w-2xl leading-relaxed">
               {tripSummary}
             </p>
             {reviewStats.totalReviews > 0 && (
