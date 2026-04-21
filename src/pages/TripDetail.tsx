@@ -255,18 +255,20 @@ const TripDetail = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
 
-        {/* Back button - fixed at top of hero, below navbar */}
-        <div className="absolute top-20 md:top-24 left-4 md:left-8 z-20">
-          <button 
-            onClick={() => navigate("/trips")}
-            className="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors bg-white/15 backdrop-blur-md px-4 py-2 rounded-full cursor-pointer border border-white/20 shadow-lg"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Back to Journeys</span>
-          </button>
-        </div>
+        {/* Flex overlay: back button at top, content at bottom */}
+        <div className="absolute inset-0 flex flex-col justify-between pt-20 md:pt-24 p-4 md:p-8 lg:p-12">
+          {/* Back button */}
+          <div>
+            <button 
+              onClick={() => navigate("/trips")}
+              className="inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors bg-white/15 backdrop-blur-md px-4 py-2 rounded-full cursor-pointer border border-white/20 shadow-lg"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Back to Journeys</span>
+            </button>
+          </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 lg:p-12">
+          {/* Bottom content */}
           <div className="container mx-auto">
 
             <div className="flex items-center justify-between mb-3">
