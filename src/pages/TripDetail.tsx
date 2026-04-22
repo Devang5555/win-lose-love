@@ -60,8 +60,15 @@ const TripDetail = () => {
 
   // Prefer live DB data, fall back to useTrips hook, then static
   const dbTrip = liveDbTrip || (tripId ? getDbTrip(tripId) : undefined);
-  // Build a Trip object from DB data if static trip is missing
-  const trip = staticTrip || (dbTrip ? {
+  // Build a Trip object: merge DB advance_amount into static trip, or build from DB
+  const trip = staticTrip ? {
+    ...staticTrip,
+    booking: {
+      ...staticTrip.booking,
+      advance: dbTrip?.advance_amount || staticTrip.booking?.advance || 2000,
+      paymentMethods: staticTrip.booking?.paymentMethods || ["upi"],
+    },
+  } : (dbTrip ? {
     tripId: dbTrip.trip_id,
     tripName: dbTrip.trip_name,
     price: {

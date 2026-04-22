@@ -63,6 +63,12 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
     }
 
     if (editingId) {
+      // Find original batch to calculate available_seats correctly
+      const originalBatch = batches.find(b => b.id === editingId);
+      const newBatchSize = parseInt(formData.batch_size);
+      const seatsBooked = originalBatch?.seats_booked || 0;
+      const newAvailableSeats = Math.max(0, newBatchSize - seatsBooked);
+
       const { error } = await supabase
         .from("batches")
         .update({
@@ -70,7 +76,8 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
           batch_name: formData.batch_name,
           start_date: formData.start_date,
           end_date: formData.end_date,
-          batch_size: parseInt(formData.batch_size),
+          batch_size: newBatchSize,
+          available_seats: newAvailableSeats,
           status: formData.status,
         })
         .eq("id", editingId);
