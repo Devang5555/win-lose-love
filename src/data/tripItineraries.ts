@@ -37,12 +37,31 @@ export interface PlaceCard {
   desc: string;
 }
 
+export interface StaySummaryRow {
+  destination: string;
+  dates: string;
+  nights: string;
+}
+
+export interface DistanceSummaryRow {
+  route: string;
+  distance: string;
+}
+
+export interface HotelInfo {
+  city: string;
+  hotels: string[];
+}
+
 export interface TripItineraryData {
   overview: OverviewItem[];
   itinerary: ItineraryDay[];
   travelNotes: TravelNote[];
   places?: PlaceCard[];
   bestTime?: string;
+  staySummary?: StaySummaryRow[];
+  distanceSummary?: DistanceSummaryRow[];
+  hotels?: HotelInfo[];
 }
 
 // Keyed by trip_id
