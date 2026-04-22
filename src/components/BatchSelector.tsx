@@ -66,7 +66,8 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchBatches = async () => {
+  useEffect(() => {
+    const fetchBatches = async () => {
       setLoading(true);
       setError(null);
 
@@ -93,7 +94,6 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
         });
         setBatches(batchList);
 
-        // Auto-select first available batch if none selected
         if (!selectedBatchId) {
           const firstAvailable = batchList.find((b) => b.available_seats > 0);
           if (firstAvailable) onSelectBatch(firstAvailable);
@@ -105,7 +105,7 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
 
     fetchBatches();
 
-    // Realtime subscription for batch updates
+    // Realtime subscription for batch updates from admin
     const channel = supabase
       .channel(`batches-${tripId}`)
       .on(
