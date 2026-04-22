@@ -79,6 +79,7 @@ const App = () => (
               <Route path="/stories" element={<Stories />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/invoice/:bookingId" element={<InvoicePage />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
