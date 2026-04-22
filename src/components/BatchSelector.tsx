@@ -66,8 +66,7 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchBatches = async () => {
+  const fetchBatches = async () => {
       setLoading(true);
       setError(null);
 
@@ -105,6 +104,27 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
     };
 
     fetchBatches();
+
+    // Realtime subscription for batch updates
+    const channel = supabase
+      .channel(`batches-${tripId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'batches',
+          filter: `trip_id=eq.${tripId}`,
+        },
+        () => {
+          fetchBatches();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [tripId]);
 
   if (loading) {
