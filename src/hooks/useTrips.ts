@@ -94,52 +94,45 @@ export const useTrips = () => {
       let dbTrips: DatabaseTrip[] = [];
       let bookingStatusMap: Record<string, boolean> = {};
 
-      if (SUPABASE_URL && SUPABASE_KEY) {
-        try {
-          const response = await fetch(`${SUPABASE_URL}/rest/v1/trips?select=*`, {
-            headers: {
-              apikey: SUPABASE_KEY,
-              Authorization: `Bearer ${SUPABASE_KEY}`,
-            },
-          });
+      try {
+        // Use supabase client so authenticated admins see all trips (including hidden)
+        const { data: tripData, error: tripsError } = await supabase
+          .from("trips")
+          .select("*");
 
-          if (response.ok) {
-            setTripsTableMissing(false);
-            const tripData = await response.json();
-            if (tripData && tripData.length > 0) {
-              dbTrips = tripData.map((t: any) => ({
-                id: t.id || t.trip_id,
-                trip_id: t.trip_id,
-                trip_name: t.trip_name,
-                price_default: t.price_default || 0,
-                price_from_pune: t.price_from_pune,
-                price_from_mumbai: t.price_from_mumbai,
-                duration: t.duration || "",
-                summary: t.summary || "",
-                highlights: t.highlights || [],
-                locations: t.locations || [],
-                images: t.images || [],
-                is_active: t.is_active ?? true,
-                booking_live: t.booking_live ?? false,
-                capacity: t.capacity || 30,
-                advance_amount: t.advance_amount || 2000,
-                inclusions: t.inclusions || [],
-                exclusions: t.exclusions || [],
-                contact_phone: t.contact_phone,
-                contact_email: t.contact_email,
-                notes: t.notes,
-              }));
-            }
-            tripData.forEach((t: any) => {
-              bookingStatusMap[t.trip_id] = !!t.booking_live;
-            });
-          } else {
-            setTripsTableMissing(true);
-          }
-        } catch {
+        if (tripsError) {
           setTripsTableMissing(true);
+        } else if (tripData && tripData.length > 0) {
+          setTripsTableMissing(false);
+          dbTrips = tripData.map((t: any) => ({
+            id: t.id || t.trip_id,
+            trip_id: t.trip_id,
+            trip_name: t.trip_name,
+            price_default: t.price_default || 0,
+            price_from_pune: t.price_from_pune,
+            price_from_mumbai: t.price_from_mumbai,
+            duration: t.duration || "",
+            summary: t.summary || "",
+            highlights: t.highlights || [],
+            locations: t.locations || [],
+            images: t.images || [],
+            is_active: t.is_active ?? true,
+            booking_live: t.booking_live ?? false,
+            capacity: t.capacity || 30,
+            advance_amount: t.advance_amount || 2000,
+            inclusions: t.inclusions || [],
+            exclusions: t.exclusions || [],
+            contact_phone: t.contact_phone,
+            contact_email: t.contact_email,
+            notes: t.notes,
+          }));
+          tripData.forEach((t: any) => {
+            bookingStatusMap[t.trip_id] = !!t.booking_live;
+          });
+        } else {
+          setTripsTableMissing(false);
         }
-      } else {
+      } catch {
         setTripsTableMissing(true);
       }
 
