@@ -30,6 +30,7 @@ const FAQ = lazy(() => import("./pages/FAQ"));
 const Stories = lazy(() => import("./pages/Stories"));
 const InvoicePage = lazy(() => import("./pages/Invoice"));
 const Profile = lazy(() => import("./pages/Profile"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
