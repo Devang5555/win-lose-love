@@ -1,6 +1,8 @@
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home, MapPin, Car, Hotel, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import ScrollReveal from "@/components/ScrollReveal";
 import type { TripItineraryData } from "@/data/tripItineraries";
 
@@ -8,14 +10,30 @@ interface TripItinerarySectionProps {
   data: TripItineraryData;
 }
 
+const SectionDivider = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (
+  <ScrollReveal>
+    <div className="flex items-center gap-3 mb-6">
+      <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+        <Icon className="h-5 w-5" />
+      </div>
+      <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">{title}</h2>
+    </div>
+  </ScrollReveal>
+);
+
 const TripItinerarySection = ({ data }: TripItinerarySectionProps) => {
+  const totalDistance = data.distanceSummary
+    ? "~" + data.distanceSummary.reduce((sum, r) => {
+        const num = parseInt(r.distance.replace(/[^0-9]/g, ""), 10);
+        return sum + (isNaN(num) ? 0 : num);
+      }, 0) + " km"
+    : null;
+
   return (
     <div className="space-y-12">
       {/* Overview Cards */}
       <div>
-        <ScrollReveal>
-          <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-6">Trip Overview</h2>
-        </ScrollReveal>
+        <SectionDivider icon={Calendar} title="Trip Overview" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {data.overview.map((item, i) => (
             <ScrollReveal key={item.label} delay={i * 0.08}>
@@ -42,12 +60,10 @@ const TripItinerarySection = ({ data }: TripItinerarySectionProps) => {
 
       {/* Day-wise Accordion */}
       <div>
-        <ScrollReveal>
-          <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-6">Day-Wise Itinerary</h2>
-        </ScrollReveal>
+        <SectionDivider icon={MapPin} title="Day-Wise Itinerary" />
         <Accordion type="single" collapsible defaultValue="day-1" className="space-y-3">
           {data.itinerary.map((day) => (
-            <ScrollReveal key={day.day} delay={day.day * 0.08}>
+            <ScrollReveal key={day.day} delay={day.day * 0.06}>
               <AccordionItem value={`day-${day.day}`} className="bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden px-0">
                 <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-muted/40 transition-colors [&[data-state=open]]:bg-primary/5">
                   <div className="flex items-center gap-3 text-left">
@@ -55,10 +71,10 @@ const TripItinerarySection = ({ data }: TripItinerarySectionProps) => {
                       {day.day}
                     </span>
                     <div>
-                      <p className="font-semibold text-foreground text-base">{day.title}</p>
+                      <p className="font-semibold text-foreground text-sm md:text-base">{day.title}</p>
                       {day.stay && (
                         <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                          <Home className="h-3 w-3" /> Stay: {day.stay}
+                          <Home className="h-3 w-3" /> {day.stay}
                         </p>
                       )}
                     </div>
@@ -90,12 +106,125 @@ const TripItinerarySection = ({ data }: TripItinerarySectionProps) => {
         </Accordion>
       </div>
 
+      {/* Stay Summary Table */}
+      {data.staySummary && data.staySummary.length > 0 && (
+        <div>
+          <SectionDivider icon={Home} title="Stay Summary" />
+          <ScrollReveal>
+            <Card className="border-border/50 shadow-card overflow-hidden">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-primary/5">
+                      <TableHead className="font-bold text-foreground">Destination</TableHead>
+                      <TableHead className="font-bold text-foreground">Dates</TableHead>
+                      <TableHead className="font-bold text-foreground text-right">Nights</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.staySummary.map((row, i) => (
+                      <TableRow key={i} className="hover:bg-muted/30">
+                        <TableCell className="font-medium">{row.destination}</TableCell>
+                        <TableCell className="text-muted-foreground">{row.dates}</TableCell>
+                        <TableCell className="text-right">
+                          <Badge variant="secondary" className="bg-primary/10 text-primary font-semibold">
+                            {row.nights}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow className="bg-muted/50 font-bold">
+                      <TableCell className="font-bold text-foreground">Total</TableCell>
+                      <TableCell className="font-bold text-foreground">
+                        {data.staySummary[0]?.dates.split(" → ")[0]} → {data.staySummary[data.staySummary.length - 1]?.dates.split(" → ")[1]}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge className="bg-primary text-primary-foreground font-bold">
+                          {data.staySummary.reduce((sum, r) => {
+                            const num = parseInt(r.nights, 10);
+                            return sum + (isNaN(num) ? 0 : num);
+                          }, 0)} Nights / {data.itinerary.length} Days
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </ScrollReveal>
+        </div>
+      )}
+
+      {/* Distance Summary Table */}
+      {data.distanceSummary && data.distanceSummary.length > 0 && (
+        <div>
+          <SectionDivider icon={Car} title="Distance Summary" />
+          <ScrollReveal>
+            <Card className="border-border/50 shadow-card overflow-hidden">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-primary/5">
+                      <TableHead className="font-bold text-foreground">Route</TableHead>
+                      <TableHead className="font-bold text-foreground text-right">Distance</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.distanceSummary.map((row, i) => (
+                      <TableRow key={i} className="hover:bg-muted/30">
+                        <TableCell className="font-medium">{row.route}</TableCell>
+                        <TableCell className="text-right text-muted-foreground font-medium">{row.distance}</TableCell>
+                      </TableRow>
+                    ))}
+                    {totalDistance && (
+                      <TableRow className="bg-muted/50 font-bold">
+                        <TableCell className="font-bold text-foreground">Total</TableCell>
+                        <TableCell className="text-right">
+                          <Badge className="bg-primary text-primary-foreground font-bold">{totalDistance}</Badge>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </ScrollReveal>
+        </div>
+      )}
+
+      {/* Hotels Section */}
+      {data.hotels && data.hotels.length > 0 && (
+        <div>
+          <SectionDivider icon={Hotel} title="Hotels (Indicative)" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {data.hotels.map((group, i) => (
+              <ScrollReveal key={group.city} delay={i * 0.1}>
+                <Card className="border-border/50 shadow-card hover:shadow-card-hover transition-shadow duration-300 h-full">
+                  <CardContent className="p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <h3 className="font-serif font-bold text-foreground text-lg">{group.city}</h3>
+                    </div>
+                    <ul className="space-y-2">
+                      {group.hotels.map((hotel, j) => (
+                        <li key={j} className="flex items-start gap-2 text-sm text-foreground/85">
+                          <Hotel className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                          <span className="font-medium">{hotel}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Places Grid */}
       {data.places && data.places.length > 0 && (
         <div>
-          <ScrollReveal>
-            <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-6">Places You'll Explore</h2>
-          </ScrollReveal>
+          <SectionDivider icon={MapPin} title="Places You'll Explore" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.places.map((place, i) => (
               <ScrollReveal key={place.name} delay={i * 0.08}>
@@ -117,9 +246,7 @@ const TripItinerarySection = ({ data }: TripItinerarySectionProps) => {
       {/* Travel Notes */}
       {data.travelNotes.length > 0 && (
         <div>
-          <ScrollReveal>
-            <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-6">Important Travel Notes</h2>
-          </ScrollReveal>
+          <SectionDivider icon={Calendar} title="Important Travel Notes" />
           <div className="space-y-3">
             {data.travelNotes.map((note, i) => (
               <ScrollReveal key={i} delay={i * 0.08}>
