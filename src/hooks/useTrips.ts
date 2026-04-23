@@ -257,11 +257,19 @@ export const useTrips = () => {
   };
 
   const getBookableTrips = useCallback((): DatabaseTrip[] => {
-    return trips.filter((trip) => isTripBookable(trip.trip_id));
+    return trips.filter((trip) => trip.type !== 'experience' && isTripBookable(trip.trip_id));
   }, [trips, isTripBookable]);
 
   const getUpcomingTrips = useCallback((): DatabaseTrip[] => {
-    return trips.filter((trip) => !isTripBookable(trip.trip_id));
+    return trips.filter((trip) => trip.type !== 'experience' && !isTripBookable(trip.trip_id));
+  }, [trips, isTripBookable]);
+
+  const getExperiences = useCallback((): DatabaseTrip[] => {
+    return trips.filter((trip) => trip.type === 'experience' && trip.is_active);
+  }, [trips]);
+
+  const getBookableExperiences = useCallback((): DatabaseTrip[] => {
+    return trips.filter((trip) => trip.type === 'experience' && isTripBookable(trip.trip_id));
   }, [trips, isTripBookable]);
 
   const getPopularDestinations = useCallback((limit: number = 6): DatabaseTrip[] => {
