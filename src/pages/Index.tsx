@@ -7,6 +7,7 @@ import HeroSection from "@/components/HeroSection";
 import TripCard from "@/components/TripCard";
 import InterestPopup from "@/components/InterestPopup";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
+import ExperiencesSection from "@/components/ExperiencesSection";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTrips } from "@/hooks/useTrips";
@@ -108,6 +109,9 @@ const Index = () => {
           )}
         </div>
       </section>
+
+      {/* Experiences Near You */}
+      <ExperiencesSection />
 
       {/* Why Choose Us */}
       <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-muted to-secondary">
