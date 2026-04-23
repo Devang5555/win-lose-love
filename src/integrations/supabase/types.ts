@@ -908,7 +908,9 @@ export type Database = {
           destination_id: string | null
           duration: string
           duration_days: number | null
+          event_time: string | null
           exclusions: string[] | null
+          experience_category: string | null
           highlights: string[] | null
           id: string
           images: string[] | null
@@ -920,10 +922,14 @@ export type Database = {
           price_default: number
           price_from_mumbai: number | null
           price_from_pune: number | null
+          safety_info: string[] | null
+          short_duration: string | null
           slug: string | null
           summary: string | null
+          tags: string[] | null
           trip_id: string
           trip_name: string
+          type: string
           updated_at: string | null
         }
         Insert: {
@@ -937,7 +943,9 @@ export type Database = {
           destination_id?: string | null
           duration: string
           duration_days?: number | null
+          event_time?: string | null
           exclusions?: string[] | null
+          experience_category?: string | null
           highlights?: string[] | null
           id?: string
           images?: string[] | null
@@ -949,10 +957,14 @@ export type Database = {
           price_default?: number
           price_from_mumbai?: number | null
           price_from_pune?: number | null
+          safety_info?: string[] | null
+          short_duration?: string | null
           slug?: string | null
           summary?: string | null
+          tags?: string[] | null
           trip_id: string
           trip_name: string
+          type?: string
           updated_at?: string | null
         }
         Update: {
@@ -966,7 +978,9 @@ export type Database = {
           destination_id?: string | null
           duration?: string
           duration_days?: number | null
+          event_time?: string | null
           exclusions?: string[] | null
+          experience_category?: string | null
           highlights?: string[] | null
           id?: string
           images?: string[] | null
@@ -978,10 +992,14 @@ export type Database = {
           price_default?: number
           price_from_mumbai?: number | null
           price_from_pune?: number | null
+          safety_info?: string[] | null
+          short_duration?: string | null
           slug?: string | null
           summary?: string | null
+          tags?: string[] | null
           trip_id?: string
           trip_name?: string
+          type?: string
           updated_at?: string | null
         }
         Relationships: [
