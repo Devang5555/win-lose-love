@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ExperienceCard from "@/components/ExperienceCard";
-import { useExperiences } from "@/hooks/useExperiences";
+import { useTrips } from "@/hooks/useTrips";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Zap } from "lucide-react";
 import { useState } from "react";
@@ -17,10 +17,10 @@ const categories = [
 ];
 
 const Experiences = () => {
-  const { loading, getActiveExperiences } = useExperiences();
+  const { loading, getExperiences } = useTrips();
   const [filter, setFilter] = useState("all");
-  const experiences = getActiveExperiences();
-  const filtered = filter === "all" ? experiences : experiences.filter((e) => e.category === filter);
+  const experiences = getExperiences();
+  const filtered = filter === "all" ? experiences : experiences.filter((e) => e.experience_category === filter);
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,7 +67,7 @@ const Experiences = () => {
           ) : filtered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((exp) => (
-                <ExperienceCard key={exp.experience_id} experience={exp} />
+                <ExperienceCard key={exp.trip_id} experience={exp} />
               ))}
             </div>
           ) : (
