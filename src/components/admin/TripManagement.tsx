@@ -19,6 +19,7 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
   const [updating, setUpdating] = useState<string | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingTripId, setEditingTripId] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string>("all");
 
   const handleToggleBookingLive = async (tripId: string, tripName: string, currentStatus: boolean) => {
     // Check if trip has batches before enabling
@@ -145,18 +146,34 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
     );
   }
 
+  const filteredTrips = typeFilter === "all" ? trips : trips.filter(t => t.type === typeFilter);
+
   return (
     <div className="space-y-6">
-      {/* Header with Create Button */}
-      <div className="flex items-center justify-between">
+      {/* Header with Create Button and Filter */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Trip Management</h3>
-          <p className="text-sm text-muted-foreground">Create, edit, and manage your trips</p>
+          <h3 className="text-lg font-semibold text-foreground">Trip & Experience Management</h3>
+          <p className="text-sm text-muted-foreground">Create, edit, and manage trips & experiences</p>
         </div>
-        <Button onClick={handleCreateTrip}>
-          <Plus className="w-4 h-4 mr-2" />
-          Create New Trip
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* Type Filter */}
+          <div className="flex rounded-lg border border-border overflow-hidden">
+            {[{ value: "all", label: "All" }, { value: "trip", label: "Trips" }, { value: "experience", label: "Experiences" }].map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setTypeFilter(opt.value)}
+                className={`px-3 py-1.5 text-xs font-semibold transition-colors ${typeFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <Button onClick={handleCreateTrip}>
+            <Plus className="w-4 h-4 mr-2" />
+            Create New
+          </Button>
+        </div>
       </div>
 
       {/* Important Notice */}
@@ -184,7 +201,7 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
 
       {/* Trips List */}
       <div className="grid gap-4">
-        {trips.map((trip) => {
+        {filteredTrips.map((trip) => {
           const stats = getBatchStats(trip.trip_id);
           const availableSeats = getAvailableSeats(trip.trip_id);
           const canBook = trip.booking_live && stats.active > 0 && availableSeats > 0;
@@ -200,6 +217,9 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <h4 className="font-semibold text-foreground">{trip.trip_name}</h4>
+                    {trip.type === 'experience' && (
+                      <Badge className="bg-accent/20 text-accent border-accent/30">Experience</Badge>
+                    )}
                     {canBook ? (
                       <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                         🟢 Booking Open
@@ -219,8 +239,9 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
                   </div>
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                     <span>{trip.duration}</span>
+                    {trip.type === 'experience' && trip.event_time && <span>⏰ {trip.event_time}</span>}
                     <span>₹{trip.price_default.toLocaleString()}</span>
-                    <span>{stats.total} batches ({stats.active} active)</span>
+                    <span>{stats.total} {trip.type === 'experience' ? 'slots' : 'batches'} ({stats.active} active)</span>
                     <span>{stats.bookedSeats}/{stats.totalSeats} seats booked</span>
                   </div>
                 </div>
