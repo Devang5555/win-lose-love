@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2, Save, Image, MapPin, DollarSign, List, FileText } from "lucide-react";
+import { X, Plus, Trash2, Save, Image, MapPin, DollarSign, List, FileText, ShieldCheck, Tag } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,6 +84,8 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
   const [newExclusion, setNewExclusion] = useState("");
   const [newLocation, setNewLocation] = useState("");
   const [newImage, setNewImage] = useState("");
+  const [newSafetyItem, setNewSafetyItem] = useState("");
+  const [newTag, setNewTag] = useState("");
 
   useEffect(() => {
     if (tripId) {
@@ -256,7 +259,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border">
             <h2 className="text-xl font-semibold text-foreground">
-              {tripId ? "Edit Trip" : "Create New Trip"}
+              {tripId ? `Edit ${formData.type === 'experience' ? 'Experience' : 'Trip'}` : `Create New ${formData.type === 'experience' ? 'Experience' : 'Trip'}`}
             </h2>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="w-5 h-5" />
