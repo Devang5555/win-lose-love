@@ -326,6 +326,8 @@ export const useTrips = () => {
     isTripBookable,
     getBookableTrips,
     getUpcomingTrips,
+    getExperiences,
+    getBookableExperiences,
     getPopularDestinations,
     getTrip,
     getTripPrice,
