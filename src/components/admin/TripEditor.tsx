@@ -573,6 +573,66 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
               </div>
             </section>
 
+            {/* Safety Info (for experiences) */}
+            {formData.type === 'experience' && (
+              <section>
+                <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
+                  Safety Information
+                </h3>
+                <div className="flex gap-2 mb-3">
+                  <Input
+                    value={newSafetyItem}
+                    onChange={(e) => setNewSafetyItem(e.target.value)}
+                    placeholder="Add safety info..."
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addToArray("safety_info", newSafetyItem, setNewSafetyItem))}
+                  />
+                  <Button type="button" onClick={() => addToArray("safety_info", newSafetyItem, setNewSafetyItem)}>
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                <ul className="space-y-1">
+                  {formData.safety_info.map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <ShieldCheck className="w-3 h-3 text-forest" /> {item}
+                      <button onClick={() => removeFromArray("safety_info", i)} className="text-destructive hover:text-destructive/80">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Tags */}
+            <section>
+              <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                <Tag className="w-5 h-5 text-primary" />
+                Tags
+              </h3>
+              <div className="flex gap-2 mb-3">
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="e.g., 🔥 This Weekend, Popular..."
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addToArray("tags", newTag, setNewTag))}
+                />
+                <Button type="button" onClick={() => addToArray("tags", newTag, setNewTag)}>
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.tags.map((item, i) => (
+                  <span key={i} className="bg-accent/10 text-accent px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    {item}
+                    <button onClick={() => removeFromArray("tags", i)} className="hover:text-destructive">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </section>
+
             {/* Notes */}
             <section>
               <Label className="mb-2 block">Additional Notes</Label>
@@ -591,7 +651,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                   checked={formData.is_active}
                   onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                 />
-                <Label>Trip Active (Visible on site)</Label>
+                <Label>{formData.type === 'experience' ? 'Experience' : 'Trip'} Active (Visible on site)</Label>
               </div>
               <div className="flex items-center gap-3">
                 <Switch
