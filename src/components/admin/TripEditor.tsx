@@ -276,21 +276,31 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="mb-2 block">Trip ID *</Label>
+                  <Label className="mb-2 block">Type *</Label>
+                  <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="trip">Trip</SelectItem>
+                      <SelectItem value="experience">Experience</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="mb-2 block">{formData.type === 'experience' ? 'Experience' : 'Trip'} ID *</Label>
                   <Input
                     value={formData.trip_id}
                     onChange={(e) => setFormData({ ...formData, trip_id: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
-                    placeholder="e.g., malvan-escape-001"
+                    placeholder={formData.type === 'experience' ? "e.g., night-cycling-pune" : "e.g., malvan-escape-001"}
                     disabled={!!tripId}
                   />
                   <p className="text-xs text-muted-foreground mt-1">Unique identifier (lowercase, no spaces)</p>
                 </div>
                 <div>
-                  <Label className="mb-2 block">Trip Name *</Label>
+                  <Label className="mb-2 block">{formData.type === 'experience' ? 'Experience' : 'Trip'} Name *</Label>
                   <Input
                     value={formData.trip_name}
                     onChange={(e) => setFormData({ ...formData, trip_name: e.target.value })}
-                    placeholder="e.g., Malvan Beach Escape"
+                    placeholder={formData.type === 'experience' ? "e.g., Late Night Cycling" : "e.g., Malvan Beach Escape"}
                   />
                 </div>
                 <div>
@@ -298,7 +308,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                   <Input
                     value={formData.duration}
                     onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                    placeholder="e.g., 3N/2D"
+                    placeholder={formData.type === 'experience' ? "e.g., 3–4 Hours" : "e.g., 3N/2D"}
                   />
                 </div>
                 <div>
@@ -310,12 +320,41 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                     min="1"
                   />
                 </div>
+
+                {/* Experience-specific fields */}
+                {formData.type === 'experience' && (
+                  <>
+                    <div>
+                      <Label className="mb-2 block">Event Time</Label>
+                      <Input
+                        value={formData.event_time}
+                        onChange={(e) => setFormData({ ...formData, event_time: e.target.value })}
+                        placeholder="e.g., 10 PM – 2 AM"
+                      />
+                    </div>
+                    <div>
+                      <Label className="mb-2 block">Category</Label>
+                      <Select value={formData.experience_category} onValueChange={(v) => setFormData({ ...formData, experience_category: v })}>
+                        <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cycling">🚴 Cycling</SelectItem>
+                          <SelectItem value="trek">🌄 Trek</SelectItem>
+                          <SelectItem value="walk">🌌 Walk</SelectItem>
+                          <SelectItem value="camping">🏕️ Camping</SelectItem>
+                          <SelectItem value="day_trip">🏞️ Day Trip</SelectItem>
+                          <SelectItem value="activity">🚀 Activity</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
                 <div className="md:col-span-2">
                   <Label className="mb-2 block">Summary</Label>
                   <Textarea
                     value={formData.summary}
                     onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                    placeholder="Brief description of the trip..."
+                    placeholder="Brief description..."
                     rows={3}
                   />
                 </div>
