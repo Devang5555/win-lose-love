@@ -388,6 +388,140 @@ export type Database = {
         }
         Relationships: []
       }
+      experience_slots: {
+        Row: {
+          available_seats: number | null
+          created_at: string | null
+          end_time: string | null
+          experience_id: string
+          id: string
+          price_override: number | null
+          seat_limit: number
+          seats_booked: number
+          slot_date: string
+          start_time: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          available_seats?: number | null
+          created_at?: string | null
+          end_time?: string | null
+          experience_id: string
+          id?: string
+          price_override?: number | null
+          seat_limit?: number
+          seats_booked?: number
+          slot_date: string
+          start_time?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          available_seats?: number | null
+          created_at?: string | null
+          end_time?: string | null
+          experience_id?: string
+          id?: string
+          price_override?: number | null
+          seat_limit?: number
+          seats_booked?: number
+          slot_date?: string
+          start_time?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_slots_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["experience_id"]
+          },
+        ]
+      }
+      experiences: {
+        Row: {
+          booking_live: boolean | null
+          capacity: number | null
+          category: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          description: string | null
+          duration: string
+          exclusions: string[] | null
+          experience_id: string
+          highlights: string[] | null
+          id: string
+          images: string[] | null
+          inclusions: string[] | null
+          is_active: boolean | null
+          location: string
+          name: string
+          price: number
+          safety_info: string[] | null
+          slug: string | null
+          summary: string | null
+          tags: string[] | null
+          time_info: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          booking_live?: boolean | null
+          capacity?: number | null
+          category?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration: string
+          exclusions?: string[] | null
+          experience_id: string
+          highlights?: string[] | null
+          id?: string
+          images?: string[] | null
+          inclusions?: string[] | null
+          is_active?: boolean | null
+          location?: string
+          name: string
+          price?: number
+          safety_info?: string[] | null
+          slug?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          time_info?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          booking_live?: boolean | null
+          capacity?: number | null
+          category?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: string
+          exclusions?: string[] | null
+          experience_id?: string
+          highlights?: string[] | null
+          id?: string
+          images?: string[] | null
+          inclusions?: string[] | null
+          is_active?: boolean | null
+          location?: string
+          name?: string
+          price?: number
+          safety_info?: string[] | null
+          slug?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          time_info?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       fraud_flags: {
         Row: {
           created_at: string
