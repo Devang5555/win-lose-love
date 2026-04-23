@@ -102,6 +102,12 @@ const DestinationDetail = () => {
           contact_phone: t.contact_phone,
           contact_email: t.contact_email,
           notes: t.notes,
+          type: t.type || "trip",
+          event_time: t.event_time || null,
+          short_duration: t.short_duration || null,
+          experience_category: t.experience_category || null,
+          tags: t.tags || [],
+          safety_info: t.safety_info || [],
         }));
         setDestTrips(mapped);
       } catch (err) {

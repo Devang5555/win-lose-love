@@ -72,6 +72,12 @@ const convertStaticToDbTrip = (trip: Trip, bookingLive: boolean = false): Databa
     contact_phone: trip.contact?.phone || null,
     contact_email: trip.contact?.email || null,
     notes: trip.notes || null,
+    type: "trip",
+    event_time: null,
+    short_duration: null,
+    experience_category: null,
+    tags: [],
+    safety_info: [],
   };
 };
 
