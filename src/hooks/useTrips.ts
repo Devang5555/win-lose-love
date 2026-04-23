@@ -23,6 +23,12 @@ export interface DatabaseTrip {
   contact_phone: string | null;
   contact_email: string | null;
   notes: string | null;
+  type: string;
+  event_time: string | null;
+  short_duration: string | null;
+  experience_category: string | null;
+  tags: string[];
+  safety_info: string[];
 }
 
 interface Batch {
@@ -125,6 +131,12 @@ export const useTrips = () => {
             contact_phone: t.contact_phone,
             contact_email: t.contact_email,
             notes: t.notes,
+            type: t.type || "trip",
+            event_time: t.event_time,
+            short_duration: t.short_duration,
+            experience_category: t.experience_category,
+            tags: t.tags || [],
+            safety_info: t.safety_info || [],
           }));
           tripData.forEach((t: any) => {
             bookingStatusMap[t.trip_id] = !!t.booking_live;
