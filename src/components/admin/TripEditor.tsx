@@ -194,7 +194,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
         // Create new trip
         const { data, error } = await supabase
           .from("trips")
-          .insert(tripData)
+          .insert(tripData as any)
           .select()
           .single();
 
