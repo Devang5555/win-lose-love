@@ -1503,9 +1503,7 @@ For queries, please contact us.
               <TabsContent value="wallet-mgmt">
                 <WalletManagement />
               </TabsContent>
-            )}
-              </TabsContent>
-            )}
+            )
           </Tabs>
         </div>
       </main>
