@@ -24,7 +24,7 @@ import FinancialReconciliation from "@/components/admin/FinancialReconciliation"
 import WhatsAppBroadcast from "@/components/admin/WhatsAppBroadcast";
 import LeadsCaptureManagement from "@/components/admin/LeadsCaptureManagement";
 import DepartureOps from "@/components/admin/DepartureOps";
-import ExperienceManagement from "@/components/admin/ExperienceManagement";
+
 import WalletManagement from "@/components/admin/WalletManagement";
 import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
@@ -1052,12 +1052,6 @@ For queries, please contact us.
                     Wallets
                   </TabsTrigger>
                 )}
-                {can('manage_trips') && (
-                  <TabsTrigger value="experiences" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
-                    <Zap className="w-3.5 h-3.5" />
-                    Experiences
-                  </TabsTrigger>
-                )}
               </TabsList>
             </div>
 
@@ -1510,11 +1504,6 @@ For queries, please contact us.
                 <WalletManagement />
               </TabsContent>
             )}
-
-            {/* Experiences Tab */}
-            {can('manage_trips') && (
-              <TabsContent value="experiences">
-                <ExperienceManagement />
               </TabsContent>
             )}
           </Tabs>
