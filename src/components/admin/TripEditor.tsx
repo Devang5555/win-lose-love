@@ -29,6 +29,12 @@ interface TripFormData {
   contact_phone: string;
   contact_email: string;
   notes: string;
+  type: string;
+  event_time: string;
+  short_duration: string;
+  experience_category: string;
+  tags: string[];
+  safety_info: string[];
 }
 
 interface TripEditorProps {
@@ -57,6 +63,12 @@ const emptyForm: TripFormData = {
   contact_phone: "+91-9415026522",
   contact_email: "bhramanbyua@gmail.com",
   notes: "",
+  type: "trip",
+  event_time: "",
+  short_duration: "",
+  experience_category: "",
+  tags: [],
+  safety_info: [],
 };
 
 const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
@@ -112,6 +124,12 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
           contact_phone: data.contact_phone || "+91-9415026522",
           contact_email: data.contact_email || "bhramanbyua@gmail.com",
           notes: data.notes || "",
+          type: (data as any).type || "trip",
+          event_time: (data as any).event_time || "",
+          short_duration: (data as any).short_duration || "",
+          experience_category: (data as any).experience_category || "",
+          tags: (data as any).tags || [],
+          safety_info: (data as any).safety_info || [],
         });
       }
     } catch (error) {
@@ -130,7 +148,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
     setSaving(true);
 
     // Build the complete update payload — replace arrays entirely
-    const tripData = {
+    const tripData: Record<string, any> = {
       trip_id: formData.trip_id,
       trip_name: formData.trip_name,
       duration: formData.duration,
@@ -139,7 +157,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       price_from_pune: formData.price_from_pune,
       price_from_mumbai: formData.price_from_mumbai,
       advance_amount: formData.advance_amount,
-      highlights: [...formData.highlights], // replace entire array
+      highlights: [...formData.highlights],
       inclusions: [...formData.inclusions],
       exclusions: [...formData.exclusions],
       locations: [...formData.locations],
@@ -150,6 +168,12 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       contact_phone: formData.contact_phone,
       contact_email: formData.contact_email,
       notes: formData.notes,
+      type: formData.type,
+      event_time: formData.event_time || null,
+      short_duration: formData.short_duration || null,
+      experience_category: formData.experience_category || null,
+      tags: [...formData.tags],
+      safety_info: [...formData.safety_info],
     };
 
     try {
