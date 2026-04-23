@@ -3,11 +3,11 @@ import { ArrowRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ExperienceCard from "@/components/ExperienceCard";
-import { useExperiences } from "@/hooks/useExperiences";
+import { useTrips } from "@/hooks/useTrips";
 
 const ExperiencesSection = () => {
-  const { loading, getActiveExperiences } = useExperiences();
-  const experiences = getActiveExperiences();
+  const { loading, getExperiences } = useTrips();
+  const experiences = getExperiences();
 
   if (!loading && experiences.length === 0) return null;
 
@@ -44,7 +44,7 @@ const ExperiencesSection = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {experiences.slice(0, 6).map((exp) => (
-              <ExperienceCard key={exp.experience_id} experience={exp} />
+              <ExperienceCard key={exp.trip_id} experience={exp} />
             ))}
           </div>
         )}

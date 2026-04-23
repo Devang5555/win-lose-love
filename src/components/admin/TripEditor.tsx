@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2, Save, Image, MapPin, DollarSign, List, FileText } from "lucide-react";
+import { X, Plus, Trash2, Save, Image, MapPin, DollarSign, List, FileText, ShieldCheck, Tag } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +30,12 @@ interface TripFormData {
   contact_phone: string;
   contact_email: string;
   notes: string;
+  type: string;
+  event_time: string;
+  short_duration: string;
+  experience_category: string;
+  tags: string[];
+  safety_info: string[];
 }
 
 interface TripEditorProps {
@@ -57,6 +64,12 @@ const emptyForm: TripFormData = {
   contact_phone: "+91-9415026522",
   contact_email: "bhramanbyua@gmail.com",
   notes: "",
+  type: "trip",
+  event_time: "",
+  short_duration: "",
+  experience_category: "",
+  tags: [],
+  safety_info: [],
 };
 
 const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
@@ -71,6 +84,8 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
   const [newExclusion, setNewExclusion] = useState("");
   const [newLocation, setNewLocation] = useState("");
   const [newImage, setNewImage] = useState("");
+  const [newSafetyItem, setNewSafetyItem] = useState("");
+  const [newTag, setNewTag] = useState("");
 
   useEffect(() => {
     if (tripId) {
@@ -112,6 +127,12 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
           contact_phone: data.contact_phone || "+91-9415026522",
           contact_email: data.contact_email || "bhramanbyua@gmail.com",
           notes: data.notes || "",
+          type: (data as any).type || "trip",
+          event_time: (data as any).event_time || "",
+          short_duration: (data as any).short_duration || "",
+          experience_category: (data as any).experience_category || "",
+          tags: (data as any).tags || [],
+          safety_info: (data as any).safety_info || [],
         });
       }
     } catch (error) {
@@ -130,7 +151,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
     setSaving(true);
 
     // Build the complete update payload — replace arrays entirely
-    const tripData = {
+    const tripData: Record<string, any> = {
       trip_id: formData.trip_id,
       trip_name: formData.trip_name,
       duration: formData.duration,
@@ -139,7 +160,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       price_from_pune: formData.price_from_pune,
       price_from_mumbai: formData.price_from_mumbai,
       advance_amount: formData.advance_amount,
-      highlights: [...formData.highlights], // replace entire array
+      highlights: [...formData.highlights],
       inclusions: [...formData.inclusions],
       exclusions: [...formData.exclusions],
       locations: [...formData.locations],
@@ -150,6 +171,12 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       contact_phone: formData.contact_phone,
       contact_email: formData.contact_email,
       notes: formData.notes,
+      type: formData.type,
+      event_time: formData.event_time || null,
+      short_duration: formData.short_duration || null,
+      experience_category: formData.experience_category || null,
+      tags: [...formData.tags],
+      safety_info: [...formData.safety_info],
     };
 
     try {
@@ -170,7 +197,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
         // Create new trip
         const { data, error } = await supabase
           .from("trips")
-          .insert(tripData)
+          .insert(tripData as any)
           .select()
           .single();
 
@@ -232,7 +259,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border">
             <h2 className="text-xl font-semibold text-foreground">
-              {tripId ? "Edit Trip" : "Create New Trip"}
+              {tripId ? `Edit ${formData.type === 'experience' ? 'Experience' : 'Trip'}` : `Create New ${formData.type === 'experience' ? 'Experience' : 'Trip'}`}
             </h2>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="w-5 h-5" />
@@ -249,21 +276,31 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="mb-2 block">Trip ID *</Label>
+                  <Label className="mb-2 block">Type *</Label>
+                  <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="trip">Trip</SelectItem>
+                      <SelectItem value="experience">Experience</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="mb-2 block">{formData.type === 'experience' ? 'Experience' : 'Trip'} ID *</Label>
                   <Input
                     value={formData.trip_id}
                     onChange={(e) => setFormData({ ...formData, trip_id: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
-                    placeholder="e.g., malvan-escape-001"
+                    placeholder={formData.type === 'experience' ? "e.g., night-cycling-pune" : "e.g., malvan-escape-001"}
                     disabled={!!tripId}
                   />
                   <p className="text-xs text-muted-foreground mt-1">Unique identifier (lowercase, no spaces)</p>
                 </div>
                 <div>
-                  <Label className="mb-2 block">Trip Name *</Label>
+                  <Label className="mb-2 block">{formData.type === 'experience' ? 'Experience' : 'Trip'} Name *</Label>
                   <Input
                     value={formData.trip_name}
                     onChange={(e) => setFormData({ ...formData, trip_name: e.target.value })}
-                    placeholder="e.g., Malvan Beach Escape"
+                    placeholder={formData.type === 'experience' ? "e.g., Late Night Cycling" : "e.g., Malvan Beach Escape"}
                   />
                 </div>
                 <div>
@@ -271,7 +308,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                   <Input
                     value={formData.duration}
                     onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                    placeholder="e.g., 3N/2D"
+                    placeholder={formData.type === 'experience' ? "e.g., 3–4 Hours" : "e.g., 3N/2D"}
                   />
                 </div>
                 <div>
@@ -283,12 +320,41 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                     min="1"
                   />
                 </div>
+
+                {/* Experience-specific fields */}
+                {formData.type === 'experience' && (
+                  <>
+                    <div>
+                      <Label className="mb-2 block">Event Time</Label>
+                      <Input
+                        value={formData.event_time}
+                        onChange={(e) => setFormData({ ...formData, event_time: e.target.value })}
+                        placeholder="e.g., 10 PM – 2 AM"
+                      />
+                    </div>
+                    <div>
+                      <Label className="mb-2 block">Category</Label>
+                      <Select value={formData.experience_category} onValueChange={(v) => setFormData({ ...formData, experience_category: v })}>
+                        <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cycling">🚴 Cycling</SelectItem>
+                          <SelectItem value="trek">🌄 Trek</SelectItem>
+                          <SelectItem value="walk">🌌 Walk</SelectItem>
+                          <SelectItem value="camping">🏕️ Camping</SelectItem>
+                          <SelectItem value="day_trip">🏞️ Day Trip</SelectItem>
+                          <SelectItem value="activity">🚀 Activity</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
                 <div className="md:col-span-2">
                   <Label className="mb-2 block">Summary</Label>
                   <Textarea
                     value={formData.summary}
                     onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                    placeholder="Brief description of the trip..."
+                    placeholder="Brief description..."
                     rows={3}
                   />
                 </div>
@@ -507,6 +573,66 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
               </div>
             </section>
 
+            {/* Safety Info (for experiences) */}
+            {formData.type === 'experience' && (
+              <section>
+                <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
+                  Safety Information
+                </h3>
+                <div className="flex gap-2 mb-3">
+                  <Input
+                    value={newSafetyItem}
+                    onChange={(e) => setNewSafetyItem(e.target.value)}
+                    placeholder="Add safety info..."
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addToArray("safety_info", newSafetyItem, setNewSafetyItem))}
+                  />
+                  <Button type="button" onClick={() => addToArray("safety_info", newSafetyItem, setNewSafetyItem)}>
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                <ul className="space-y-1">
+                  {formData.safety_info.map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <ShieldCheck className="w-3 h-3 text-forest" /> {item}
+                      <button onClick={() => removeFromArray("safety_info", i)} className="text-destructive hover:text-destructive/80">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Tags */}
+            <section>
+              <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                <Tag className="w-5 h-5 text-primary" />
+                Tags
+              </h3>
+              <div className="flex gap-2 mb-3">
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="e.g., 🔥 This Weekend, Popular..."
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addToArray("tags", newTag, setNewTag))}
+                />
+                <Button type="button" onClick={() => addToArray("tags", newTag, setNewTag)}>
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.tags.map((item, i) => (
+                  <span key={i} className="bg-accent/10 text-accent px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    {item}
+                    <button onClick={() => removeFromArray("tags", i)} className="hover:text-destructive">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </section>
+
             {/* Notes */}
             <section>
               <Label className="mb-2 block">Additional Notes</Label>
@@ -525,7 +651,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                   checked={formData.is_active}
                   onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                 />
-                <Label>Trip Active (Visible on site)</Label>
+                <Label>{formData.type === 'experience' ? 'Experience' : 'Trip'} Active (Visible on site)</Label>
               </div>
               <div className="flex items-center gap-3">
                 <Switch

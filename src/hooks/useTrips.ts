@@ -23,6 +23,12 @@ export interface DatabaseTrip {
   contact_phone: string | null;
   contact_email: string | null;
   notes: string | null;
+  type: string;
+  event_time: string | null;
+  short_duration: string | null;
+  experience_category: string | null;
+  tags: string[];
+  safety_info: string[];
 }
 
 interface Batch {
@@ -66,6 +72,12 @@ const convertStaticToDbTrip = (trip: Trip, bookingLive: boolean = false): Databa
     contact_phone: trip.contact?.phone || null,
     contact_email: trip.contact?.email || null,
     notes: trip.notes || null,
+    type: "trip",
+    event_time: null,
+    short_duration: null,
+    experience_category: null,
+    tags: [],
+    safety_info: [],
   };
 };
 
@@ -125,6 +137,12 @@ export const useTrips = () => {
             contact_phone: t.contact_phone,
             contact_email: t.contact_email,
             notes: t.notes,
+            type: t.type || "trip",
+            event_time: t.event_time,
+            short_duration: t.short_duration,
+            experience_category: t.experience_category,
+            tags: t.tags || [],
+            safety_info: t.safety_info || [],
           }));
           tripData.forEach((t: any) => {
             bookingStatusMap[t.trip_id] = !!t.booking_live;
@@ -239,11 +257,19 @@ export const useTrips = () => {
   };
 
   const getBookableTrips = useCallback((): DatabaseTrip[] => {
-    return trips.filter((trip) => isTripBookable(trip.trip_id));
+    return trips.filter((trip) => trip.type !== 'experience' && isTripBookable(trip.trip_id));
   }, [trips, isTripBookable]);
 
   const getUpcomingTrips = useCallback((): DatabaseTrip[] => {
-    return trips.filter((trip) => !isTripBookable(trip.trip_id));
+    return trips.filter((trip) => trip.type !== 'experience' && !isTripBookable(trip.trip_id));
+  }, [trips, isTripBookable]);
+
+  const getExperiences = useCallback((): DatabaseTrip[] => {
+    return trips.filter((trip) => trip.type === 'experience' && trip.is_active);
+  }, [trips]);
+
+  const getBookableExperiences = useCallback((): DatabaseTrip[] => {
+    return trips.filter((trip) => trip.type === 'experience' && isTripBookable(trip.trip_id));
   }, [trips, isTripBookable]);
 
   const getPopularDestinations = useCallback((limit: number = 6): DatabaseTrip[] => {
@@ -300,6 +326,8 @@ export const useTrips = () => {
     isTripBookable,
     getBookableTrips,
     getUpcomingTrips,
+    getExperiences,
+    getBookableExperiences,
     getPopularDestinations,
     getTrip,
     getTripPrice,

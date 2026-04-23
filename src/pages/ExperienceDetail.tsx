@@ -1,7 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExperienceSlots, type Experience } from "@/hooks/useExperiences";
+import { useTrips } from "@/hooks/useTrips";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
@@ -18,25 +16,14 @@ const ExperienceDetail = () => {
   const { experienceId } = useParams<{ experienceId: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { loading, getTrip, getTripBatches, isTripBookable } = useTrips();
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
-  const { data: experience, isLoading } = useQuery({
-    queryKey: ["experience", experienceId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("experiences")
-        .select("*")
-        .eq("experience_id", experienceId!)
-        .single();
-      if (error) throw error;
-      return data as Experience;
-    },
-    enabled: !!experienceId,
-  });
+  const experience = getTrip(experienceId || "");
+  const slots = getTripBatches(experienceId || "");
+  const bookable = experienceId ? isTripBookable(experienceId) : false;
 
-  const { upcomingSlots, loading: slotsLoading } = useExperienceSlots(experienceId);
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -70,8 +57,8 @@ const ExperienceDetail = () => {
       toast({ title: "Select a date", description: "Please pick a slot before booking.", variant: "destructive" });
       return;
     }
-    const slot = upcomingSlots.find((s) => s.id === selectedSlot);
-    const whatsappMsg = `Hi! I'd like to book *${experience.name}* on ${slot?.slot_date}. Price: ₹${experience.price}. My name: ${user.email}`;
+    const slot = slots.find((s) => s.id === selectedSlot);
+    const whatsappMsg = `Hi! I'd like to book *${experience.trip_name}* on ${slot?.start_date}. Price: ₹${experience.price_default}. My name: ${user.email}`;
     window.open(`https://wa.me/919415026522?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
   };
 
@@ -84,7 +71,7 @@ const ExperienceDetail = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent z-10" />
         <img
           src={experience.images?.[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200"}
-          alt={experience.name}
+          alt={experience.trip_name}
           className="w-full h-full object-cover"
         />
         <div className="absolute bottom-0 left-0 right-0 z-20 container mx-auto px-4 pb-6 md:pb-10">
@@ -93,11 +80,13 @@ const ExperienceDetail = () => {
               <Badge key={tag} className="bg-primary/90 text-primary-foreground font-bold">{tag}</Badge>
             ))}
           </div>
-          <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground">{experience.name}</h1>
+          <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground">{experience.trip_name}</h1>
           <div className="flex flex-wrap items-center gap-4 mt-3 text-muted-foreground">
-            <span className="flex items-center gap-1"><MapPin className="w-4 h-4 text-accent" />{experience.location}</span>
+            {experience.locations?.[0] && (
+              <span className="flex items-center gap-1"><MapPin className="w-4 h-4 text-accent" />{experience.locations[0]}</span>
+            )}
             <span className="flex items-center gap-1"><Clock className="w-4 h-4 text-primary" />{experience.duration}</span>
-            {experience.time_info && <span className="flex items-center gap-1"><Calendar className="w-4 h-4 text-forest" />{experience.time_info}</span>}
+            {experience.event_time && <span className="flex items-center gap-1"><Calendar className="w-4 h-4 text-forest" />{experience.event_time}</span>}
           </div>
         </div>
       </div>
@@ -106,15 +95,13 @@ const ExperienceDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Description */}
-            {experience.description && (
+            {experience.summary && (
               <Card>
                 <CardHeader><CardTitle className="font-serif">About This Experience</CardTitle></CardHeader>
-                <CardContent><p className="text-muted-foreground leading-relaxed">{experience.description}</p></CardContent>
+                <CardContent><p className="text-muted-foreground leading-relaxed">{experience.summary}</p></CardContent>
               </Card>
             )}
 
-            {/* Highlights */}
             {experience.highlights?.length > 0 && (
               <Card>
                 <CardHeader><CardTitle className="font-serif">✨ Highlights</CardTitle></CardHeader>
@@ -131,7 +118,6 @@ const ExperienceDetail = () => {
               </Card>
             )}
 
-            {/* Inclusions & Exclusions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {experience.inclusions?.length > 0 && (
                 <Card>
@@ -161,7 +147,6 @@ const ExperienceDetail = () => {
               )}
             </div>
 
-            {/* Safety */}
             {experience.safety_info?.length > 0 && (
               <Card className="border-forest/30 bg-forest/5">
                 <CardHeader>
@@ -187,20 +172,17 @@ const ExperienceDetail = () => {
             <Card className="sticky top-24 border-2 border-primary/30 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
                 <CardTitle className="font-serif text-center">
-                  <span className="text-3xl font-bold text-primary">₹{experience.price.toLocaleString("en-IN")}</span>
+                  <span className="text-3xl font-bold text-primary">₹{experience.price_default.toLocaleString("en-IN")}</span>
                   <span className="text-sm text-muted-foreground ml-2">per person</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
-                {/* Date Slots */}
                 <div>
-                  <p className="text-sm font-semibold text-foreground mb-2">📅 Available Dates</p>
-                  {slotsLoading ? (
-                    <Skeleton className="h-20 w-full rounded-lg" />
-                  ) : upcomingSlots.length > 0 ? (
+                  <p className="text-sm font-semibold text-foreground mb-2">📅 Available Slots</p>
+                  {slots.length > 0 ? (
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {upcomingSlots.map((slot) => {
-                        const seatsLeft = slot.available_seats ?? (slot.seat_limit - slot.seats_booked);
+                      {slots.map((slot) => {
+                        const seatsLeft = Math.max(0, slot.batch_size - slot.seats_booked);
                         return (
                           <button
                             key={slot.id}
@@ -214,24 +196,20 @@ const ExperienceDetail = () => {
                           >
                             <div className="flex justify-between items-center">
                               <span className="font-semibold text-foreground">
-                                {new Date(slot.slot_date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
+                                {new Date(slot.start_date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
                               </span>
                               <Badge variant={seatsLeft <= 5 ? "destructive" : "secondary"} className="text-xs">
                                 {seatsLeft <= 0 ? "Full" : `${seatsLeft} seats left`}
                               </Badge>
                             </div>
-                            {slot.start_time && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {slot.start_time}{slot.end_time ? ` – ${slot.end_time}` : ""}
-                              </p>
-                            )}
+                            <p className="text-xs text-muted-foreground mt-1">{slot.batch_name}</p>
                           </button>
                         );
                       })}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg text-center">
-                      No upcoming dates yet. Check back soon!
+                      No upcoming slots yet. Check back soon!
                     </p>
                   )}
                 </div>
@@ -239,12 +217,11 @@ const ExperienceDetail = () => {
                 <Button
                   onClick={handleBooking}
                   className="w-full font-bold text-lg py-6"
-                  disabled={!experience.booking_live || upcomingSlots.length === 0}
+                  disabled={!bookable || slots.length === 0}
                 >
-                  {experience.booking_live ? "Book Now via WhatsApp" : "Coming Soon"}
+                  {bookable ? "Book Now via WhatsApp" : "Coming Soon"}
                 </Button>
 
-                {/* Contact */}
                 <div className="text-center space-y-1 pt-2 border-t border-border">
                   <p className="text-xs text-muted-foreground">Need help?</p>
                   {experience.contact_phone && (
