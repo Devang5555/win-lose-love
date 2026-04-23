@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send, Gift, Trash2, ArchiveX, Plane, TrendingDown } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send, Gift, Trash2, ArchiveX, Plane, TrendingDown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,7 @@ import FinancialReconciliation from "@/components/admin/FinancialReconciliation"
 import WhatsAppBroadcast from "@/components/admin/WhatsAppBroadcast";
 import LeadsCaptureManagement from "@/components/admin/LeadsCaptureManagement";
 import DepartureOps from "@/components/admin/DepartureOps";
+import ExperienceManagement from "@/components/admin/ExperienceManagement";
 import WalletManagement from "@/components/admin/WalletManagement";
 import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
@@ -1051,6 +1052,12 @@ For queries, please contact us.
                     Wallets
                   </TabsTrigger>
                 )}
+                {can('manage_trips') && (
+                  <TabsTrigger value="experiences" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Zap className="w-3.5 h-3.5" />
+                    Experiences
+                  </TabsTrigger>
+                )}
               </TabsList>
             </div>
 
@@ -1501,6 +1508,13 @@ For queries, please contact us.
             {canAny('view_financial_data', 'verify_payments') && (
               <TabsContent value="wallet-mgmt">
                 <WalletManagement />
+              </TabsContent>
+            )}
+
+            {/* Experiences Tab */}
+            {can('manage_trips') && (
+              <TabsContent value="experiences">
+                <ExperienceManagement />
               </TabsContent>
             )}
           </Tabs>

@@ -33,6 +33,8 @@ const Stories = lazy(() => import("./pages/Stories"));
 const InvoicePage = lazy(() => import("./pages/Invoice"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const ExperiencesPage = lazy(() => import("./pages/Experiences"));
+const ExperienceDetailPage = lazy(() => import("./pages/ExperienceDetail"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -83,6 +85,8 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/invoice/:bookingId" element={<InvoicePage />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/experiences" element={<ExperiencesPage />} />
+                <Route path="/experiences/:experienceId" element={<ExperienceDetailPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
