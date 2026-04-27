@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/trips";
 import { calculateDynamicPrice, DynamicPriceResult } from "@/lib/dynamicPricing";
+import { autoShiftEmptyBatches } from "@/lib/autoShiftBatches";
 
 export interface BatchInfo {
   id: string;
