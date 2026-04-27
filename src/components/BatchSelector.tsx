@@ -227,14 +227,6 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
                 </span>
               </div>
             </div>
-            {!isSoldOut && (
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <Users className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  {batch.available_seats} seat{batch.available_seats !== 1 ? "s" : ""} remaining
-                </span>
-              </div>
-            )}
           </button>
         );
       })}
