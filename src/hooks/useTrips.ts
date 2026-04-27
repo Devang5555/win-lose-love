@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { trips as staticTrips, Trip } from "@/data/trips";
+import { autoShiftEmptyBatches } from "@/lib/autoShiftBatches";
 
 export interface DatabaseTrip {
   id: string;
