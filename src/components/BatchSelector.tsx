@@ -72,6 +72,8 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
       setLoading(true);
       setError(null);
 
+      try { await autoShiftEmptyBatches(); } catch { /* non-fatal */ }
+
       const { data, error: fetchError } = await supabase
         .from("batches")
         .select("id, batch_name, start_date, end_date, batch_size, available_seats, price_override, status")
