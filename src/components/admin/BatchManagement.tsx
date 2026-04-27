@@ -104,6 +104,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
         batch_size: parseInt(formData.batch_size),
         status: formData.status,
         auto_shift: formData.auto_shift,
+        auto_duplicate: formData.auto_duplicate,
       });
 
       if (error) {
@@ -126,6 +127,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
       batch_size: batch.batch_size.toString(),
       status: batch.status,
       auto_shift: batch.auto_shift ?? true,
+      auto_duplicate: batch.auto_duplicate ?? true,
     });
     setIsAdding(true);
   };
