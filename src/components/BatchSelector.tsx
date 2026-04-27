@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/trips";
 import { calculateDynamicPrice, DynamicPriceResult } from "@/lib/dynamicPricing";
 import { autoShiftEmptyBatches } from "@/lib/autoShiftBatches";
+import { autoDuplicateBatches } from "@/lib/autoDuplicateBatches";
 
 export interface BatchInfo {
   id: string;
@@ -73,6 +74,7 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
       setError(null);
 
       try { await autoShiftEmptyBatches(); } catch { /* non-fatal */ }
+      try { await autoDuplicateBatches(); } catch { /* non-fatal */ }
 
       const { data, error: fetchError } = await supabase
         .from("batches")
