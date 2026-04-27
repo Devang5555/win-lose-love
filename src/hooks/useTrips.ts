@@ -94,6 +94,10 @@ export const useTrips = () => {
       setLoading(true);
       setError(null);
 
+      // Auto-shift past empty batches forward (one-shot per session).
+      // Awaited so the subsequent batches query reflects the new dates.
+      try { await autoShiftEmptyBatches(); } catch { /* non-fatal */ }
+
       // Fetch batches from database (source of truth for availability)
       const { data: dbBatches, error: batchesError } = await supabase
         .from("batches")
