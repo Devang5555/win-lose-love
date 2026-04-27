@@ -198,7 +198,7 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
                     {badge.label}
                   </Badge>
                 ))}
-                {getSeatBadge(batch.available_seats)}
+                {getSeatBadge(batch.batch_size, Math.max(0, batch.batch_size - batch.available_seats), batch.available_seats)}
               </div>
             </div>
             <div className="flex items-center justify-between">
