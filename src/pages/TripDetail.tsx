@@ -588,7 +588,7 @@ const TripDetail = () => {
                       <div className="flex items-center gap-3 text-sm">
                         <Users className="w-5 h-5 text-accent" />
                         <span className="text-card-foreground font-medium">
-                          {selectedBatch.available_seats} seat{selectedBatch.available_seats !== 1 ? 's' : ''} remaining
+                          {selectedBatch.available_seats} seat{selectedBatch.available_seats !== 1 ? 's' : ''} available
                         </span>
                       </div>
                     )}
