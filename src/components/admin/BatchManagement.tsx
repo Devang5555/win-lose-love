@@ -86,8 +86,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
           available_seats: newAvailableSeats,
           status: formData.status,
           auto_shift: formData.auto_shift,
-        })
-        .eq("id", editingId);
+          auto_duplicate: formData.auto_duplicate,
 
       if (error) {
         toast({ title: "Error", description: "Failed to update batch", variant: "destructive" });
