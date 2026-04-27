@@ -12,7 +12,7 @@ import { useTrips } from "@/hooks/useTrips";
 import { useWishlist } from "@/hooks/useWishlist";
 
 const Trips = () => {
-  const { trips, loading, isTripBookable } = useTrips();
+  const { trips, loading, isTripBookable, batches } = useTrips();
   const { isInWishlist, isToggling, toggleWishlist } = useWishlist();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
@@ -155,6 +155,7 @@ const Trips = () => {
                         trip={trip}
                         featured
                         isBookable={isTripBookable(trip.trip_id)}
+                        batches={batches.filter((b) => b.trip_id === trip.trip_id)}
                         wishlistProps={{
                           isSaved: isInWishlist(trip.trip_id),
                           isToggling: isToggling(trip.trip_id),
