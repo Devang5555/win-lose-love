@@ -20,6 +20,7 @@ interface Batch {
   seats_booked: number;
   status: string;
   auto_shift?: boolean;
+  auto_duplicate?: boolean;
 }
 
 interface BatchManagementProps {
@@ -39,6 +40,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
     batch_size: "20",
     status: "active",
     auto_shift: true,
+    auto_duplicate: true,
   });
 
   const resetForm = () => {
@@ -50,6 +52,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
       batch_size: "20",
       status: "active",
       auto_shift: true,
+      auto_duplicate: true,
     });
     setIsAdding(false);
     setEditingId(null);
@@ -83,6 +86,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
           available_seats: newAvailableSeats,
           status: formData.status,
           auto_shift: formData.auto_shift,
+          auto_duplicate: formData.auto_duplicate,
         })
         .eq("id", editingId);
 
@@ -102,6 +106,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
         batch_size: parseInt(formData.batch_size),
         status: formData.status,
         auto_shift: formData.auto_shift,
+        auto_duplicate: formData.auto_duplicate,
       });
 
       if (error) {
@@ -124,6 +129,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
       batch_size: batch.batch_size.toString(),
       status: batch.status,
       auto_shift: batch.auto_shift ?? true,
+      auto_duplicate: batch.auto_duplicate ?? true,
     });
     setIsAdding(true);
   };
@@ -249,6 +255,17 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
             />
             <span className="text-sm text-foreground">
               Auto-shift if no bookings <span className="text-muted-foreground">(rolls dates +7 days when start date passes with zero bookings)</span>
+            </span>
+          </label>
+          <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={formData.auto_duplicate}
+              onChange={(e) => setFormData({ ...formData, auto_duplicate: e.target.checked })}
+              className="h-4 w-4 rounded border-border"
+            />
+            <span className="text-sm text-foreground">
+              Auto-create next batch <span className="text-muted-foreground">(creates a new +7-day batch when this one is sold out or its date passes)</span>
             </span>
           </label>
           <div className="flex gap-2 mt-4">

@@ -17,7 +17,7 @@ const categories = [
 ];
 
 const Experiences = () => {
-  const { loading, getExperiences } = useTrips();
+  const { loading, getExperiences, batches } = useTrips();
   const [filter, setFilter] = useState("all");
   const experiences = getExperiences();
   const filtered = filter === "all" ? experiences : experiences.filter((e) => e.experience_category === filter);
@@ -67,7 +67,11 @@ const Experiences = () => {
           ) : filtered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((exp) => (
-                <ExperienceCard key={exp.trip_id} experience={exp} />
+                <ExperienceCard
+                  key={exp.trip_id}
+                  experience={exp}
+                  batches={batches.filter((b) => b.trip_id === exp.trip_id)}
+                />
               ))}
             </div>
           ) : (

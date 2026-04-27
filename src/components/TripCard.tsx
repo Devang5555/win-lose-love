@@ -7,12 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import WishlistButton from "@/components/WishlistButton";
+import { getAggregateSeatStatus } from "@/lib/seatStatus";
 
 interface TripCardProps {
   trip: Trip | DatabaseTrip;
   featured?: boolean;
   isBookable?: boolean;
   onRegisterInterest?: (tripId: string) => void;
+  /** Active batches for this trip — used to derive Filling Fast / Sold Out indicator. */
+  batches?: Array<{ batch_size: number; seats_booked: number; status?: string }>;
   wishlistProps?: {
     isSaved: boolean;
     isToggling: boolean;
@@ -25,7 +28,8 @@ const isDatabaseTrip = (trip: Trip | DatabaseTrip): trip is DatabaseTrip => {
   return 'trip_id' in trip;
 };
 
-const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegisterInterest, wishlistProps }: TripCardProps) => {
+const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegisterInterest, batches, wishlistProps }: TripCardProps) => {
+  const seatStatus = getAggregateSeatStatus(batches || []);
   // Handle both Trip and DatabaseTrip types
   const tripId = isDatabaseTrip(trip) ? trip.trip_id : trip.tripId;
   const tripName = isDatabaseTrip(trip) ? trip.trip_name : trip.tripName;
@@ -157,8 +161,17 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
           )}
         </div>
 
-        {/* Limited seats micro-text */}
-        {isBookable && (
+        {/* Filling Fast / Sold Out indicator (uses live batch data) */}
+        {isBookable && seatStatus.label && (
+          <div className="mb-3">
+            <Badge className={cn("font-semibold text-xs", seatStatus.className)}>
+              {seatStatus.label}
+            </Badge>
+          </div>
+        )}
+
+        {/* Limited seats micro-text — shown only when no urgent indicator */}
+        {isBookable && !seatStatus.label && (
           <p className="text-xs text-accent mb-3 font-medium">
             Limited seats • Handpicked experiences
           </p>

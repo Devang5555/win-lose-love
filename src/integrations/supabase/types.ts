@@ -46,6 +46,7 @@ export type Database = {
       }
       batches: {
         Row: {
+          auto_duplicate: boolean
           auto_shift: boolean
           available_seats: number | null
           batch_name: string
@@ -61,6 +62,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          auto_duplicate?: boolean
           auto_shift?: boolean
           available_seats?: number | null
           batch_name: string
@@ -76,6 +78,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          auto_duplicate?: boolean
           auto_shift?: boolean
           available_seats?: number | null
           batch_name?: string
@@ -1258,6 +1261,7 @@ export type Database = {
         Args: { p_amount: number; p_booking_id: string; p_user_id: string }
         Returns: boolean
       }
+      auto_duplicate_batches: { Args: never; Returns: number }
       auto_shift_empty_batches: { Args: never; Returns: number }
       cancel_booking_with_seat_release: {
         Args: {

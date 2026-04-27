@@ -17,7 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import WalletBanner from "@/components/WalletBanner";
 
 const Index = () => {
-  const { loading, getBookableTrips, getUpcomingTrips } = useTrips();
+  const { loading, getBookableTrips, getUpcomingTrips, batches } = useTrips();
   const { destinations, loading: destLoading, getDestinationsByState, getFeaturedDestinations } = useDestinations();
   const { isInWishlist, isToggling, toggleWishlist } = useWishlist();
   const [showInterestPopup, setShowInterestPopup] = useState(false);
@@ -94,6 +94,7 @@ const Index = () => {
                   trip={trip} 
                   featured={false} 
                   isBookable={true}
+                  batches={batches.filter((b) => b.trip_id === trip.trip_id)}
                   wishlistProps={{
                     isSaved: isInWishlist(trip.trip_id),
                     isToggling: isToggling(trip.trip_id),

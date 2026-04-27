@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Calendar, Users, AlertTriangle, TrendingUp, Sparkles, CheckCircle } from "lucide-react";
+import { Calendar, Users, AlertTriangle, TrendingUp, Sparkles, CheckCircle, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/trips";
 import { calculateDynamicPrice, DynamicPriceResult } from "@/lib/dynamicPricing";
 import { autoShiftEmptyBatches } from "@/lib/autoShiftBatches";
+import { autoDuplicateBatches } from "@/lib/autoDuplicateBatches";
+import { getSeatStatus } from "@/lib/seatStatus";
 
 export interface BatchInfo {
   id: string;
@@ -33,31 +35,18 @@ const formatDate = (dateString: string) =>
     year: "numeric",
   });
 
-const getSeatBadge = (seats: number) => {
-  if (seats === 0) {
+const getSeatBadge = (capacity: number, seatsBooked: number, available: number) => {
+  const status = getSeatStatus(capacity, seatsBooked);
+  if (status.label) {
     return (
-      <Badge className="bg-destructive/10 text-destructive border-destructive/20 font-semibold text-xs">
-        Sold Out
-      </Badge>
-    );
-  }
-  if (seats <= 3) {
-    return (
-      <Badge className="bg-destructive/10 text-destructive border-destructive/20 font-semibold text-xs animate-pulse">
-        Only {seats} seat{seats !== 1 ? "s" : ""} left
-      </Badge>
-    );
-  }
-  if (seats <= 10) {
-    return (
-      <Badge className="bg-accent/10 text-accent border-accent/20 font-semibold text-xs">
-        Filling Fast · {seats} seats
+      <Badge className={`${status.className} font-semibold text-xs ${status.level === "low" ? "animate-pulse" : ""}`}>
+        {status.label}
       </Badge>
     );
   }
   return (
     <Badge variant="secondary" className="text-xs font-medium">
-      {seats} seats available
+      {available} seats available
     </Badge>
   );
 };
@@ -73,6 +62,7 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
       setError(null);
 
       try { await autoShiftEmptyBatches(); } catch { /* non-fatal */ }
+      try { await autoDuplicateBatches(); } catch { /* non-fatal */ }
 
       const { data, error: fetchError } = await supabase
         .from("batches")
@@ -208,7 +198,7 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
                     {badge.label}
                   </Badge>
                 ))}
-                {getSeatBadge(batch.available_seats)}
+                {getSeatBadge(batch.batch_size, Math.max(0, batch.batch_size - batch.available_seats), batch.available_seats)}
               </div>
             </div>
             <div className="flex items-center justify-between">
