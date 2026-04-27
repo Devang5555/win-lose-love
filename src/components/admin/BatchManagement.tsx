@@ -19,6 +19,7 @@ interface Batch {
   batch_size: number;
   seats_booked: number;
   status: string;
+  auto_shift?: boolean;
 }
 
 interface BatchManagementProps {
