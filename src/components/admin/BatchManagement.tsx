@@ -38,6 +38,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
     end_date: "",
     batch_size: "20",
     status: "active",
+    auto_shift: true,
   });
 
   const resetForm = () => {
@@ -48,6 +49,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
       end_date: "",
       batch_size: "20",
       status: "active",
+      auto_shift: true,
     });
     setIsAdding(false);
     setEditingId(null);
