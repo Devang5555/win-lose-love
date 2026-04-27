@@ -79,6 +79,14 @@ const ExperienceCard = ({ experience, batches }: ExperienceCardProps) => {
           )}
         </div>
 
+        {experience.booking_live && seatStatus.label && (
+          <div className="mb-3">
+            <Badge className={cn("font-semibold text-xs", seatStatus.className)}>
+              {seatStatus.label}
+            </Badge>
+          </div>
+        )}
+
         {/* Price & CTA */}
         <div className="flex items-end justify-between pt-3 border-t border-border gap-2">
           <div>
