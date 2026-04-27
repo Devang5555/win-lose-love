@@ -82,6 +82,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
           batch_size: newBatchSize,
           available_seats: newAvailableSeats,
           status: formData.status,
+          auto_shift: formData.auto_shift,
         })
         .eq("id", editingId);
 
@@ -100,6 +101,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
         end_date: formData.end_date,
         batch_size: parseInt(formData.batch_size),
         status: formData.status,
+        auto_shift: formData.auto_shift,
       });
 
       if (error) {
@@ -121,6 +123,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
       end_date: batch.end_date,
       batch_size: batch.batch_size.toString(),
       status: batch.status,
+      auto_shift: batch.auto_shift ?? true,
     });
     setIsAdding(true);
   };
