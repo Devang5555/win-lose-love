@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Users, AlertTriangle, TrendingUp, Sparkles, CheckCircle } from "lucide-react";
+import { Calendar, Users, AlertTriangle, TrendingUp, Sparkles, CheckCircle, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,7 @@ import { formatPrice } from "@/data/trips";
 import { calculateDynamicPrice, DynamicPriceResult } from "@/lib/dynamicPricing";
 import { autoShiftEmptyBatches } from "@/lib/autoShiftBatches";
 import { autoDuplicateBatches } from "@/lib/autoDuplicateBatches";
+import { getSeatStatus } from "@/lib/seatStatus";
 
 export interface BatchInfo {
   id: string;
