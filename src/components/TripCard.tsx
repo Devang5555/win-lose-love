@@ -161,8 +161,17 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
           )}
         </div>
 
-        {/* Limited seats micro-text */}
-        {isBookable && (
+        {/* Filling Fast / Sold Out indicator (uses live batch data) */}
+        {isBookable && seatStatus.label && (
+          <div className="mb-3">
+            <Badge className={cn("font-semibold text-xs", seatStatus.className)}>
+              {seatStatus.label}
+            </Badge>
+          </div>
+        )}
+
+        {/* Limited seats micro-text — shown only when no urgent indicator */}
+        {isBookable && !seatStatus.label && (
           <p className="text-xs text-accent mb-3 font-medium">
             Limited seats • Handpicked experiences
           </p>
