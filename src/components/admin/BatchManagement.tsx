@@ -19,6 +19,7 @@ interface Batch {
   batch_size: number;
   seats_booked: number;
   status: string;
+  auto_shift?: boolean;
 }
 
 interface BatchManagementProps {
@@ -37,6 +38,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
     end_date: "",
     batch_size: "20",
     status: "active",
+    auto_shift: true,
   });
 
   const resetForm = () => {
@@ -47,6 +49,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
       end_date: "",
       batch_size: "20",
       status: "active",
+      auto_shift: true,
     });
     setIsAdding(false);
     setEditingId(null);
@@ -79,6 +82,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
           batch_size: newBatchSize,
           available_seats: newAvailableSeats,
           status: formData.status,
+          auto_shift: formData.auto_shift,
         })
         .eq("id", editingId);
 
@@ -97,6 +101,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
         end_date: formData.end_date,
         batch_size: parseInt(formData.batch_size),
         status: formData.status,
+        auto_shift: formData.auto_shift,
       });
 
       if (error) {
@@ -118,6 +123,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
       end_date: batch.end_date,
       batch_size: batch.batch_size.toString(),
       status: batch.status,
+      auto_shift: batch.auto_shift ?? true,
     });
     setIsAdding(true);
   };
@@ -234,6 +240,17 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
               </Select>
             </div>
           </div>
+          <label className="flex items-center gap-2 mt-4 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={formData.auto_shift}
+              onChange={(e) => setFormData({ ...formData, auto_shift: e.target.checked })}
+              className="h-4 w-4 rounded border-border"
+            />
+            <span className="text-sm text-foreground">
+              Auto-shift if no bookings <span className="text-muted-foreground">(rolls dates +7 days when start date passes with zero bookings)</span>
+            </span>
+          </label>
           <div className="flex gap-2 mt-4">
             <Button onClick={handleSubmit}>
               <Save className="w-4 h-4 mr-2" />

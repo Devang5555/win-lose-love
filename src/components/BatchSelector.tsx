@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/trips";
 import { calculateDynamicPrice, DynamicPriceResult } from "@/lib/dynamicPricing";
+import { autoShiftEmptyBatches } from "@/lib/autoShiftBatches";
 
 export interface BatchInfo {
   id: string;
@@ -70,6 +71,8 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
     const fetchBatches = async () => {
       setLoading(true);
       setError(null);
+
+      try { await autoShiftEmptyBatches(); } catch { /* non-fatal */ }
 
       const { data, error: fetchError } = await supabase
         .from("batches")

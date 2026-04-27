@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { trips as staticTrips, Trip } from "@/data/trips";
+import { autoShiftEmptyBatches } from "@/lib/autoShiftBatches";
 
 export interface DatabaseTrip {
   id: string;
@@ -92,6 +93,10 @@ export const useTrips = () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Auto-shift past empty batches forward (one-shot per session).
+      // Awaited so the subsequent batches query reflects the new dates.
+      try { await autoShiftEmptyBatches(); } catch { /* non-fatal */ }
 
       // Fetch batches from database (source of truth for availability)
       const { data: dbBatches, error: batchesError } = await supabase
