@@ -257,6 +257,17 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
               Auto-shift if no bookings <span className="text-muted-foreground">(rolls dates +7 days when start date passes with zero bookings)</span>
             </span>
           </label>
+          <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={formData.auto_duplicate}
+              onChange={(e) => setFormData({ ...formData, auto_duplicate: e.target.checked })}
+              className="h-4 w-4 rounded border-border"
+            />
+            <span className="text-sm text-foreground">
+              Auto-create next batch <span className="text-muted-foreground">(creates a new +7-day batch when this one is sold out or its date passes)</span>
+            </span>
+          </label>
           <div className="flex gap-2 mt-4">
             <Button onClick={handleSubmit}>
               <Save className="w-4 h-4 mr-2" />
