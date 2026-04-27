@@ -20,6 +20,7 @@ interface Batch {
   seats_booked: number;
   status: string;
   auto_shift?: boolean;
+  auto_duplicate?: boolean;
 }
 
 interface BatchManagementProps {
@@ -39,6 +40,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
     batch_size: "20",
     status: "active",
     auto_shift: true,
+    auto_duplicate: true,
   });
 
   const resetForm = () => {
@@ -50,6 +52,7 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
       batch_size: "20",
       status: "active",
       auto_shift: true,
+      auto_duplicate: true,
     });
     setIsAdding(false);
     setEditingId(null);
