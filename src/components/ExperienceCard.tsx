@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { MapPin, Clock, ChevronRight, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { DatabaseTrip } from "@/hooks/useTrips";
+import { getAggregateSeatStatus } from "@/lib/seatStatus";
 
 const categoryEmoji: Record<string, string> = {
   cycling: "🚴",
@@ -14,8 +16,14 @@ const categoryEmoji: Record<string, string> = {
   activity: "🚀",
 };
 
-const ExperienceCard = ({ experience }: { experience: DatabaseTrip }) => {
+interface ExperienceCardProps {
+  experience: DatabaseTrip;
+  batches?: Array<{ batch_size: number; seats_booked: number; status?: string }>;
+}
+
+const ExperienceCard = ({ experience, batches }: ExperienceCardProps) => {
   const emoji = categoryEmoji[experience.experience_category || ""] || "🚀";
+  const seatStatus = getAggregateSeatStatus(batches || []);
 
   return (
     <Link
