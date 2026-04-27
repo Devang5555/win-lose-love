@@ -6,7 +6,7 @@ import ExperienceCard from "@/components/ExperienceCard";
 import { useTrips } from "@/hooks/useTrips";
 
 const ExperiencesSection = () => {
-  const { loading, getExperiences } = useTrips();
+  const { loading, getExperiences, batches } = useTrips();
   const experiences = getExperiences();
 
   if (!loading && experiences.length === 0) return null;
@@ -44,7 +44,11 @@ const ExperiencesSection = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {experiences.slice(0, 6).map((exp) => (
-              <ExperienceCard key={exp.trip_id} experience={exp} />
+              <ExperienceCard
+                key={exp.trip_id}
+                experience={exp}
+                batches={batches.filter((b) => b.trip_id === exp.trip_id)}
+              />
             ))}
           </div>
         )}
