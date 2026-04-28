@@ -24,9 +24,9 @@ const HeroSection = () => {
     setCheckingTrip(true);
     const { data, error } = await supabase
       .from("bookings")
-      .select("trip_id, status, created_at")
+      .select("trip_id, booking_status, created_at")
       .eq("user_id", user.id)
-      .in("status", ["confirmed", "pending_verification", "advance_paid"])
+      .in("booking_status", ["confirmed", "pending_verification", "advance_paid", "fully_paid"])
       .order("created_at", { ascending: false })
       .limit(1);
     setCheckingTrip(false);
