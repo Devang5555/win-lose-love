@@ -43,51 +43,57 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-24 relative">
+        <div className="flex items-center justify-between h-16 md:h-24 gap-4">
           {/* Desktop Navigation - Left */}
-          <div className="hidden md:flex items-center gap-1 flex-1">
-            {navLinks.slice(0, 4).map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={cn(
-                  "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
-                  isActive(link.href)
-                    ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center gap-1 flex-1 min-w-0">
+            {navLinks.slice(0, 4).map((link) => {
+              const active = isActive(link.href);
+              const isHome = link.href === "/";
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className={cn(
+                    "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap",
+                    active
+                      ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
+                      : isHome
+                        ? "text-animated-gradient hover:opacity-80"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Logo - Centered on Desktop, Left on Mobile */}
           <Link
             to="/"
-            className="flex items-center gap-3 group md:absolute md:left-1/2 md:-translate-x-1/2"
+            className="flex items-center gap-2 md:gap-3 group shrink-0"
           >
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-lg">
+            <div className="w-11 h-11 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-lg shrink-0">
               <img
                 src={logo}
                 alt="GoBhraman Logo"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               />
             </div>
-            <div className="flex flex-col">
-              <span className="font-serif text-xl md:text-2xl font-bold text-foreground">GoBhraman</span>
-              <span className="text-[10px] md:text-xs text-primary font-semibold -mt-1 tracking-wide">भ्रमण से मिटे भ्रम</span>
+            <div className="hidden sm:flex flex-col">
+              <span className="font-serif text-lg md:text-xl font-bold text-foreground leading-tight">GoBhraman</span>
+              <span className="text-[10px] md:text-xs text-primary font-semibold tracking-wide leading-tight">भ्रमण से मिटे भ्रम</span>
             </div>
           </Link>
 
           {/* Desktop Navigation Right + CTA */}
-          <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
+          <div className="hidden md:flex items-center gap-2 flex-1 justify-end min-w-0">
             {navLinks.slice(4).map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
                 className={cn(
-                  "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
+                  "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap",
                   isActive(link.href)
                     ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -154,7 +160,7 @@ const Navbar = () => {
               </Button>
             )}
 
-            <Button asChild className="bg-gradient-to-r from-primary to-accent hover:opacity-90 font-bold shadow-lg">
+            <Button asChild className="bg-animated-gradient text-primary-foreground hover:opacity-90 font-bold shadow-lg border-0">
               <Link to="/trips">Book Now</Link>
             </Button>
           </div>
@@ -239,7 +245,7 @@ const Navbar = () => {
               )}
               
               <div className="pt-4 mt-2 border-t border-border">
-                <Button asChild className="w-full bg-gradient-to-r from-primary to-accent font-bold">
+                <Button asChild className="w-full bg-animated-gradient text-primary-foreground font-bold border-0">
                   <Link to="/trips" onClick={() => setIsOpen(false)}>Book Now</Link>
                 </Button>
               </div>

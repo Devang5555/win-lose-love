@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Compass, Mountain, Utensils, X } from "lucide-react";
+import { ArrowRight, Compass, Mountain, Utensils, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -131,11 +132,35 @@ const HeroSection = () => {
             disabled={checkingTrip}
             variant="outline"
             size="lg"
-            className="text-lg px-8 bg-background/10 border-background/30 text-background hover:bg-background/20 hover:text-background backdrop-blur-sm"
+            className="text-lg px-8 bg-background/10 border-background/30 text-background hover:bg-background/20 hover:text-background backdrop-blur-sm min-w-[200px]"
           >
-            {checkingTrip ? "Checking…" : "Get Trip Updates"}
+            {checkingTrip ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Checking your trips…
+              </span>
+            ) : (
+              "Get Trip Updates"
+            )}
           </Button>
         </div>
+
+        {/* Skeleton state while checking bookings */}
+        {checkingTrip && (
+          <div className="max-w-md mx-auto mb-12 animate-fade-in">
+            <div className="bg-background/10 backdrop-blur-md border border-background/20 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-10 h-10 rounded-full bg-background/20" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3 w-3/4 bg-background/20" />
+                  <Skeleton className="h-3 w-1/2 bg-background/20" />
+                </div>
+              </div>
+              <Skeleton className="h-3 w-full bg-background/20" />
+              <Skeleton className="h-3 w-5/6 bg-background/20" />
+            </div>
+          </div>
+        )}
 
         {/* Feature Pills */}
         <div className="flex flex-wrap items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
