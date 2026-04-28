@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Compass, Mountain, Utensils, X } from "lucide-react";
+import { ArrowRight, Compass, Mountain, Utensils, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
