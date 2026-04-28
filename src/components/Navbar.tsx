@@ -43,30 +43,15 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo - Now Circular */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-lg">
-              <img 
-                src={logo} 
-                alt="GoBhraman Logo" 
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-serif text-xl font-bold text-foreground">GoBhraman</span>
-              <span className="text-[10px] text-primary font-semibold -mt-1 tracking-wide">भ्रमण से मिटे भ्रम</span>
-            </div>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
+        <div className="flex items-center justify-between h-16 md:h-24 relative">
+          {/* Desktop Navigation - Left */}
+          <div className="hidden md:flex items-center gap-1 flex-1">
+            {navLinks.slice(0, 4).map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
                 className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
+                  "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
                   isActive(link.href)
                     ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -77,20 +62,48 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Logo - Centered on Desktop, Left on Mobile */}
+          <Link
+            to="/"
+            className="flex items-center gap-3 group md:absolute md:left-1/2 md:-translate-x-1/2"
+          >
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-lg">
+              <img
+                src={logo}
+                alt="GoBhraman Logo"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-serif text-xl md:text-2xl font-bold text-foreground">GoBhraman</span>
+              <span className="text-[10px] md:text-xs text-primary font-semibold -mt-1 tracking-wide">भ्रमण से मिटे भ्रम</span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation Right + CTA */}
+          <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
+            {navLinks.slice(4).map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className={cn(
+                  "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
+                  isActive(link.href)
+                    ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
             <GlobalSearchBar variant="navbar" />
-            <a href="tel:+919415026522" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
-              <Phone className="w-4 h-4" />
-              <span className="font-medium">+91-9415026522</span>
-            </a>
-            
+
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2 font-semibold relative">
                     <User className="w-4 h-4" />
-                    <span className="max-w-[100px] truncate">{user.email?.split('@')[0]}</span>
+                    <span className="max-w-[80px] truncate">{user.email?.split('@')[0]}</span>
                     {balance > 0 && (
                       <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
                         ₹{balance >= 1000 ? `${(balance / 1000).toFixed(0)}k` : balance}
@@ -140,7 +153,7 @@ const Navbar = () => {
                 <Link to="/auth">Login</Link>
               </Button>
             )}
-            
+
             <Button asChild className="bg-gradient-to-r from-primary to-accent hover:opacity-90 font-bold shadow-lg">
               <Link to="/trips">Book Now</Link>
             </Button>
