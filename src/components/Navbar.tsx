@@ -245,7 +245,7 @@ const Navbar = () => {
               )}
               
               <div className="pt-4 mt-2 border-t border-border">
-                <Button asChild className="w-full bg-gradient-to-r from-primary to-accent font-bold">
+                <Button asChild className="w-full bg-animated-gradient text-primary-foreground font-bold border-0">
                   <Link to="/trips" onClick={() => setIsOpen(false)}>Book Now</Link>
                 </Button>
               </div>
