@@ -585,23 +585,6 @@ const TripDetail = () => {
                       <Clock className="w-5 h-5 text-primary" />
                       <span className="text-card-foreground font-medium">{tripDuration}</span>
                     </div>
-                    {selectedBatch && (() => {
-                      const seatsBooked = Math.max(0, selectedBatch.batch_size - selectedBatch.available_seats);
-                      const status = getSeatStatus(selectedBatch.batch_size, seatsBooked);
-                      return (
-                        <div className="flex items-center gap-3 text-sm flex-wrap">
-                          <Users className="w-5 h-5 text-accent" />
-                          <span className="text-card-foreground font-medium">
-                            {selectedBatch.available_seats} seat{selectedBatch.available_seats !== 1 ? 's' : ''} available
-                          </span>
-                          {status.label && (
-                            <Badge className={`${status.className} font-semibold text-xs ${status.level === "low" ? "animate-pulse" : ""}`}>
-                              {status.label}
-                            </Badge>
-                          )}
-                        </div>
-                      );
-                    })()}
                     {!selectedBatch && tripCapacity && (
                       <div className="flex items-center gap-3 text-sm">
                         <Users className="w-5 h-5 text-accent" />

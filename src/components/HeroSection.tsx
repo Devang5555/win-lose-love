@@ -1,16 +1,43 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Compass, Mountain, Utensils, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const WELCOME_SHOWN_KEY = "gb_welcome_shown";
 
 const HeroSection = () => {
   const { user, roles } = useAuth();
+  const navigate = useNavigate();
   const [showWelcome, setShowWelcome] = useState(false);
+  const [checkingTrip, setCheckingTrip] = useState(false);
   const prevUserRef = useRef<string | null>(null);
+
+  const handleTripUpdates = async () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setCheckingTrip(true);
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("trip_id, booking_status, created_at")
+      .eq("user_id", user.id)
+      .in("booking_status", ["confirmed", "pending_verification", "advance_paid", "fully_paid"])
+      .order("created_at", { ascending: false })
+      .limit(1);
+    setCheckingTrip(false);
+
+    if (error || !data || data.length === 0 || !data[0].trip_id) {
+      toast({ title: "No trips booked yet", description: "Browse our trips and book your first adventure!" });
+      navigate("/trips");
+      return;
+    }
+    navigate(`/trips/${data[0].trip_id}`);
+  };
 
   useEffect(() => {
     // Show popup only when user transitions from logged-out to logged-in
@@ -99,10 +126,14 @@ const HeroSection = () => {
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="text-lg px-8 bg-background/10 border-background/30 text-background hover:bg-background/20 hover:text-background backdrop-blur-sm">
-            <Link to="/about">
-              Get Trip Updates
-            </Link>
+          <Button
+            onClick={handleTripUpdates}
+            disabled={checkingTrip}
+            variant="outline"
+            size="lg"
+            className="text-lg px-8 bg-background/10 border-background/30 text-background hover:bg-background/20 hover:text-background backdrop-blur-sm"
+          >
+            {checkingTrip ? "Checking…" : "Get Trip Updates"}
           </Button>
         </div>
 
