@@ -346,7 +346,7 @@ export const trips: Trip[] = [
       "Village homestay experience",
       "Coastal trail walks"
     ],
-    images: ["https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800&q=80"],
+    images: ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80"],
     isActive: true,
     tripStatus: 'upcoming',
     locations: ["Guhagar", "Devgad", "Velneshwar"],
