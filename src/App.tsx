@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
+import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import ChunkErrorBoundary from "@/components/ChunkErrorBoundary";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import Index from "./pages/Index";
@@ -92,6 +93,7 @@ const App = () => (
             </Suspense>
           </ChunkErrorBoundary>
           <BottomNav />
+          <FloatingWhatsApp />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
