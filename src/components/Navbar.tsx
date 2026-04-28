@@ -160,7 +160,7 @@ const Navbar = () => {
               </Button>
             )}
 
-            <Button asChild className="bg-gradient-to-r from-primary to-accent hover:opacity-90 font-bold shadow-lg">
+            <Button asChild className="bg-animated-gradient text-primary-foreground hover:opacity-90 font-bold shadow-lg border-0">
               <Link to="/trips">Book Now</Link>
             </Button>
           </div>
