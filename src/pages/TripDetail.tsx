@@ -31,6 +31,8 @@ import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
 import { getTripItinerary } from "@/data/tripItineraries";
+import { adaptAdminItinerary, isAdminItineraryUsable } from "@/lib/tripItineraryAdapter";
+import { resolveTripPolicies } from "@/lib/tripPolicies";
 
 const TripDetail = () => {
   const { tripId } = useParams<{ tripId: string }>();
