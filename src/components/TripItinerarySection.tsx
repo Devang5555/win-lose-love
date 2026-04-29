@@ -8,6 +8,7 @@ import type { TripItineraryData } from "@/data/tripItineraries";
 
 interface TripItinerarySectionProps {
   data: TripItineraryData;
+  policies?: string[];
 }
 
 const SectionDivider = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (
