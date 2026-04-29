@@ -107,12 +107,12 @@ const HeroSection = () => {
         </div>
 
         <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold text-background mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          Discover India
-          <span className="block text-primary mt-2">Beyond the Map</span>
+          Explore India with
+          <span className="block text-primary mt-2">Curated Trips & Experiences</span>
         </h1>
 
         <p className="text-lg md:text-xl text-background/90 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          Curated journeys across India for explorers who seek culture, adventure, and real connections — not tourist checklists.
+          Affordable, well-planned group trips with verified stays.
         </p>
 
         {/* Search Bar */}
@@ -120,29 +120,49 @@ const HeroSection = () => {
           <GlobalSearchBar variant="hero" />
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-3 animate-slide-up" style={{ animationDelay: '0.3s' }}>
           <Button asChild size="lg" className="text-lg px-8 shadow-lg hover:shadow-xl transition-shadow">
             <Link to="/trips">
-              Start Your Journey
+              Explore Trips
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
           </Button>
           <Button
-            onClick={handleTripUpdates}
-            disabled={checkingTrip}
+            asChild
             variant="outline"
             size="lg"
-            className="text-lg px-8 bg-background/10 border-background/30 text-background hover:bg-background/20 hover:text-background backdrop-blur-sm min-w-[200px]"
+            className="text-lg px-8 bg-[#25D366]/15 border-[#25D366]/40 text-background hover:bg-[#25D366]/25 hover:text-background backdrop-blur-sm min-w-[200px]"
+          >
+            <a
+              href={`https://wa.me/919415026522?text=${encodeURIComponent("Hi GoBhraman! I'd like to know more about your trips.")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <MessageCircle className="w-5 h-5 mr-2" />
+              Chat on WhatsApp
+            </a>
+          </Button>
+        </div>
+        <p className="text-sm text-background/80 mb-12 animate-slide-up" style={{ animationDelay: '0.35s' }}>
+          💬 Chat on WhatsApp to get instant details
+        </p>
+
+        {/* Secondary action: trip updates */}
+        <div className="mb-10 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <button
+            onClick={handleTripUpdates}
+            disabled={checkingTrip}
+            className="text-sm text-background/85 underline-offset-4 hover:underline inline-flex items-center gap-2 disabled:opacity-60"
           >
             {checkingTrip ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" />
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
                 Checking your trips…
-              </span>
+              </>
             ) : (
-              "Get Trip Updates"
+              "Already booked? Get trip updates →"
             )}
-          </Button>
+          </button>
         </div>
 
         {/* Skeleton state while checking bookings */}
