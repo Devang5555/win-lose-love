@@ -391,26 +391,38 @@ const TripDetail = () => {
               {/* Reviews Section */}
               {tripId && <TripReviews tripId={tripId} />}
 
-              {/* Detailed Itinerary Section (from tripItineraries data) */}
+              {/* Detailed Itinerary Section — admin-managed (DB) > hardcoded fallback */}
               {(() => {
-                const itineraryData = tripId ? getTripItinerary(tripId) : null;
-                if (itineraryData) {
-                  return <TripItinerarySection data={itineraryData} />;
-                }
-                return null;
+                const adminRaw = (liveDbTrip as any)?.itinerary_data;
+                const itineraryData = isAdminItineraryUsable(adminRaw)
+                  ? adaptAdminItinerary(adminRaw)
+                  : tripId
+                    ? getTripItinerary(tripId)
+                    : null;
+                if (!itineraryData) return null;
+                const policies = resolveTripPolicies(
+                  (liveDbTrip as any)?.policies,
+                  tripName,
+                  tripLocations,
+                );
+                return <TripItinerarySection data={itineraryData} policies={policies} />;
               })()}
 
-              {/* Tabs */}
-              <Tabs defaultValue={tripId && getTripItinerary(tripId) ? "inclusions" : "itinerary"} className="w-full">
+              {(() => {
+                const adminRaw = (liveDbTrip as any)?.itinerary_data;
+                const hasItinerarySection =
+                  isAdminItineraryUsable(adminRaw) || (tripId && getTripItinerary(tripId));
+                return (
+              <Tabs defaultValue={hasItinerarySection ? "inclusions" : "itinerary"} className="w-full">
                 <TabsList className="w-full justify-start mb-6 bg-muted h-auto p-1 md:p-1.5 rounded-xl">
-                  {!(tripId && getTripItinerary(tripId)) && (
+                  {!hasItinerarySection && (
                     <TabsTrigger value="itinerary" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Itinerary</TabsTrigger>
                   )}
                   <TabsTrigger value="inclusions" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Included</TabsTrigger>
                   <TabsTrigger value="policy" className="flex-1 md:flex-none rounded-lg font-semibold text-xs md:text-sm px-2 md:px-3">Policies</TabsTrigger>
                 </TabsList>
 
-                {!(tripId && getTripItinerary(tripId)) && (
+                {!hasItinerarySection && (
                 <TabsContent value="itinerary" className="space-y-6">
                   {trip?.itinerary ? (
                     trip.itinerary.map((day) => (
