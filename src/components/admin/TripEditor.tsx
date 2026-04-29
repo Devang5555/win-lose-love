@@ -74,6 +74,8 @@ const emptyForm: TripFormData = {
   experience_category: "",
   tags: [],
   safety_info: [],
+  itinerary_data: null,
+  policies: [],
 };
 
 const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
