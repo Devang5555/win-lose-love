@@ -922,9 +922,11 @@ export type Database = {
           images: string[] | null
           inclusions: string[] | null
           is_active: boolean | null
+          itinerary_data: Json | null
           locations: string[] | null
           notes: string | null
           overview: string | null
+          policies: Json | null
           price_default: number
           price_from_mumbai: number | null
           price_from_pune: number | null
@@ -957,9 +959,11 @@ export type Database = {
           images?: string[] | null
           inclusions?: string[] | null
           is_active?: boolean | null
+          itinerary_data?: Json | null
           locations?: string[] | null
           notes?: string | null
           overview?: string | null
+          policies?: Json | null
           price_default?: number
           price_from_mumbai?: number | null
           price_from_pune?: number | null
@@ -992,9 +996,11 @@ export type Database = {
           images?: string[] | null
           inclusions?: string[] | null
           is_active?: boolean | null
+          itinerary_data?: Json | null
           locations?: string[] | null
           notes?: string | null
           overview?: string | null
+          policies?: Json | null
           price_default?: number
           price_from_mumbai?: number | null
           price_from_pune?: number | null

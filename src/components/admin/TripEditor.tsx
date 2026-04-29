@@ -9,6 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import TripItineraryEditor from "./TripItineraryEditor";
+import type { RawItineraryJson } from "@/lib/tripItineraryAdapter";
 
 interface TripFormData {
   trip_id: string;
@@ -36,6 +38,8 @@ interface TripFormData {
   experience_category: string;
   tags: string[];
   safety_info: string[];
+  itinerary_data: RawItineraryJson | null;
+  policies: string[];
 }
 
 interface TripEditorProps {
@@ -70,6 +74,8 @@ const emptyForm: TripFormData = {
   experience_category: "",
   tags: [],
   safety_info: [],
+  itinerary_data: null,
+  policies: [],
 };
 
 const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
@@ -133,6 +139,10 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
           experience_category: (data as any).experience_category || "",
           tags: (data as any).tags || [],
           safety_info: (data as any).safety_info || [],
+          itinerary_data: ((data as any).itinerary_data ?? null) as RawItineraryJson | null,
+          policies: Array.isArray((data as any).policies?.items)
+            ? ((data as any).policies.items as string[])
+            : [],
         });
       }
     } catch (error) {
@@ -177,6 +187,8 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       experience_category: formData.experience_category || null,
       tags: [...formData.tags],
       safety_info: [...formData.safety_info],
+      itinerary_data: formData.itinerary_data ?? null,
+      policies: formData.policies.length > 0 ? { items: formData.policies.filter((p) => p.trim()) } : null,
     };
 
     try {
@@ -643,6 +655,20 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                 rows={2}
               />
             </section>
+
+            {/* Itinerary + Policies (admin-managed per trip) */}
+            {formData.type !== "experience" && (
+              <section className="border-t border-border pt-6">
+                <TripItineraryEditor
+                  tripName={formData.trip_name}
+                  locations={formData.locations}
+                  itinerary={formData.itinerary_data}
+                  setItinerary={(v) => setFormData({ ...formData, itinerary_data: v })}
+                  policies={formData.policies}
+                  setPolicies={(v) => setFormData({ ...formData, policies: v })}
+                />
+              </section>
+            )}
 
             {/* Status Toggles */}
             <section className="flex flex-wrap gap-6">
