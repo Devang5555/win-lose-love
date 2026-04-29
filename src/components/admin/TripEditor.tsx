@@ -656,6 +656,20 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
               />
             </section>
 
+            {/* Itinerary + Policies (admin-managed per trip) */}
+            {formData.type !== "experience" && (
+              <section className="border-t border-border pt-6">
+                <TripItineraryEditor
+                  tripName={formData.trip_name}
+                  locations={formData.locations}
+                  itinerary={formData.itinerary_data}
+                  setItinerary={(v) => setFormData({ ...formData, itinerary_data: v })}
+                  policies={formData.policies}
+                  setPolicies={(v) => setFormData({ ...formData, policies: v })}
+                />
+              </section>
+            )}
+
             {/* Status Toggles */}
             <section className="flex flex-wrap gap-6">
               <div className="flex items-center gap-3">
