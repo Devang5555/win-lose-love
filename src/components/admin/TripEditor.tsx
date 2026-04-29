@@ -187,6 +187,8 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       experience_category: formData.experience_category || null,
       tags: [...formData.tags],
       safety_info: [...formData.safety_info],
+      itinerary_data: formData.itinerary_data ?? null,
+      policies: formData.policies.length > 0 ? { items: formData.policies.filter((p) => p.trim()) } : null,
     };
 
     try {
