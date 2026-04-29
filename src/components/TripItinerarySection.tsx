@@ -60,7 +60,7 @@ const TripItinerarySection = ({ data }: TripItinerarySectionProps) => {
 
       {/* Day-wise Accordion */}
       <div>
-        <SectionDivider icon={MapPin} title="Day-Wise Itinerary" />
+        <SectionDivider icon={MapPin} title="🗓️ Day-wise Itinerary" />
         <Accordion type="single" collapsible defaultValue="day-1" className="space-y-3">
           {data.itinerary.map((day) => (
             <ScrollReveal key={day.day} delay={day.day * 0.06}>
@@ -196,6 +196,11 @@ const TripItinerarySection = ({ data }: TripItinerarySectionProps) => {
       {data.hotels && data.hotels.length > 0 && (
         <div>
           <SectionDivider icon={Hotel} title="Hotels (Indicative)" />
+          <div className="mb-4 rounded-lg bg-accent/10 border border-accent/20 px-4 py-3">
+            <p className="text-sm text-foreground/85">
+              <span className="font-semibold">Note:</span> Hotels shown are indicative. Similar category hotels will be provided based on availability.
+            </p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.hotels.map((group, i) => (
               <ScrollReveal key={group.city} delay={i * 0.1}>
