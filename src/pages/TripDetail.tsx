@@ -536,6 +536,8 @@ const TripDetail = () => {
                   )}
                 </TabsContent>
               </Tabs>
+                );
+              })()}
             </div>
 
             {/* Sidebar */}
