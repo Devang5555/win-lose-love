@@ -266,6 +266,33 @@ const TripItinerarySection = ({ data }: TripItinerarySectionProps) => {
           </div>
         </div>
       )}
+
+      {/* Standard Booking & Trip Policies */}
+      <div>
+        <SectionDivider icon={Calendar} title="Booking & Trip Policies" />
+        <ScrollReveal>
+          <div className="bg-card rounded-xl border border-border/50 shadow-sm p-5">
+            <ul className="space-y-2.5 text-sm text-foreground/85">
+              <li className="flex items-start gap-2.5">
+                <ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                Booking confirmation is subject to availability.
+              </li>
+              <li className="flex items-start gap-2.5">
+                <ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                Cancellation as per company cancellation policy.
+              </li>
+              <li className="flex items-start gap-2.5">
+                <ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                Itinerary may change based on weather or local conditions.
+              </li>
+              <li className="flex items-start gap-2.5">
+                <ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                The organizer reserves the right to make changes when necessary.
+              </li>
+            </ul>
+          </div>
+        </ScrollReveal>
+      </div>
     </div>
   );
 };
