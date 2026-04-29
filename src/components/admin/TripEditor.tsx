@@ -139,6 +139,10 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
           experience_category: (data as any).experience_category || "",
           tags: (data as any).tags || [],
           safety_info: (data as any).safety_info || [],
+          itinerary_data: ((data as any).itinerary_data ?? null) as RawItineraryJson | null,
+          policies: Array.isArray((data as any).policies?.items)
+            ? ((data as any).policies.items as string[])
+            : [],
         });
       }
     } catch (error) {
