@@ -164,9 +164,9 @@ const tripItineraries: Record<string, TripItineraryData> = {
       { day: 8, title: "Amritsar Sightseeing & Departure", icon: Sun, stay: null, items: ["Early Golden Temple visit during Amrit Vela (pre-dawn)", "Jallianwala Bagh — pay respects at the historic memorial", "Partition Museum — powerful storytelling of 1947", "Wagah Border ceremony — patriotic flag-lowering experience", "Trip ends 🏁"] },
     ],
     staySummary: [
-      { destination: "Shimla", dates: "13 May → 15 May", nights: "2 Nights" },
-      { destination: "Manali", dates: "15 May → 19 May", nights: "4 Nights" },
-      { destination: "Amritsar", dates: "19 May → 20 May", nights: "1 Night" },
+      { destination: "Shimla", dates: "Day 1 → Day 3", nights: "2 Nights" },
+      { destination: "Manali", dates: "Day 3 → Day 7", nights: "4 Nights" },
+      { destination: "Amritsar", dates: "Day 7 → Day 8", nights: "1 Night" },
     ],
     distanceSummary: [
       { route: "Chandigarh → Shimla", distance: "~120 km" },
