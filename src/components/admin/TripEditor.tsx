@@ -38,6 +38,8 @@ interface TripFormData {
   experience_category: string;
   tags: string[];
   safety_info: string[];
+  itinerary_data: RawItineraryJson | null;
+  policies: string[];
 }
 
 interface TripEditorProps {
