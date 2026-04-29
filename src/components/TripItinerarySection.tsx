@@ -22,7 +22,7 @@ const SectionDivider = ({ icon: Icon, title }: { icon: React.ElementType; title:
   </ScrollReveal>
 );
 
-const TripItinerarySection = ({ data }: TripItinerarySectionProps) => {
+const TripItinerarySection = ({ data, policies }: TripItinerarySectionProps) => {
   const totalDistance = data.distanceSummary
     ? "~" + data.distanceSummary.reduce((sum, r) => {
         const num = parseInt(r.distance.replace(/[^0-9]/g, ""), 10);
