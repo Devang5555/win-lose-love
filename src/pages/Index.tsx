@@ -36,23 +36,23 @@ const Index = () => {
   const features = [
     {
       icon: Shield,
-      title: "Safe & Secure",
-      description: "All journeys include safety support and verified local stays"
+      title: "Verified Stays",
+      description: "Every hotel and homestay is hand-checked for quality and safety"
     },
     {
-      icon: Users,
-      title: "Small Groups",
-      description: "Intimate groups for authentic connections and experiences"
+      icon: Sparkles,
+      title: "No Hidden Costs",
+      description: "Transparent pricing — what you see is what you pay"
     },
     {
       icon: Compass,
-      title: "Local Experts",
-      description: "Guides who know the hidden stories and secret spots"
+      title: "Guided Trips",
+      description: "Local experts and trip leaders with you at every step"
     },
     {
-      icon: Headphones,
-      title: "24/7 Support",
-      description: "Round-the-clock assistance throughout your journey"
+      icon: Users,
+      title: "Budget-Friendly Pricing",
+      description: "Premium experiences without the premium price tag"
     }
   ];
 
@@ -118,9 +118,9 @@ const Index = () => {
       <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-muted to-secondary">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <span className="text-primary font-bold text-sm uppercase tracking-wider">Why GoBhraman</span>
+            <span className="text-primary font-bold text-sm uppercase tracking-wider">Why GoBhraman?</span>
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">
-              Travel with Purpose
+              Travel with Confidence
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
