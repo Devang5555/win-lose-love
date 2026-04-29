@@ -76,18 +76,18 @@ const Navbar = () => {
           {/* CENTER: Logo */}
           <Link
             to="/"
-            className="flex items-center gap-2 md:gap-3 group shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2"
+            className="flex items-center gap-2 group shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2 min-w-0"
           >
-            <div className="w-11 h-11 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-lg shrink-0">
+            <div className="w-10 h-10 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-lg shrink-0">
               <img
                 src={logo}
                 alt="GoBhraman Logo"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               />
             </div>
-            <div className="hidden sm:flex md:hidden lg:flex flex-col">
-              <span className="font-serif text-lg md:text-xl font-bold text-foreground leading-tight">GoBhraman</span>
-              <span className="text-[10px] md:text-xs text-primary font-semibold tracking-wide leading-tight">भ्रमण से मिटे भ्रम</span>
+            <div className="flex flex-col min-w-0">
+              <span className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground leading-tight whitespace-nowrap">GoBhraman</span>
+              <span className="hidden sm:block text-[10px] md:text-xs text-primary font-semibold tracking-wide leading-tight whitespace-nowrap">भ्रमण से मिटे भ्रम</span>
             </div>
           </Link>
 

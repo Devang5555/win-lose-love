@@ -667,12 +667,15 @@ const TripDetail = () => {
 
                   <Button 
                     variant="outline" 
-                    className="w-full mb-3"
+                    className="w-full mb-1 border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/10 hover:text-[#25D366]"
                     onClick={handleWhatsAppClick}
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
                     Chat on WhatsApp
                   </Button>
+                  <p className="text-xs text-center text-muted-foreground mb-3">
+                    💬 Chat on WhatsApp to get instant details
+                  </p>
 
                   <Button 
                     variant="ghost" 
