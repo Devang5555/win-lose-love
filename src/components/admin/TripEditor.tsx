@@ -9,6 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import TripItineraryEditor from "./TripItineraryEditor";
+import type { RawItineraryJson } from "@/lib/tripItineraryAdapter";
 
 interface TripFormData {
   trip_id: string;
