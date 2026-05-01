@@ -176,28 +176,21 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
             }`}
           >
             <div className="flex items-center justify-between gap-2 mb-1.5">
-              <span className="font-semibold text-sm text-card-foreground flex items-center gap-2">
+              <span className="font-semibold text-sm text-card-foreground flex items-center gap-2 flex-wrap">
                 {isSelected && <CheckCircle className="w-4 h-4 text-primary animate-in zoom-in-50 duration-200" />}
                 {batch.batch_name}
+                {(() => {
+                  const startDow = new Date(batch.start_date).getDay(); // 0=Sun..6=Sat
+                  const endDow = new Date(batch.end_date).getDay();
+                  const overlapsWeekend = [startDow, endDow].some(d => d === 0 || d === 5 || d === 6);
+                  return overlapsWeekend ? (
+                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0 h-4">
+                      🌴 Perfect Weekend Escape
+                    </Badge>
+                  ) : null;
+                })()}
               </span>
               <div className="flex items-center gap-1.5">
-                {dp.badges.map((badge, i) => (
-                  <Badge
-                    key={i}
-                    className={
-                      badge.type === "surge"
-                        ? "bg-orange-500/10 text-orange-600 border-orange-500/20 text-[10px] px-1.5 py-0 h-4"
-                        : "bg-green-500/10 text-green-600 border-green-500/20 text-[10px] px-1.5 py-0 h-4"
-                    }
-                  >
-                    {badge.type === "surge" ? (
-                      <TrendingUp className="w-2.5 h-2.5 mr-0.5" />
-                    ) : (
-                      <Sparkles className="w-2.5 h-2.5 mr-0.5" />
-                    )}
-                    {badge.label}
-                  </Badge>
-                ))}
                 {getSeatBadge(batch.batch_size, Math.max(0, batch.batch_size - batch.available_seats), batch.available_seats)}
               </div>
             </div>
@@ -206,16 +199,9 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
                 <Calendar className="w-3.5 h-3.5" />
                 {formatDate(batch.start_date)} – {formatDate(batch.end_date)}
               </span>
-              <div className="flex items-center gap-1.5">
-                {(hasSurge || hasDiscount) && (
-                  <span className="text-xs text-muted-foreground line-through">
-                    {formatPrice(dp.basePrice)}
-                  </span>
-                )}
-                <span className={`text-sm font-bold ${hasDiscount ? "text-green-600" : "text-primary"}`}>
-                  {formatPrice(dp.effectivePrice)}
-                </span>
-              </div>
+              <span className="text-sm font-bold text-primary">
+                {formatPrice(dp.effectivePrice)}
+              </span>
             </div>
           </button>
         );
