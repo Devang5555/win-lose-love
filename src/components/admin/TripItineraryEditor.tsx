@@ -1,4 +1,5 @@
-import { Plus, Trash2, ChevronUp, ChevronDown, MapPin, Calendar } from "lucide-react";
+import { useState } from "react";
+import { Plus, Trash2, ChevronUp, ChevronDown, MapPin, Calendar, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,6 +57,18 @@ const TripItineraryEditor = ({
     const j = idx + dir;
     if (j < 0 || j >= days.length) return;
     [days[idx], days[j]] = [days[j], days[idx]];
+    update({ itinerary: days.map((d, i) => ({ ...d, day: i + 1 })) });
+  };
+
+  // ——— Drag & drop reordering ———
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+
+  const reorder = (from: number, to: number) => {
+    if (from === to) return;
+    const days = [...(data.itinerary ?? [])];
+    const [moved] = days.splice(from, 1);
+    days.splice(to, 0, moved);
     update({ itinerary: days.map((d, i) => ({ ...d, day: i + 1 })) });
   };
 
