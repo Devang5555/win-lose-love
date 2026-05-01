@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Users, AlertTriangle, TrendingUp, Sparkles, CheckCircle, Flame } from "lucide-react";
+import { Calendar, AlertTriangle, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -158,8 +158,6 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
         const isSoldOut = batch.available_seats === 0;
         const isSelected = selectedBatchId === batch.id;
         const dp = batch.dynamicPrice!;
-        const hasSurge = dp.adjustmentPercent > 0;
-        const hasDiscount = dp.adjustmentPercent < 0;
 
         return (
           <button
