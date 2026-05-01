@@ -40,7 +40,7 @@ const SeoMeta = ({ title, description, image, url, type = "website" }: SeoMetaPr
     setMeta("description", description);
 
     return () => {
-      document.title = "GoBhraman - Adventure Travel";
+      document.title = "GoBhraman | Curated Trips Across India";
     };
   }, [title, description, image, url, type]);
 

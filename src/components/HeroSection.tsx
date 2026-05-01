@@ -120,7 +120,25 @@ const HeroSection = () => {
           <GlobalSearchBar variant="hero" />
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-3 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+        {/* Already booked? — moved above CTAs for visibility */}
+        <div className="mb-5 animate-slide-up" style={{ animationDelay: '0.28s' }}>
+          <button
+            onClick={handleTripUpdates}
+            disabled={checkingTrip}
+            className="text-sm text-background/90 underline-offset-4 hover:underline inline-flex items-center gap-2 disabled:opacity-60"
+          >
+            {checkingTrip ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Checking your trips…
+              </>
+            ) : (
+              "Already booked? Get trip updates →"
+            )}
+          </button>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-slide-up" style={{ animationDelay: '0.3s' }}>
           <Button asChild size="lg" className="text-lg px-8 shadow-lg hover:shadow-xl transition-shadow">
             <Link to="/trips">
               Explore Trips
@@ -142,27 +160,6 @@ const HeroSection = () => {
               Chat on WhatsApp
             </a>
           </Button>
-        </div>
-        <p className="text-sm text-background/80 mb-12 animate-slide-up" style={{ animationDelay: '0.35s' }}>
-          💬 Chat on WhatsApp to get instant details
-        </p>
-
-        {/* Secondary action: trip updates */}
-        <div className="mb-10 animate-slide-up" style={{ animationDelay: '0.4s' }}>
-          <button
-            onClick={handleTripUpdates}
-            disabled={checkingTrip}
-            className="text-sm text-background/85 underline-offset-4 hover:underline inline-flex items-center gap-2 disabled:opacity-60"
-          >
-            {checkingTrip ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Checking your trips…
-              </>
-            ) : (
-              "Already booked? Get trip updates →"
-            )}
-          </button>
         </div>
 
         {/* Skeleton state while checking bookings */}
