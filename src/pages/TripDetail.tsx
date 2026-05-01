@@ -21,6 +21,7 @@ import { useTrips } from "@/hooks/useTrips";
 import { useWishlist } from "@/hooks/useWishlist";
 import JsonLd from "@/components/JsonLd";
 import SeoMeta from "@/components/SeoMeta";
+import TripFaqSection from "@/components/TripFaqSection";
 import TripReviews from "@/components/TripReviews";
 import StarRating from "@/components/StarRating";
 import { useReviews } from "@/hooks/useReviews";
@@ -247,8 +248,8 @@ const TripDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <SeoMeta
-        title={`${tripName} - GoBhraman`}
-        description={tripSummary || `Explore ${tripName} with GoBhraman`}
+        title={`${tripName} | GoBhraman`}
+        description={tripSummary || `Explore ${tripName} with GoBhraman — curated trips across India.`}
         image={tripImages?.[0]}
         url={window.location.href}
         type="product"
@@ -538,6 +539,9 @@ const TripDetail = () => {
               </Tabs>
                 );
               })()}
+
+              {/* FAQs — reusable static section */}
+              <TripFaqSection />
             </div>
 
             {/* Sidebar */}

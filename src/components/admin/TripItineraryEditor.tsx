@@ -1,4 +1,5 @@
-import { Plus, Trash2, ChevronUp, ChevronDown, MapPin, Calendar } from "lucide-react";
+import { useState } from "react";
+import { Plus, Trash2, ChevronUp, ChevronDown, MapPin, Calendar, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,6 +60,18 @@ const TripItineraryEditor = ({
     update({ itinerary: days.map((d, i) => ({ ...d, day: i + 1 })) });
   };
 
+  // ——— Drag & drop reordering ———
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+
+  const reorder = (from: number, to: number) => {
+    if (from === to) return;
+    const days = [...(data.itinerary ?? [])];
+    const [moved] = days.splice(from, 1);
+    days.splice(to, 0, moved);
+    update({ itinerary: days.map((d, i) => ({ ...d, day: i + 1 })) });
+  };
+
   const updateDayItem = (dayIdx: number, itemIdx: number, value: string) => {
     const items = [...(data.itinerary?.[dayIdx]?.items ?? [])];
     items[itemIdx] = value;
@@ -114,11 +127,56 @@ const TripItineraryEditor = ({
           <p className="text-sm text-muted-foreground italic">No days added yet. Click "Add Day" to start.</p>
         )}
 
+        {(data.itinerary ?? []).length > 1 && (
+          <p className="text-xs text-muted-foreground mb-2">
+            Tip: Drag the <GripVertical className="inline w-3 h-3 -mt-0.5" /> handle to reorder days.
+          </p>
+        )}
+
         <div className="space-y-4">
-          {(data.itinerary ?? []).map((day, idx) => (
-            <div key={idx} className="border border-border rounded-xl p-4 bg-muted/20">
+          {(data.itinerary ?? []).map((day, idx) => {
+            const isDragging = dragIdx === idx;
+            const isOver = overIdx === idx && dragIdx !== null && dragIdx !== idx;
+            return (
+            <div
+              key={idx}
+              draggable
+              onDragStart={(e) => {
+                setDragIdx(idx);
+                e.dataTransfer.effectAllowed = "move";
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                if (overIdx !== idx) setOverIdx(idx);
+              }}
+              onDragLeave={() => {
+                if (overIdx === idx) setOverIdx(null);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (dragIdx !== null) reorder(dragIdx, idx);
+                setDragIdx(null);
+                setOverIdx(null);
+              }}
+              onDragEnd={() => {
+                setDragIdx(null);
+                setOverIdx(null);
+              }}
+              className={`border rounded-xl p-4 bg-muted/20 transition-all ${
+                isDragging ? "opacity-50 border-primary" : "border-border"
+              } ${isOver ? "border-primary ring-2 ring-primary/30 bg-primary/5" : ""}`}
+            >
               <div className="flex items-center justify-between mb-3">
-                <span className="font-semibold text-foreground">Day {day.day}</span>
+                <span className="font-semibold text-foreground flex items-center gap-2">
+                  <span
+                    className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
+                    title="Drag to reorder"
+                  >
+                    <GripVertical className="w-4 h-4" />
+                  </span>
+                  Day {day.day}
+                </span>
                 <div className="flex gap-1">
                   <Button type="button" size="sm" variant="ghost" onClick={() => moveDay(idx, -1)} disabled={idx === 0}>
                     <ChevronUp className="w-4 h-4" />
@@ -131,6 +189,7 @@ const TripItineraryEditor = ({
                   </Button>
                 </div>
               </div>
+
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                 <div className="md:col-span-2">
@@ -186,7 +245,8 @@ const TripItineraryEditor = ({
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
