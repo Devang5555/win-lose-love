@@ -47,10 +47,10 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between h-16 md:h-20 gap-4">
+      <div className="max-w-7xl mx-auto px-3 md:px-5">
+        <div className="flex items-center justify-between h-14 md:h-16 gap-3">
           {/* LEFT: Primary nav links (desktop) */}
-          <div className="hidden md:flex items-center gap-2 flex-1 basis-0 min-w-0">
+          <div className="hidden md:flex items-center gap-0.5 flex-1 basis-0 min-w-0">
             {primaryLinks.map((link) => {
               const active = isActive(link.href);
               const isHome = link.href === "/";
@@ -59,9 +59,9 @@ const Navbar = () => {
                   key={link.href}
                   to={link.href}
                   className={cn(
-                    "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap",
+                    "px-2.5 py-1.5 rounded-md text-[13px] font-semibold transition-all duration-200 whitespace-nowrap",
                     active
-                      ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
+                      ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-sm"
                       : isHome
                         ? "text-animated-gradient hover:opacity-80"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -78,21 +78,21 @@ const Navbar = () => {
             to="/"
             className="flex items-center gap-2 group shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2 min-w-0"
           >
-            <div className="w-10 h-10 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-lg shrink-0">
+            <div className="w-9 h-9 md:w-11 md:h-11 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-md shrink-0">
               <img
                 src={logo}
                 alt="GoBhraman Logo"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               />
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground leading-tight whitespace-nowrap">GoBhraman</span>
-              <span className="hidden sm:block text-[10px] md:text-xs text-primary font-semibold tracking-wide leading-tight whitespace-nowrap">भ्रमण से मिटे भ्रम</span>
+            <div className="flex flex-col min-w-0 leading-none">
+              <span className="font-serif text-sm sm:text-base md:text-lg font-bold text-foreground leading-tight whitespace-nowrap">GoBhraman</span>
+              <span className="hidden sm:block text-[9px] md:text-[10px] text-primary font-semibold tracking-wide leading-tight whitespace-nowrap">भ्रमण से मिटे भ्रम</span>
             </div>
           </Link>
 
           {/* RIGHT: Search + Profile + Book Now (desktop) */}
-          <div className="hidden md:flex items-center gap-2 flex-1 basis-0 justify-end min-w-0">
+          <div className="hidden md:flex items-center gap-1.5 flex-1 basis-0 justify-end min-w-0">
             <GlobalSearchBar variant="navbar" />
 
             {user ? (
