@@ -245,7 +245,8 @@ const TripItineraryEditor = ({
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
