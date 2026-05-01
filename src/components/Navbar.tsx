@@ -178,16 +178,16 @@ const Navbar = () => {
           </div>
 
           {/* MOBILE: Book Now + Hamburger */}
-          <div className="flex md:hidden items-center gap-2 shrink-0">
-            <Button asChild size="sm" className="bg-animated-gradient text-primary-foreground font-bold border-0 h-9 px-3 text-xs">
+          <div className="flex md:hidden items-center gap-1.5 shrink-0">
+            <Button asChild size="sm" className="bg-animated-gradient text-primary-foreground font-bold border-0 h-8 px-2.5 text-[11px]">
               <Link to="/trips">Book Now</Link>
             </Button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 text-foreground"
+              className="p-1.5 text-foreground"
               aria-label="Toggle menu"
             >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
