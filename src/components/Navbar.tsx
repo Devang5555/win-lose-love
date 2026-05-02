@@ -59,7 +59,7 @@ const Navbar = () => {
                   key={link.href}
                   to={link.href}
                   className={cn(
-                    "px-3 py-2 rounded-lg text-[15px] font-semibold tracking-tight transition-all duration-200 whitespace-nowrap",
+                    "nav-link px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap",
                     active
                       ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
                       : isHome
@@ -86,8 +86,8 @@ const Navbar = () => {
               />
             </div>
             <div className="flex flex-col min-w-0 leading-tight">
-              <span className="font-serif text-base sm:text-lg md:text-[22px] font-bold text-foreground whitespace-nowrap">GoBhraman</span>
-              <span className="hidden sm:block text-[10px] md:text-xs text-primary font-semibold tracking-wide whitespace-nowrap">भ्रमण से मिटे भ्रम</span>
+              <span className="font-serif text-lg sm:text-xl md:text-[24px] font-bold text-foreground whitespace-nowrap">GoBhraman</span>
+              <span className="hidden sm:block text-[11px] md:text-[13px] text-primary font-semibold tracking-wide whitespace-nowrap">भ्रमण से मिटे भ्रम</span>
             </div>
           </Link>
 

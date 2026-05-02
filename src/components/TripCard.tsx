@@ -115,15 +115,15 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
         featured && "lg:w-1/2 lg:p-8 lg:flex lg:flex-col lg:justify-center"
       )}>
         <h3 className={cn(
-          "font-serif font-bold text-card-foreground group-hover:text-primary transition-colors",
-          featured ? "text-2xl lg:text-3xl mb-3" : "text-xl mb-2"
+          "h3 group-hover:text-primary transition-colors",
+          featured ? "!text-2xl lg:!text-3xl mb-3" : "mb-2"
         )}>
           {tripName}
         </h3>
         
         <p className={cn(
-          "text-muted-foreground line-clamp-2 mb-4",
-          featured ? "text-base lg:text-lg" : "text-sm"
+          "small line-clamp-2 mb-4",
+          featured && "md:!text-base lg:!text-lg"
         )}>
           {summary}
         </p>

@@ -153,6 +153,35 @@
 }
 
 @layer components {
+  /* ===== Shared Typography System ===== */
+  .h1 {
+    @apply font-serif font-bold tracking-tight text-foreground text-4xl md:text-5xl lg:text-6xl leading-tight;
+  }
+  .h2 {
+    @apply font-serif font-bold tracking-tight text-foreground text-3xl md:text-4xl lg:text-5xl leading-tight;
+  }
+  .h3 {
+    @apply font-serif font-semibold tracking-tight text-foreground text-xl md:text-2xl leading-snug;
+  }
+  .body {
+    @apply font-sans text-base md:text-lg text-foreground/90 leading-relaxed;
+  }
+  .small {
+    @apply font-sans text-sm text-muted-foreground leading-normal;
+  }
+  .label {
+    @apply font-sans text-sm font-semibold tracking-tight text-foreground;
+  }
+  .badge-text {
+    @apply font-sans text-xs font-semibold uppercase tracking-wide;
+  }
+  .cta-primary {
+    @apply font-sans text-base font-bold tracking-tight;
+  }
+  .nav-link {
+    @apply font-sans text-[16px] font-semibold tracking-tight;
+  }
+
   .gradient-hero {
     background: var(--gradient-hero);
   }
