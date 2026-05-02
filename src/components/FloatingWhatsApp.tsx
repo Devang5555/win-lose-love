@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 const WHATSAPP_NUMBER = "919415026522";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   "Hi GoBhraman! I'd like to know more about your trips."
@@ -17,13 +19,26 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 );
 
 const FloatingWhatsApp = () => {
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<{ active: boolean }>;
+      setHidden(!!ce.detail?.active);
+    };
+    window.addEventListener("global-search-active", handler as EventListener);
+    return () => window.removeEventListener("global-search-active", handler as EventListener);
+  }, []);
+
   return (
     <a
       href={WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
-      className="fixed right-4 bottom-20 md:bottom-6 z-40 w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#25D366] text-white shadow-[0_8px_24px_rgba(37,211,102,0.45)] hover:shadow-[0_12px_28px_rgba(37,211,102,0.55)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center ring-2 ring-white/30"
+      className={`fixed right-4 bottom-20 md:bottom-6 z-40 w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#25D366] text-white shadow-[0_8px_24px_rgba(37,211,102,0.45)] hover:shadow-[0_12px_28px_rgba(37,211,102,0.55)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center ring-2 ring-white/30 ${
+        hidden ? "opacity-0 pointer-events-none scale-90" : "opacity-100"
+      }`}
     >
       <WhatsAppIcon className="w-7 h-7 md:w-8 md:h-8" />
     </a>
