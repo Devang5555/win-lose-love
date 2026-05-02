@@ -48,9 +48,9 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between h-16 md:h-20 gap-4">
+        <div className="flex items-center justify-between h-16 md:h-[76px] gap-4">
           {/* LEFT: Primary nav links (desktop) */}
-          <div className="hidden md:flex items-center gap-2 flex-1 basis-0 min-w-0">
+          <div className="hidden md:flex items-center gap-1 lg:gap-1.5 flex-1 basis-0 min-w-0">
             {primaryLinks.map((link) => {
               const active = isActive(link.href);
               const isHome = link.href === "/";
@@ -59,12 +59,12 @@ const Navbar = () => {
                   key={link.href}
                   to={link.href}
                   className={cn(
-                    "px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap",
+                    "px-3 py-2 rounded-lg text-[15px] font-semibold tracking-tight transition-all duration-200 whitespace-nowrap",
                     active
                       ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
                       : isHome
                         ? "text-animated-gradient hover:opacity-80"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        : "text-foreground/80 hover:text-foreground hover:bg-muted"
                   )}
                 >
                   {link.label}
@@ -76,18 +76,18 @@ const Navbar = () => {
           {/* CENTER: Logo */}
           <Link
             to="/"
-            className="flex items-center gap-2 group shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2 min-w-0"
+            className="flex items-center gap-2.5 group shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2 min-w-0"
           >
-            <div className="w-10 h-10 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-lg shrink-0">
+            <div className="w-11 h-11 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary transition-colors shadow-lg shrink-0">
               <img
                 src={logo}
                 alt="GoBhraman Logo"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               />
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-serif text-base sm:text-lg md:text-xl font-bold text-foreground leading-tight whitespace-nowrap">GoBhraman</span>
-              <span className="hidden sm:block text-[10px] md:text-xs text-primary font-semibold tracking-wide leading-tight whitespace-nowrap">भ्रमण से मिटे भ्रम</span>
+            <div className="flex flex-col min-w-0 leading-tight">
+              <span className="font-serif text-base sm:text-lg md:text-[22px] font-bold text-foreground whitespace-nowrap">GoBhraman</span>
+              <span className="hidden sm:block text-[10px] md:text-xs text-primary font-semibold tracking-wide whitespace-nowrap">भ्रमण से मिटे भ्रम</span>
             </div>
           </Link>
 

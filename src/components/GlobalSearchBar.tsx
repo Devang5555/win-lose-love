@@ -31,6 +31,19 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Broadcast dropdown open/close so floating UI can hide
+  const showDropdownState = isFocused && query.length >= 2;
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("global-search-active", { detail: { active: showDropdownState } })
+    );
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("global-search-active", { detail: { active: false } })
+      );
+    };
+  }, [showDropdownState]);
+
   const handleSelect = (result: SearchResult) => {
     const path = result.type === "trip" ? `/trips/${result.slug}` : `/destinations/${result.slug}`;
     navigate(path);
@@ -48,7 +61,7 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
     }
   };
 
-  const showDropdown = isFocused && query.length >= 2;
+  const showDropdown = showDropdownState;
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -89,12 +102,15 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
 
       {/* Suggestions Dropdown */}
       {showDropdown && (
-        <div className={cn(
-          "absolute z-[60] mt-2 w-full bg-card border border-border rounded-xl shadow-2xl overflow-hidden",
-          variant === "hero" ? "max-w-2xl" : "min-w-[320px] right-0"
-        )}>
+        <div
+          className={cn(
+            "absolute left-0 right-0 z-[100] mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden",
+            variant === "hero" ? "max-w-2xl" : "w-[320px] right-0 left-auto"
+          )}
+          style={{ maxHeight: "min(70vh, 480px)" }}
+        >
           {results.length > 0 ? (
-            <div className="max-h-[360px] overflow-y-auto">
+            <div className="overflow-y-auto" style={{ maxHeight: "min(70vh, 480px)" }}>
               {results.map((result) => (
                 <button
                   key={`${result.type}-${result.id}`}
