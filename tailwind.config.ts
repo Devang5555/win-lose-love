@@ -107,8 +107,8 @@ export default {
 			'slide-in-bottom': 'slide-in-bottom 0.3s ease-out'
 		},
 		fontFamily: {
-			sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-			serif: ['Playfair Display', 'ui-serif', 'Georgia', 'serif']
+			sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+			serif: ['Fraunces', 'ui-serif', 'Georgia', 'serif']
 		}
   	}
   },
