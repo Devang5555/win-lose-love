@@ -138,7 +138,7 @@ const HeroSection = () => {
           </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+        <div className="relative z-0 flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-slide-up" style={{ animationDelay: '0.3s' }}>
           <Button asChild size="lg" className="text-lg px-8 shadow-lg hover:shadow-xl transition-shadow">
             <Link to="/trips">
               Explore Trips
