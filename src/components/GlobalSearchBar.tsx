@@ -31,6 +31,19 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Broadcast dropdown open/close so floating UI can hide
+  const showDropdownState = isFocused && query.length >= 2;
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("global-search-active", { detail: { active: showDropdownState } })
+    );
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("global-search-active", { detail: { active: false } })
+      );
+    };
+  }, [showDropdownState]);
+
   const handleSelect = (result: SearchResult) => {
     const path = result.type === "trip" ? `/trips/${result.slug}` : `/destinations/${result.slug}`;
     navigate(path);
@@ -48,7 +61,7 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
     }
   };
 
-  const showDropdown = isFocused && query.length >= 2;
+  const showDropdown = showDropdownState;
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
