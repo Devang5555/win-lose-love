@@ -116,7 +116,7 @@ const HeroSection = () => {
         </p>
 
         {/* Search Bar */}
-        <div className="max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '0.25s' }}>
+        <div className="relative z-50 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '0.25s' }}>
           <GlobalSearchBar variant="hero" />
         </div>
 
