@@ -107,12 +107,12 @@ const HeroSection = () => {
         </div>
 
         <h1 className="h1 !text-background mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          Explore India with
-          <span className="block text-primary mt-2">Curated Trips & Experiences</span>
+          Curated Trips Across India
+          <span className="block text-primary mt-2">Verified Stays. No Hidden Costs.</span>
         </h1>
 
         <p className="body !text-background/90 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          Affordable, well-planned group trips with verified stays.
+          Curated trips across India with verified stays, no hidden costs, and seamless booking.
         </p>
 
         {/* Search Bar */}
