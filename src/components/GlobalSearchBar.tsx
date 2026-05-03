@@ -13,6 +13,8 @@ interface GlobalSearchBarProps {
   onNavigate?: () => void;
 }
 
+const POPULAR_SEARCHES = ["Manali", "Goa", "Alibaug", "Ladakh", "Kerala", "Spiti"];
+
 const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSearchBarProps) => {
   const navigate = useNavigate();
   const { query, results, loading, debouncedSearch, clearSearch } = useSearch();
