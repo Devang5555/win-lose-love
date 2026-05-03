@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, Calendar, Shield, Wallet, ChevronDown } from "lucide-react";
 import logo from "@/assets/logo.jpg";
@@ -17,10 +17,18 @@ import {
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
   const { balance } = useWallet();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const primaryLinks = [
     { href: "/", label: "Home" },
@@ -46,7 +54,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
+    <nav className={cn(
+      "fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b transition-shadow duration-300",
+      scrolled ? "border-border shadow-md" : "border-border/60 shadow-sm"
+    )}>
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16 md:h-[76px] gap-4">
           {/* LEFT: Primary nav links (desktop) */}

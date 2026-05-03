@@ -107,12 +107,12 @@ const HeroSection = () => {
         </div>
 
         <h1 className="h1 !text-background mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          Explore India with
-          <span className="block text-primary mt-2">Curated Trips & Experiences</span>
+          Curated Trips Across India
+          <span className="block text-primary mt-2">Verified Stays. No Hidden Costs.</span>
         </h1>
 
         <p className="body !text-background/90 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          Affordable, well-planned group trips with verified stays.
+          Curated trips across India with verified stays, no hidden costs, and seamless booking.
         </p>
 
         {/* Search Bar */}
@@ -160,6 +160,15 @@ const HeroSection = () => {
               Chat on WhatsApp
             </a>
           </Button>
+        </div>
+
+        {/* Trust points below CTA */}
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mb-10 text-sm font-medium text-background/90 animate-slide-up" style={{ animationDelay: '0.32s' }}>
+          <span>✔ Verified stays</span>
+          <span className="opacity-50">•</span>
+          <span>✔ No hidden costs</span>
+          <span className="opacity-50">•</span>
+          <span>✔ Easy booking</span>
         </div>
 
         {/* Skeleton state while checking bookings */}
