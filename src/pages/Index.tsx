@@ -280,6 +280,8 @@ const Index = () => {
         </div>
       </section>
 
+      <PersonalizedTripSection />
+
       {/* CTA Section */}
       <section className="py-16 md:py-24 bg-gradient-to-r from-primary via-ocean-dark to-accent">
         <div className="container mx-auto px-4 text-center">
