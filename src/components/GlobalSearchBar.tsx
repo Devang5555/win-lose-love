@@ -34,7 +34,7 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
   }, []);
 
   // Broadcast dropdown open/close so floating UI can hide
-  const showDropdownState = isFocused && query.length >= 2;
+  const showDropdownState = isFocused && (query.length >= 2 || query.length === 0);
   useEffect(() => {
     window.dispatchEvent(
       new CustomEvent("global-search-active", { detail: { active: showDropdownState } })
