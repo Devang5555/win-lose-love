@@ -3,6 +3,7 @@ import { ArrowRight, Heart, Map, Shield, Users, Compass, Sparkles } from "lucide
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import aboutHero from "@/assets/about-hero.jpg";
 
 const About = () => {
   return (
@@ -10,12 +11,21 @@ const About = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative py-32 md:py-40 gradient-ocean">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
+      <section className="relative py-32 md:py-40 overflow-hidden">
+        <img
+          src={aboutHero}
+          alt="Sunrise over Himalayan mountains"
+          className="absolute inset-0 w-full h-full object-cover"
+          fetchPriority="high"
+          width={1920}
+          height={1080}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/45 to-foreground/70" />
+        <div className="relative container mx-auto px-4 text-center">
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-background mb-4 drop-shadow-lg">
             Our Story
           </h1>
-          <p className="text-lg text-primary-foreground/90 max-w-2xl mx-auto">
+          <p className="text-lg text-background/90 max-w-2xl mx-auto drop-shadow">
             Travel with meaning, clarity, and connection
           </p>
         </div>
