@@ -54,7 +54,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
+    <nav className={cn(
+      "fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b transition-shadow duration-300",
+      scrolled ? "border-border shadow-md" : "border-border/60 shadow-sm"
+    )}>
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16 md:h-[76px] gap-4">
           {/* LEFT: Primary nav links (desktop) */}
