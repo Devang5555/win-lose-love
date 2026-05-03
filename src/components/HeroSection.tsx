@@ -162,6 +162,15 @@ const HeroSection = () => {
           </Button>
         </div>
 
+        {/* Trust points below CTA */}
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mb-10 text-sm font-medium text-background/90 animate-slide-up" style={{ animationDelay: '0.32s' }}>
+          <span>✔ Verified stays</span>
+          <span className="opacity-50">•</span>
+          <span>✔ No hidden costs</span>
+          <span className="opacity-50">•</span>
+          <span>✔ Easy booking</span>
+        </div>
+
         {/* Skeleton state while checking bookings */}
         {checkingTrip && (
           <div className="max-w-md mx-auto mb-12 animate-fade-in">
