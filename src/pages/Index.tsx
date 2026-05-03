@@ -8,6 +8,7 @@ import TripCard from "@/components/TripCard";
 import InterestPopup from "@/components/InterestPopup";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
 import ExperiencesSection from "@/components/ExperiencesSection";
+import PersonalizedTripSection from "@/components/PersonalizedTripSection";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTrips } from "@/hooks/useTrips";
