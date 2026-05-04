@@ -60,10 +60,15 @@
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(200 25% 98%) 100%);
     --gradient-bold: linear-gradient(135deg, hsl(200 95% 45%) 0%, hsl(175 70% 40%) 50%, hsl(20 95% 55%) 100%);
 
-    /* Enhanced Shadows */
-    --shadow-card: 0 4px 25px -4px hsl(210 50% 10% / 0.12);
-    --shadow-card-hover: 0 12px 40px -8px hsl(200 95% 45% / 0.25);
-    --shadow-button: 0 6px 20px 0 hsl(200 95% 45% / 0.35);
+    /* Enhanced Shadows - softer, premium */
+    --shadow-card: 0 2px 8px -2px hsl(210 40% 15% / 0.06), 0 8px 24px -8px hsl(210 40% 15% / 0.08);
+    --shadow-card-hover: 0 8px 16px -4px hsl(200 80% 30% / 0.1), 0 20px 48px -12px hsl(200 95% 45% / 0.18);
+    --shadow-button: 0 4px 14px 0 hsl(200 95% 45% / 0.28);
+    --shadow-soft: 0 1px 2px hsl(210 40% 15% / 0.04), 0 2px 8px hsl(210 40% 15% / 0.04);
+
+    /* Premium soft surfaces */
+    --surface-soft: linear-gradient(180deg, hsl(200 30% 99%) 0%, hsl(200 25% 96%) 100%);
+    --surface-tint: linear-gradient(180deg, hsl(200 50% 98%) 0%, hsl(38 40% 97%) 100%);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 210 50% 10%;
@@ -155,23 +160,23 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-sans;
   }
 }
 
 @layer components {
-  /* ===== Shared Typography System ===== */
+  /* ===== Shared Typography System — Plus Jakarta Sans ===== */
   .h1 {
-    @apply font-serif font-bold tracking-tight text-foreground text-4xl md:text-5xl lg:text-6xl leading-tight;
+    @apply font-sans font-extrabold tracking-tight text-foreground text-4xl md:text-5xl lg:text-6xl leading-[1.1];
   }
   .h2 {
-    @apply font-serif font-bold tracking-tight text-foreground text-3xl md:text-4xl lg:text-5xl leading-tight;
+    @apply font-sans font-bold tracking-tight text-foreground text-3xl md:text-4xl lg:text-5xl leading-tight;
   }
   .h3 {
-    @apply font-serif font-semibold tracking-tight text-foreground text-xl md:text-2xl leading-snug;
+    @apply font-sans font-bold tracking-tight text-foreground text-xl md:text-2xl leading-snug;
   }
   .body {
-    @apply font-sans text-base md:text-lg text-foreground/90 leading-relaxed;
+    @apply font-sans text-base md:text-lg text-muted-foreground leading-relaxed;
   }
   .small {
     @apply font-sans text-sm text-muted-foreground leading-normal;
@@ -189,22 +194,56 @@
     @apply font-sans text-[16px] font-semibold tracking-tight;
   }
 
+  /* ===== Premium surface utilities ===== */
+  .surface-soft {
+    background: var(--surface-soft);
+  }
+  .surface-tint {
+    background: var(--surface-tint);
+  }
+  .glass-panel {
+    @apply backdrop-blur-xl border border-white/40 rounded-2xl;
+    background: hsl(0 0% 100% / 0.55);
+    box-shadow: var(--shadow-card);
+  }
+  .dark .glass-panel {
+    @apply border-white/10;
+    background: hsl(210 40% 12% / 0.55);
+  }
+  .premium-card {
+    @apply rounded-2xl bg-card border border-border/60 transition-all duration-300;
+    box-shadow: var(--shadow-soft);
+  }
+  .premium-card:hover {
+    @apply -translate-y-0.5 border-primary/30;
+    box-shadow: var(--shadow-card-hover);
+  }
+  .cta-gradient {
+    background: linear-gradient(135deg, hsl(var(--sunset-light)) 0%, hsl(var(--sunset)) 50%, hsl(var(--accent)) 100%);
+    color: hsl(var(--accent-foreground));
+    box-shadow: 0 6px 20px -6px hsl(var(--sunset) / 0.5);
+    transition: all 0.3s ease;
+  }
+  .cta-gradient:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 10px 28px -8px hsl(var(--sunset) / 0.6);
+  }
+  .section-padding {
+    @apply py-12 md:py-20 px-4 md:px-6;
+  }
+
   .gradient-hero {
     background: var(--gradient-hero);
   }
-  
   .gradient-ocean {
     background: var(--gradient-ocean);
   }
-  
   .gradient-sunset {
     background: var(--gradient-sunset);
   }
-
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
-
   .shadow-card-hover {
     box-shadow: var(--shadow-card-hover);
   }
