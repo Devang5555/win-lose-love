@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDestinations } from "@/hooks/useDestinations";
+import destinationsHero from "@/assets/destinations-hero.jpg";
 
 const Destinations = () => {
   const { destinations, loading, error, getDestinationsByState } = useDestinations();
@@ -15,12 +16,18 @@ const Destinations = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="pt-24 pb-12 md:pt-32 md:pb-16 bg-gradient-to-r from-primary via-ocean-dark to-accent">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4">
+      <section className="relative pt-24 pb-12 md:pt-32 md:pb-16 overflow-hidden">
+        <img
+          src={destinationsHero}
+          alt="Scenic India destinations from Himalayas to Konkan coast"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-ocean-dark/80 via-ocean-dark/60 to-background/40" />
+        <div className="relative container mx-auto px-4 text-center">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
             Explore Destinations
           </h1>
-          <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-white/95 max-w-2xl mx-auto drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
             From Konkan shores to Himalayan peaks — discover India's most extraordinary places
           </p>
         </div>
