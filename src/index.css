@@ -145,6 +145,13 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    background-image: url("/src/assets/page-bg-pattern.jpg");
+    background-repeat: repeat;
+    background-size: 900px auto;
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image: none;
   }
 
   h1, h2, h3, h4, h5, h6 {
