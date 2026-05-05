@@ -108,7 +108,7 @@ const HeroSection = () => {
 
         <h1 className="h1 !text-background mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
           Curated Trips Across India
-          <span className="block text-primary mt-2">Verified Stays. No Hidden Costs.</span>
+          <span className="block text-primary mt-2">Not Just Trips. Memories That Stay With You</span>
         </h1>
 
         <p className="body !text-background/90 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
