@@ -22,7 +22,7 @@ const Blog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <SeoMeta
         title="Travel Blog & Guides | GoBhraman"
         description="Explore travel stories, destination guides, and tips from the GoBhraman team. Plan your next adventure with expert insights."

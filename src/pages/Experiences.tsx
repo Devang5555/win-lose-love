@@ -24,15 +24,16 @@ const Experiences = () => {
   const filtered = filter === "all" ? experiences : experiences.filter((e) => e.experience_category === filter);
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen relative">
       <Navbar />
-      {/* Scenic background */}
+      {/* Scenic background — soft, faded, slightly blurred */}
       <div
-        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
+        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-40 blur-[2px] scale-105"
         style={{ backgroundImage: `url(${experiencesBg})` }}
         aria-hidden="true"
       />
-      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-background/60 via-background/75 to-background/90" aria-hidden="true" />
+      {/* Light white gradient overlay for readability */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-background/75 via-background/85 to-background/95" aria-hidden="true" />
       <section className="pt-24 pb-16 md:pt-32 md:pb-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">

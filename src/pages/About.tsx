@@ -7,7 +7,7 @@ import aboutHero from "@/assets/about-hero.jpg";
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
 
       {/* Hero */}
