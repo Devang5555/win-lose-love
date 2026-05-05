@@ -106,9 +106,9 @@ const HeroSection = () => {
           </span>
         </div>
 
-        <h1 className="hero-heading font-serif font-semibold tracking-tight text-4xl md:text-6xl lg:text-7xl leading-[1.05] !text-background mb-6 animate-slide-up [text-shadow:0_2px_10px_hsl(0_0%_0%/0.4)]" style={{ animationDelay: '0.1s' }}>
+        <h1 className="hero-heading font-display font-semibold tracking-tight text-4xl md:text-6xl lg:text-7xl leading-[1.1] !text-background mb-6 animate-slide-up [text-shadow:0_2px_10px_hsl(0_0%_0%/0.4)]" style={{ animationDelay: '0.1s' }}>
           Curated Trips Across India
-          <span className="block text-primary mt-3 italic font-medium">Not Just Trips. Memories That Stay With You</span>
+          <span className="block !text-background mt-4 font-medium text-3xl md:text-5xl lg:text-6xl">Not Just Trips. Memories That Stay With You</span>
         </h1>
 
         <p className="body !text-background/90 max-w-2xl mx-auto mb-8 animate-slide-up [text-shadow:0_1px_6px_hsl(0_0%_0%/0.5)]" style={{ animationDelay: '0.2s' }}>

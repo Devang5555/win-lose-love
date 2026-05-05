@@ -41,7 +41,7 @@ const Experiences = () => {
               <Zap className="w-5 h-5 text-accent" />
               <span className="text-accent font-bold text-sm uppercase tracking-wider">Weekend Adventures</span>
             </div>
-            <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground">
+            <h1 className="font-display text-4xl md:text-5xl font-semibold text-foreground tracking-tight leading-tight">
               🚀 Experiences
             </h1>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
