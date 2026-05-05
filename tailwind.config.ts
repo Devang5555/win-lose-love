@@ -108,8 +108,7 @@ export default {
 		},
 		fontFamily: {
 			sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-			serif: ['Playfair Display', 'ui-serif', 'Georgia', 'serif'],
-			display: ['Playfair Display', 'ui-serif', 'Georgia', 'serif']
+			serif: ['Fraunces', 'ui-serif', 'Georgia', 'serif']
 		}
   	}
   },
