@@ -150,13 +150,18 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    background-image: url("/assets/page-bg-pattern.jpg");
-    background-repeat: repeat;
-    background-size: 900px auto;
-    background-attachment: fixed;
+    background-image:
+      linear-gradient(180deg, hsl(var(--background) / 0.82) 0%, hsl(var(--background) / 0.9) 50%, hsl(var(--background) / 0.96) 100%),
+      url("/assets/scenic-bg.jpg");
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, cover;
+    background-position: center, center;
+    background-attachment: fixed, fixed;
   }
   .dark body {
-    background-image: none;
+    background-image:
+      linear-gradient(180deg, hsl(var(--background) / 0.92) 0%, hsl(var(--background) / 0.96) 100%),
+      url("/assets/scenic-bg.jpg");
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -202,13 +207,13 @@
     background: var(--surface-tint);
   }
   .glass-panel {
-    @apply backdrop-blur-xl border border-white/40 rounded-2xl;
-    background: hsl(0 0% 100% / 0.55);
+    @apply backdrop-blur-2xl border border-white/50 rounded-2xl;
+    background: hsl(0 0% 100% / 0.7);
     box-shadow: var(--shadow-card);
   }
   .dark .glass-panel {
     @apply border-white/10;
-    background: hsl(210 40% 12% / 0.55);
+    background: hsl(210 40% 12% / 0.65);
   }
   .premium-card {
     @apply rounded-2xl bg-card border border-border/60 transition-all duration-300;

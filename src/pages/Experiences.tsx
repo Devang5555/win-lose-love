@@ -32,7 +32,7 @@ const Experiences = () => {
         style={{ backgroundImage: `url(${experiencesBg})` }}
         aria-hidden="true"
       />
-      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-background/70 via-background/85 to-background" aria-hidden="true" />
+      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-background/60 via-background/75 to-background/90" aria-hidden="true" />
       <section className="pt-24 pb-16 md:pt-32 md:pb-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
