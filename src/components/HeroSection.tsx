@@ -91,7 +91,7 @@ const HeroSection = () => {
           width={1920}
           height={1080}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/50 to-foreground/80" />
+        <div className="hero-overlay absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/50 to-foreground/80" />
       </div>
 
       {/* Floating Elements */}
@@ -106,13 +106,13 @@ const HeroSection = () => {
           </span>
         </div>
 
-        <h1 className="h1 !text-background mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <h1 className="hero-heading h1 !text-background mb-6 animate-slide-up [text-shadow:0_2px_10px_hsl(0_0%_0%/0.4)]" style={{ animationDelay: '0.1s' }}>
           Curated Trips Across India
           <span className="block text-primary mt-2">Not Just Trips. Memories That Stay With You</span>
         </h1>
 
-        <p className="body !text-background/90 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          Curated trips across India with verified stays, no hidden costs, and seamless booking.
+        <p className="body !text-background/90 max-w-2xl mx-auto mb-8 animate-slide-up [text-shadow:0_1px_6px_hsl(0_0%_0%/0.5)]" style={{ animationDelay: '0.2s' }}>
+          Handpicked group experiences across India with seamless planning, trusted stays, and unforgettable moments.
         </p>
 
         {/* Search Bar */}
