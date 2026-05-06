@@ -30,14 +30,28 @@ const HeroSection = () => {
       .in("booking_status", ["confirmed", "pending_verification", "advance_paid", "fully_paid"])
       .order("created_at", { ascending: false })
       .limit(1);
-    setCheckingTrip(false);
 
     if (error || !data || data.length === 0 || !data[0].trip_id) {
+      setCheckingTrip(false);
       toast({ title: "No trips booked yet", description: "Browse our trips and book your first adventure!" });
       navigate("/trips");
       return;
     }
-    navigate(`/trips/${data[0].trip_id}`);
+
+    // Detect whether the booked item is a trip or experience and route accordingly
+    const tripId = data[0].trip_id;
+    const { data: tripRow } = await supabase
+      .from("trips")
+      .select("type")
+      .eq("trip_id", tripId)
+      .maybeSingle();
+    setCheckingTrip(false);
+
+    if (tripRow?.type === "experience") {
+      navigate(`/experiences/${tripId}`);
+    } else {
+      navigate(`/trips/${tripId}`);
+    }
   };
 
   useEffect(() => {
