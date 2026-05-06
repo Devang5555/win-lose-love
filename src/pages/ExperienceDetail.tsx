@@ -186,11 +186,39 @@ const ExperienceDetail = () => {
             <Card className="sticky top-24 border-2 border-primary/30 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
                 <CardTitle className="font-serif text-center">
-                  <span className="text-3xl font-bold text-primary">₹{experience.price_default.toLocaleString("en-IN")}</span>
+                  <span className="text-3xl font-bold text-primary">₹{effectivePrice.toLocaleString("en-IN")}</span>
                   <span className="text-sm text-muted-foreground ml-2">per person</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
+                {pricingTiers.length > 0 && (
+                  <div>
+                    <p className="text-sm font-semibold text-foreground mb-2">💰 Choose Your Option</p>
+                    <div className="space-y-2">
+                      {pricingTiers.map((tier, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setSelectedTierIdx(i)}
+                          className={cn(
+                            "w-full text-left p-3 rounded-lg border transition-all",
+                            selectedTierIdx === i
+                              ? "border-primary bg-primary/10 ring-1 ring-primary/30"
+                              : "border-border hover:border-primary/40"
+                          )}
+                        >
+                          <div className="flex justify-between items-center gap-2">
+                            <span className="font-semibold text-sm text-foreground">{tier.label}</span>
+                            <span className="text-sm font-bold text-primary">₹{tier.price.toLocaleString("en-IN")}</span>
+                          </div>
+                          {tier.description && (
+                            <p className="text-xs text-muted-foreground mt-1">{tier.description}</p>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm font-semibold text-foreground mb-2">📅 Available Slots</p>
                   {slots.length > 0 ? (
