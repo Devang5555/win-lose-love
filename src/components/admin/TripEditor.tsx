@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2, Save, Image, MapPin, DollarSign, List, FileText, ShieldCheck, Tag } from "lucide-react";
+import { X, Plus, Trash2, Save, Image, MapPin, DollarSign, List, FileText, ShieldCheck, Tag, Calendar } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import BatchManagement from "./BatchManagement";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
