@@ -169,22 +169,19 @@ const ExperienceBookingModal = ({
       const txnNote = formData.upiTransactionId ? `UPI Txn: ${formData.upiTransactionId}` : "";
       const combinedNotes = [tierNote, txnNote].filter(Boolean).join(" | ") || null;
 
+      // Experience flow: save proof, mark pending verification.
+      // Seats are deducted only when admin approves (via RPC in admin panel).
       const { error: updErr } = await supabase
         .from("bookings")
         .update({
           advance_paid: totalPrice, // FULL payment for experiences
           advance_screenshot_url: screenshotUrl,
           payment_status: "pending_advance",
+          booking_status: "pending",
           notes: combinedNotes,
         })
         .eq("id", bookingId);
       if (updErr) throw updErr;
-
-      const { error: rpcErr } = await supabase.rpc("confirm_booking_after_payment", { p_booking_id: bookingId });
-      if (rpcErr) {
-        toast({ title: "Seats unavailable", description: rpcErr.message, variant: "destructive" });
-        return;
-      }
 
       // Fire-and-forget admin notification
       try {
@@ -196,21 +193,12 @@ const ExperienceBookingModal = ({
         console.warn("notification failed", e);
       }
 
-      // User WhatsApp confirmation if opted in
-      if (formData.whatsappOptin && formData.phone) {
-        try {
-          const msg = `✅ Booking Confirmed!\n\nHi ${formData.name},\n\nYour booking for *${experienceName}* on ${formatDate(selectedSlot!.start_date)} is confirmed.\n\n• Guests: ${formData.travelers}${selectedTier ? `\n• Option: ${selectedTier.label}` : ""}\n• Paid: ₹${totalPrice.toLocaleString()}\n\nView: ${window.location.origin}/my-bookings\n\n– Team GoBhraman`;
-          await supabase.functions.invoke("whatsapp-broadcast", {
-            body: { action: "send_single", phone: formData.phone, message: msg, message_type: "confirmation" },
-          });
-        } catch (e) {
-          console.warn("user wa failed", e);
-        }
-      }
-
-      toast({ title: "Booking confirmed!", description: "Redirecting to your bookings…" });
+      toast({
+        title: "🎉 Payment submitted successfully!",
+        description: "Your booking is awaiting confirmation from Team GoBhraman.",
+      });
       handleClose();
-      navigate(`/booking-success/${bookingId}`);
+      navigate(`/my-bookings`);
     } catch (err: any) {
       toast({ title: "Booking failed", description: err?.message || "Try again", variant: "destructive" });
     } finally {
