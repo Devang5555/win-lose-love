@@ -186,23 +186,18 @@ const ExperienceDetail = () => {
           <div className="space-y-6">
             <Card className="sticky top-24 border-2 border-primary/30 shadow-lg overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10 pb-4">
-                <div className="flex flex-wrap justify-center gap-1.5 mb-2">
-                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px] font-bold uppercase tracking-wide">
-                    ✨ Early Access Offer
-                  </Badge>
-                  <Badge variant="outline" className="text-[10px] font-semibold border-primary/40 text-primary">
-                    Available Every Weekend
+                <div className="flex justify-center mb-2">
+                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs font-bold uppercase tracking-wide flex items-center gap-2 px-3 py-1.5">
+                    <span>✨ Early Access Offer</span>
+                    <span className="font-extrabold">₹{effectivePrice.toLocaleString("en-IN")}</span>
+                    {effectivePrice < 599 && (
+                      <span className="line-through opacity-80 font-semibold">₹599</span>
+                    )}
                   </Badge>
                 </div>
                 <CardTitle className="font-serif text-center">
-                  <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-3xl font-bold text-primary">₹{effectivePrice.toLocaleString("en-IN")}</span>
-                    {effectivePrice < 599 && (
-                      <span className="text-base text-muted-foreground line-through">₹599</span>
-                    )}
-                  </div>
                   <span className="block text-xs text-muted-foreground font-normal mt-1">
-                    per person • Limited Weekend Launch
+                    per person • Available Every Weekend
                   </span>
                 </CardTitle>
               </CardHeader>
