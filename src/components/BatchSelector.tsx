@@ -182,12 +182,12 @@ const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectB
             type="button"
             disabled={isSoldOut}
             onClick={() => onSelectBatch(batch)}
-            className={`w-full text-left rounded-xl border-2 p-4 transition-all duration-300 ${
+            className={`w-full text-left rounded-2xl border p-4 transition-all duration-300 ${
               isSoldOut
                 ? "opacity-60 cursor-not-allowed border-border bg-muted"
                 : isSelected
-                ? "border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20 scale-[1.02]"
-                : "border-border bg-card hover:border-primary/40 hover:shadow-sm"
+                ? "border-primary/60 bg-primary/5 shadow-card ring-2 ring-primary/15 scale-[1.015]"
+                : "border-border/60 surface-elevated hover:border-primary/40 hover:shadow-soft"
             }`}
           >
             <div className="flex items-center justify-between gap-2 mb-1.5">
