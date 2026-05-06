@@ -71,7 +71,8 @@ const ExperienceDetail = () => {
       return;
     }
     const slot = slots.find((s) => s.id === selectedSlot);
-    const whatsappMsg = `Hi! I'd like to book *${experience.trip_name}* on ${slot?.start_date}. Price: ₹${experience.price_default}. My name: ${user.email}`;
+    const tierLine = pricingTiers.length > 0 ? `\nOption: ${pricingTiers[selectedTierIdx].label}` : "";
+    const whatsappMsg = `Hi! I'd like to book *${experience.trip_name}* on ${slot?.start_date}.${tierLine}\nPrice: ₹${effectivePrice}. My name: ${user.email}`;
     window.open(`https://wa.me/919415026522?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
   };
 
