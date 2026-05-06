@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { generateUpiQrString, getMerchantUpiId } from "@/lib/upi";
-import { useWallet } from "@/hooks/useWallet";
+import { useWallet, computeWalletApplicable, WALLET_MAX_PER_BOOKING, WALLET_MIN_ORDER_AMOUNT } from "@/hooks/useWallet";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { BatchInfo } from "@/components/BatchSelector";
