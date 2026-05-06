@@ -61,6 +61,8 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
   }, [showDropdownState]);
 
   const handleSelect = (result: SearchResult) => {
+    saveRecent(result.title);
+    setRecent(loadRecent());
     const path = result.type === "trip" ? `/trips/${result.slug}` : `/destinations/${result.slug}`;
     navigate(path);
     clearSearch();
@@ -71,10 +73,17 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      saveRecent(query.trim());
+      setRecent(loadRecent());
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
       setIsFocused(false);
       onNavigate?.();
     }
+  };
+
+  const clearRecent = () => {
+    localStorage.removeItem(RECENT_KEY);
+    setRecent([]);
   };
 
   const showDropdown = showDropdownState;
