@@ -47,6 +47,7 @@ interface TripFormData {
   itinerary_data: RawItineraryJson | null;
   policies: string[];
   seo: SeoData;
+  pricing_tiers: { label: string; price: number; description?: string }[];
 }
 
 interface TripEditorProps {
