@@ -85,6 +85,7 @@ const emptyForm: TripFormData = {
   itinerary_data: null,
   policies: [],
   seo: {},
+  pricing_tiers: [],
 };
 
 const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
