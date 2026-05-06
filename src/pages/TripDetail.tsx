@@ -32,6 +32,7 @@ import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
 import SmartDateStrip from "@/components/SmartDateStrip";
+import TrustIndicators from "@/components/TrustIndicators";
 import { getTripItinerary } from "@/data/tripItineraries";
 import { adaptAdminItinerary, isAdminItineraryUsable } from "@/lib/tripItineraryAdapter";
 import { resolveTripPolicies } from "@/lib/tripPolicies";
@@ -624,6 +625,7 @@ const TripDetail = () => {
                     <div className="mb-6">
                       <BatchSelector
                         tripId={tripId}
+                        tripName={tripName}
                         basePrice={displayPrice}
                         selectedBatchId={selectedBatch?.id ?? null}
                         onSelectBatch={setSelectedBatch}
@@ -703,28 +705,25 @@ const TripDetail = () => {
                     💬 Chat on WhatsApp to get instant details
                   </p>
 
-                  <Button 
-                    variant="ghost" 
-                    className="w-full mb-3"
-                    onClick={handleShare}
+                  <Button
+                    variant="ghost"
+                    className="w-full mb-4 text-foreground/80 hover:text-foreground"
+                    onClick={async () => {
+                      const batch = selectedBatch;
+                      const dateInfo = batch ? ` | Departing: ${new Date(batch.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : '';
+                      const shareText = `🌊 *${tripName}*\n\n📍 ${tripLocations?.join(', ') || ''}\n⏱ ${tripDuration} | ₹${displayPrice.toLocaleString()}/person${dateInfo}\n\n${tripSummary}\n\n👉 Book now: ${window.location.href}\n\n– GoBhraman`;
+                      if (navigator.share) {
+                        try { await navigator.share({ title: tripName, text: shareText, url: window.location.href }); return; } catch {}
+                      }
+                      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+                    }}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
                     Share Experience
                   </Button>
 
-                  <Button
-                    variant="ghost"
-                    className="w-full text-green-600 hover:text-green-700 hover:bg-green-50"
-                    onClick={() => {
-                      const batch = selectedBatch;
-                      const dateInfo = batch ? ` | Departing: ${new Date(batch.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : '';
-                      const shareText = `🌊 *${tripName}*\n\n📍 ${tripLocations?.join(', ') || ''}\n⏱ ${tripDuration} | ₹${displayPrice.toLocaleString()}/person${dateInfo}\n\n${tripSummary}\n\n👉 Book now: ${window.location.href}\n\n– GoBhraman`;
-                      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
-                    }}
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Share on WhatsApp
-                  </Button>
+                  {/* Trust indicators */}
+                  <TrustIndicators className="mt-1" />
                 </div>
 
                 {/* Contact Card */}
