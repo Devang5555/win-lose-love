@@ -183,12 +183,11 @@ const ExperienceBookingModal = ({
         .eq("id", bookingId);
       if (updErr) throw updErr;
 
-      // Fire-and-forget admin notification
+      // Fire-and-forget WhatsApp notifications (admin + user) via Meta Cloud API
       try {
-        const { data: notif } = await supabase.functions.invoke("send-booking-notification", {
+        await supabase.functions.invoke("send-booking-notification", {
           body: { booking_id: bookingId },
         });
-        if (notif?.admin_whatsapp_url) window.open(notif.admin_whatsapp_url, "_blank");
       } catch (e) {
         console.warn("notification failed", e);
       }
