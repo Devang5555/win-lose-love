@@ -163,6 +163,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
             ? ((data as any).policies.items as string[])
             : [],
           seo: ((data as any).seo as SeoData) || {},
+          pricing_tiers: Array.isArray((data as any).pricing_tiers) ? (data as any).pricing_tiers : [],
         });
       }
     } catch (error) {
