@@ -6,11 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Clock, CheckCircle, XCircle, ShieldCheck, Calendar, Users, Phone, Mail } from "lucide-react";
+import { MapPin, Clock, CheckCircle, XCircle, ShieldCheck, Calendar, Phone, Mail, Bell, MessageCircle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import TrustIndicators from "@/components/TrustIndicators";
 
 const ExperienceDetail = () => {
   const { experienceId } = useParams<{ experienceId: string }>();
