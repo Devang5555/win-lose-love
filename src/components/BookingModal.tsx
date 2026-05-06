@@ -46,6 +46,11 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
     referralCode: "",
   });
   const [useWalletCredits, setUseWalletCredits] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponCode, setCouponCode] = useState<string | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   if (!isOpen) return null;
 
