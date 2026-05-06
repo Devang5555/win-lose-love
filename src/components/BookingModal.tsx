@@ -193,6 +193,8 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
           notes: formData.upiTransactionId ? `UPI: ${formData.upiTransactionId}` : null,
           referral_code_used: formData.referralCode || null,
           wallet_discount: walletApplicable,
+          coupon_code: couponCode,
+          coupon_discount: couponDiscount,
         })
         .eq("id", bookingId);
 
