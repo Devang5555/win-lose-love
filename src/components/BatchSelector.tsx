@@ -24,10 +24,16 @@ export interface BatchInfo {
 
 interface BatchSelectorProps {
   tripId: string;
+  tripName?: string;
   basePrice: number;
   selectedBatchId: string | null;
   onSelectBatch: (batch: BatchInfo | null) => void;
 }
+
+const WHATSAPP_NUMBER = "919415026522";
+const sendWhatsApp = (msg: string) => {
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
+};
 
 const formatDate = (dateString: string) =>
   new Date(dateString).toLocaleDateString("en-IN", {
