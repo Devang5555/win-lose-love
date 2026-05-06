@@ -12,6 +12,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import TripItineraryEditor from "./TripItineraryEditor";
 import type { RawItineraryJson } from "@/lib/tripItineraryAdapter";
 import ImageUpload from "./ImageUpload";
+import SmartImageManager from "./SmartImageManager";
+import SeoSection, { SeoData } from "./SeoSection";
+import { FEATURED_TAG_LABELS, FEATURED_TAGS, FeaturedTagKey, hasFeaturedTag, toggleFeaturedTag, ALL_FEATURED_TAGS } from "@/lib/featuredTags";
 
 interface TripFormData {
   trip_id: string;
@@ -41,6 +44,7 @@ interface TripFormData {
   safety_info: string[];
   itinerary_data: RawItineraryJson | null;
   policies: string[];
+  seo: SeoData;
 }
 
 interface TripEditorProps {
@@ -77,6 +81,7 @@ const emptyForm: TripFormData = {
   safety_info: [],
   itinerary_data: null,
   policies: [],
+  seo: {},
 };
 
 const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
@@ -144,6 +149,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
           policies: Array.isArray((data as any).policies?.items)
             ? ((data as any).policies.items as string[])
             : [],
+          seo: ((data as any).seo as SeoData) || {},
         });
       }
     } catch (error) {
@@ -190,6 +196,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       safety_info: [...formData.safety_info],
       itinerary_data: formData.itinerary_data ?? null,
       policies: formData.policies.length > 0 ? { items: formData.policies.filter((p) => p.trim()) } : null,
+      seo: formData.seo && Object.values(formData.seo).some((v) => v && (typeof v !== "object" || Object.keys(v).length)) ? formData.seo : null,
     };
 
     try {
@@ -530,43 +537,18 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
               </div>
             </section>
 
-            {/* Images */}
+            {/* Smart Image Manager: reorder, set hero, alt text */}
             <section>
               <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                 <Image className="w-5 h-5 text-primary" />
-                Images (URLs)
+                Images
               </h3>
-              <div className="flex flex-col sm:flex-row gap-2 mb-3">
-                <div className="flex gap-2 flex-1">
-                  <Input
-                    value={newImage}
-                    onChange={(e) => setNewImage(e.target.value)}
-                    placeholder="Paste image URL..."
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addToArray("images", newImage, setNewImage))}
-                  />
-                  <Button type="button" onClick={() => addToArray("images", newImage, setNewImage)}>
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                <ImageUpload
-                  onUploaded={(url) =>
-                    setFormData((prev) => ({ ...prev, images: [...prev.images, url] }))
-                  }
-                />
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {formData.images.map((url, i) => (
-                  <div key={i} className="relative group">
-                    <img src={url} alt={`Trip image ${i + 1}`} className="w-full h-24 object-cover rounded-lg" />
-                    <button
-                      onClick={() => removeFromArray("images", i)}
-                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <SmartImageManager
+                images={formData.images}
+                alt={formData.seo.image_alt}
+                onImagesChange={(imgs) => setFormData({ ...formData, images: imgs })}
+                onAltChange={(alt) => setFormData({ ...formData, seo: { ...formData.seo, image_alt: alt } })}
+              />
             </section>
 
             {/* Contact */}
@@ -651,9 +633,40 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                   </span>
                 ))}
               </div>
+              {/* Featured / homepage curation toggles (stored as tags) */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-xs font-semibold text-foreground mb-2">Homepage curation</p>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(FEATURED_TAG_LABELS) as FeaturedTagKey[]).map((key) => {
+                    const active = hasFeaturedTag(formData.tags, key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, tags: toggleFeaturedTag(formData.tags, key) })}
+                        className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                          active
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-card text-muted-foreground border-border hover:border-primary/40"
+                        }`}
+                      >
+                        {FEATURED_TAG_LABELS[key]}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Toggles add/remove curation tags. Frontend filters use these to surface trips on the homepage.
+                </p>
+              </div>
             </section>
 
-            {/* Notes */}
+            {/* SEO & Social */}
+            <SeoSection
+              value={formData.seo}
+              onChange={(v) => setFormData({ ...formData, seo: v })}
+              fallbackImage={formData.images[0]}
+            />
             <section>
               <Label className="mb-2 block">Additional Notes</Label>
               <Textarea

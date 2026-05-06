@@ -371,6 +371,7 @@ export type Database = {
           hero_image: string | null
           id: string
           name: string
+          seo: Json | null
           slug: string
           state: string
         }
@@ -380,6 +381,7 @@ export type Database = {
           hero_image?: string | null
           id?: string
           name: string
+          seo?: Json | null
           slug: string
           state: string
         }
@@ -389,6 +391,7 @@ export type Database = {
           hero_image?: string | null
           id?: string
           name?: string
+          seo?: Json | null
           slug?: string
           state?: string
         }
@@ -455,6 +458,8 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           duration: string
           exclusions: string[] | null
@@ -464,10 +469,12 @@ export type Database = {
           images: string[] | null
           inclusions: string[] | null
           is_active: boolean | null
+          is_deleted: boolean
           location: string
           name: string
           price: number
           safety_info: string[] | null
+          seo: Json | null
           slug: string | null
           summary: string | null
           tags: string[] | null
@@ -481,6 +488,8 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           duration: string
           exclusions?: string[] | null
@@ -490,10 +499,12 @@ export type Database = {
           images?: string[] | null
           inclusions?: string[] | null
           is_active?: boolean | null
+          is_deleted?: boolean
           location?: string
           name: string
           price?: number
           safety_info?: string[] | null
+          seo?: Json | null
           slug?: string | null
           summary?: string | null
           tags?: string[] | null
@@ -507,6 +518,8 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           duration?: string
           exclusions?: string[] | null
@@ -516,10 +529,12 @@ export type Database = {
           images?: string[] | null
           inclusions?: string[] | null
           is_active?: boolean | null
+          is_deleted?: boolean
           location?: string
           name?: string
           price?: number
           safety_info?: string[] | null
+          seo?: Json | null
           slug?: string | null
           summary?: string | null
           tags?: string[] | null
@@ -911,6 +926,8 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           destination_id: string | null
           duration: string
           duration_days: number | null
@@ -922,6 +939,7 @@ export type Database = {
           images: string[] | null
           inclusions: string[] | null
           is_active: boolean | null
+          is_deleted: boolean
           itinerary_data: Json | null
           locations: string[] | null
           notes: string | null
@@ -931,6 +949,7 @@ export type Database = {
           price_from_mumbai: number | null
           price_from_pune: number | null
           safety_info: string[] | null
+          seo: Json | null
           short_duration: string | null
           slug: string | null
           summary: string | null
@@ -948,6 +967,8 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           destination_id?: string | null
           duration: string
           duration_days?: number | null
@@ -959,6 +980,7 @@ export type Database = {
           images?: string[] | null
           inclusions?: string[] | null
           is_active?: boolean | null
+          is_deleted?: boolean
           itinerary_data?: Json | null
           locations?: string[] | null
           notes?: string | null
@@ -968,6 +990,7 @@ export type Database = {
           price_from_mumbai?: number | null
           price_from_pune?: number | null
           safety_info?: string[] | null
+          seo?: Json | null
           short_duration?: string | null
           slug?: string | null
           summary?: string | null
@@ -985,6 +1008,8 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           destination_id?: string | null
           duration?: string
           duration_days?: number | null
@@ -996,6 +1021,7 @@ export type Database = {
           images?: string[] | null
           inclusions?: string[] | null
           is_active?: boolean | null
+          is_deleted?: boolean
           itinerary_data?: Json | null
           locations?: string[] | null
           notes?: string | null
@@ -1005,6 +1031,7 @@ export type Database = {
           price_from_mumbai?: number | null
           price_from_pune?: number | null
           safety_info?: string[] | null
+          seo?: Json | null
           short_duration?: string | null
           slug?: string | null
           summary?: string | null
@@ -1267,6 +1294,7 @@ export type Database = {
         Args: { p_amount: number; p_booking_id: string; p_user_id: string }
         Returns: boolean
       }
+      auto_archive_expired_batches: { Args: never; Returns: number }
       auto_duplicate_batches: { Args: never; Returns: number }
       auto_shift_empty_batches: { Args: never; Returns: number }
       cancel_booking_with_seat_release: {
@@ -1333,6 +1361,11 @@ export type Database = {
         Args: { batch_id_param: string; seats_count: number }
         Returns: undefined
       }
+      restore_experience: {
+        Args: { p_experience_id: string }
+        Returns: undefined
+      }
+      restore_trip: { Args: { p_trip_id: string }; Returns: undefined }
       toggle_wallet_freeze: {
         Args: { p_freeze: boolean; p_user_id: string }
         Returns: boolean

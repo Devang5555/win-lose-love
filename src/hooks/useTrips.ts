@@ -123,6 +123,8 @@ export const useTrips = () => {
           setTripsTableMissing(true);
         } else if (tripData && tripData.length > 0) {
           setTripsTableMissing(false);
+          // Hide soft-deleted trips from public-facing consumers; admin queries directly via supabase
+          tripData = tripData.filter((t: any) => !t.is_deleted);
           dbTrips = tripData.map((t: any) => ({
             id: t.id || t.trip_id,
             trip_id: t.trip_id,
