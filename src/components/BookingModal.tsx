@@ -563,18 +563,83 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
                 <div className="space-y-4">
                   {/* Wallet Credits Toggle */}
                   {balance > 0 && (
-                    <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground">
-                          💰 Apply ₹{Math.min(balance, totalPrice).toLocaleString()} wallet credits
-                        </span>
+                    <div className="p-4 bg-primary/5 rounded-lg border border-primary/20 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-foreground">
+                            💰 Apply ₹{computeWalletApplicable(balance, totalPrice, isFrozen).toLocaleString()} wallet credits
+                          </span>
+                        </div>
+                        <Switch
+                          checked={useWalletCredits}
+                          onCheckedChange={setUseWalletCredits}
+                          disabled={totalPrice < WALLET_MIN_ORDER_AMOUNT || isFrozen}
+                        />
                       </div>
-                      <Switch
-                        checked={useWalletCredits}
-                        onCheckedChange={setUseWalletCredits}
-                      />
+                      <p className="text-[11px] text-muted-foreground">
+                        Max ₹{WALLET_MAX_PER_BOOKING} per booking · valid on orders ≥ ₹{WALLET_MIN_ORDER_AMOUNT.toLocaleString()}
+                      </p>
+                      {totalPrice < WALLET_MIN_ORDER_AMOUNT && (
+                        <p className="text-[11px] text-amber-600">
+                          Add more travelers to reach ₹{WALLET_MIN_ORDER_AMOUNT.toLocaleString()} and unlock wallet credits.
+                        </p>
+                      )}
                     </div>
                   )}
+
+                  {/* Coupon Code */}
+                  <div>
+                    <Label htmlFor="couponCode" className="text-sm mb-1 block text-muted-foreground">
+                      Coupon code
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="couponCode"
+                        value={couponInput}
+                        onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(null); }}
+                        placeholder="Enter coupon"
+                        className="font-mono"
+                        disabled={!!couponCode}
+                      />
+                      {couponCode ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => { setCouponCode(null); setCouponDiscount(0); setCouponInput(""); }}
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={!couponInput || validatingCoupon || !bookingId}
+                          onClick={async () => {
+                            if (!bookingId) {
+                              setCouponError("Continue to payment step first");
+                              return;
+                            }
+                            setValidatingCoupon(true);
+                            const res = await applyCoupon(bookingId, couponInput);
+                            setValidatingCoupon(false);
+                            if (res.success && res.discount) {
+                              setCouponCode(couponInput);
+                              setCouponDiscount(res.discount);
+                              toast({ title: "Coupon applied", description: `You saved ₹${res.discount.toLocaleString()}` });
+                            } else {
+                              setCouponError(res.error || "Invalid coupon");
+                            }
+                          }}
+                        >
+                          {validatingCoupon ? "..." : "Apply"}
+                        </Button>
+                      )}
+                    </div>
+                    {couponError && <p className="text-[11px] text-destructive mt-1">{couponError}</p>}
+                    {couponCode && <p className="text-[11px] text-green-600 mt-1">Coupon {couponCode} applied · -₹{couponDiscount.toLocaleString()}</p>}
+                  </div>
 
                   {/* Referral Code */}
                   <div>
@@ -611,18 +676,27 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
                           <span>-{formatPrice(walletApplicable)}</span>
                         </div>
                       )}
+                      {couponDiscount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>Coupon ({couponCode})</span>
+                          <span>-{formatPrice(couponDiscount)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between pt-2 border-t border-border font-medium">
                         <span className="text-card-foreground">Total Amount</span>
                         <span className="text-primary text-lg">{formatPrice(effectiveTotalPrice)}</span>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">Advance to pay now</span>
+                        <span className="text-muted-foreground">Pay now (advance)</span>
                         <span className="text-accent font-medium">{formatPrice(totalAdvance)}</span>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">Remaining (pay later)</span>
+                        <span className="text-muted-foreground">Pay before trip start</span>
                         <span className="text-muted-foreground">{formatPrice(remainingAmount)}</span>
                       </div>
+                      <p className="text-[11px] text-muted-foreground pt-1 border-t border-border">
+                        Pay only the advance now to confirm your seat. The remaining balance can be paid closer to your trip date.
+                      </p>
                     </div>
                   </div>
 
