@@ -11,7 +11,7 @@
     --background: 200 25% 98%;
     --foreground: 210 50% 10%;
 
-    --card: 0 0% 100%;
+    --card: 200 30% 99.5%;
     --card-foreground: 210 50% 10%;
 
     --popover: 0 0% 100%;
@@ -60,15 +60,19 @@
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(200 25% 98%) 100%);
     --gradient-bold: linear-gradient(135deg, hsl(200 95% 45%) 0%, hsl(175 70% 40%) 50%, hsl(20 95% 55%) 100%);
 
-    /* Enhanced Shadows - softer, premium */
-    --shadow-card: 0 2px 8px -2px hsl(210 40% 15% / 0.06), 0 8px 24px -8px hsl(210 40% 15% / 0.08);
-    --shadow-card-hover: 0 8px 16px -4px hsl(200 80% 30% / 0.1), 0 20px 48px -12px hsl(200 95% 45% / 0.18);
+    /* Enhanced Shadows - softer, premium, layered */
+    --shadow-card: 0 1px 2px -1px hsl(210 40% 15% / 0.04), 0 4px 12px -4px hsl(210 40% 15% / 0.06), 0 12px 32px -12px hsl(210 40% 15% / 0.08);
+    --shadow-card-hover: 0 2px 4px -2px hsl(200 80% 30% / 0.08), 0 12px 24px -8px hsl(200 80% 30% / 0.12), 0 24px 56px -16px hsl(200 95% 45% / 0.2);
     --shadow-button: 0 4px 14px 0 hsl(200 95% 45% / 0.28);
-    --shadow-soft: 0 1px 2px hsl(210 40% 15% / 0.04), 0 2px 8px hsl(210 40% 15% / 0.04);
+    --shadow-soft: 0 1px 2px hsl(210 40% 15% / 0.03), 0 2px 8px hsl(210 40% 15% / 0.04);
+    --shadow-elevated: 0 8px 24px -8px hsl(210 40% 15% / 0.1), 0 24px 64px -24px hsl(210 40% 15% / 0.12);
 
     /* Premium soft surfaces */
     --surface-soft: linear-gradient(180deg, hsl(200 30% 99%) 0%, hsl(200 25% 96%) 100%);
     --surface-tint: linear-gradient(180deg, hsl(200 50% 98%) 0%, hsl(38 40% 97%) 100%);
+    --surface-warm: linear-gradient(180deg, hsl(38 50% 98%) 0%, hsl(35 40% 95%) 100%);
+    --surface-cool: linear-gradient(180deg, hsl(195 40% 98%) 0%, hsl(200 30% 95%) 100%);
+    --surface-elevated: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(200 25% 98.5%) 100%);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 210 50% 10%;
@@ -189,20 +193,25 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans;
+    @apply font-serif;
+    font-feature-settings: "ss01", "ss02";
+    letter-spacing: -0.02em;
   }
 }
 
 @layer components {
-  /* ===== Shared Typography System — Plus Jakarta Sans ===== */
+  /* ===== Shared Typography System — Fraunces (display) + Plus Jakarta Sans (body) ===== */
   .h1 {
-    @apply font-sans font-extrabold tracking-tight text-foreground text-4xl md:text-5xl lg:text-6xl leading-[1.1];
+    @apply font-serif font-bold tracking-tight text-foreground text-4xl md:text-5xl lg:text-6xl leading-[1.05];
+    letter-spacing: -0.025em;
   }
   .h2 {
-    @apply font-sans font-bold tracking-tight text-foreground text-3xl md:text-4xl lg:text-5xl leading-tight;
+    @apply font-serif font-semibold tracking-tight text-foreground text-3xl md:text-4xl lg:text-5xl leading-[1.1];
+    letter-spacing: -0.022em;
   }
   .h3 {
-    @apply font-sans font-bold tracking-tight text-foreground text-xl md:text-2xl leading-snug;
+    @apply font-serif font-semibold tracking-tight text-foreground text-xl md:text-2xl leading-snug;
+    letter-spacing: -0.018em;
   }
   .body {
     @apply font-sans text-base md:text-lg text-muted-foreground leading-relaxed;
@@ -222,6 +231,9 @@
   .nav-link {
     @apply font-sans text-[16px] font-semibold tracking-tight;
   }
+  .display-eyebrow {
+    @apply font-sans text-xs md:text-sm font-semibold uppercase tracking-[0.18em] text-primary;
+  }
 
   /* ===== Premium surface utilities ===== */
   .surface-soft {
@@ -230,10 +242,37 @@
   .surface-tint {
     background: var(--surface-tint);
   }
+  .surface-warm {
+    background: var(--surface-warm);
+  }
+  .surface-cool {
+    background: var(--surface-cool);
+  }
+  .surface-elevated {
+    background: var(--surface-elevated);
+  }
   .glass-panel {
     @apply backdrop-blur-2xl border border-white/50 rounded-2xl;
     background: hsl(0 0% 100% / 0.7);
     box-shadow: var(--shadow-card);
+  }
+  .glass-nav {
+    @apply backdrop-blur-xl border-b border-white/40;
+    background: hsl(0 0% 100% / 0.72);
+    box-shadow: 0 1px 0 0 hsl(210 40% 15% / 0.04), 0 4px 16px -8px hsl(210 40% 15% / 0.06);
+  }
+  .dark .glass-nav {
+    @apply border-white/10;
+    background: hsl(210 40% 10% / 0.7);
+  }
+  .glass-bar {
+    @apply backdrop-blur-2xl border border-white/40 rounded-2xl;
+    background: hsl(0 0% 100% / 0.78);
+    box-shadow: var(--shadow-elevated);
+  }
+  .dark .glass-bar {
+    @apply border-white/10;
+    background: hsl(210 40% 10% / 0.78);
   }
   .dark .glass-panel {
     @apply border-white/10;
@@ -247,6 +286,14 @@
     @apply -translate-y-0.5 border-primary/30;
     box-shadow: var(--shadow-card-hover);
   }
+  .premium-surface {
+    background: var(--surface-elevated);
+    @apply border border-border/50 rounded-2xl;
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
   .cta-gradient {
     background: linear-gradient(135deg, hsl(var(--sunset-light)) 0%, hsl(var(--sunset)) 50%, hsl(var(--accent)) 100%);
     color: hsl(var(--accent-foreground));
@@ -259,6 +306,9 @@
   }
   .section-padding {
     @apply py-12 md:py-20 px-4 md:px-6;
+  }
+  .section-tight {
+    @apply py-8 md:py-14 px-4 md:px-6;
   }
 
   .gradient-hero {
