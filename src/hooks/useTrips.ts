@@ -31,6 +31,7 @@ export interface DatabaseTrip {
   experience_category: string | null;
   tags: string[];
   safety_info: string[];
+  pricing_tiers?: Array<{ label: string; price: number; description?: string }>;
 }
 
 interface Batch {
