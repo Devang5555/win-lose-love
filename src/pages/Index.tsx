@@ -170,23 +170,23 @@ const Index = () => {
                 <Link
                   key={dest.id}
                   to={`/destinations/${dest.slug}`}
-                  className="group relative rounded-2xl overflow-hidden aspect-[4/3] shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+                  className="group relative rounded-3xl overflow-hidden aspect-[4/3] shadow-soft hover:shadow-card-hover transition-all duration-500 hover:-translate-y-1.5 border border-border/40"
                 >
                   <img
                     src={dest.hero_image || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"}
                     alt={dest.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-[1.08] transition-transform duration-[900ms] ease-out"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent group-hover:from-black/75 transition-colors duration-500" />
                   {(dest.trip_count ?? 0) > 0 && (
-                    <Badge className="absolute top-3 right-3 bg-primary/90 text-primary-foreground text-xs font-semibold">
+                    <Badge className="absolute top-3 right-3 bg-primary/95 backdrop-blur-md text-primary-foreground text-xs font-semibold border border-white/20">
                       {dest.trip_count} trip{dest.trip_count !== 1 ? "s" : ""}
                     </Badge>
                   )}
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="font-serif text-lg font-bold text-white">{dest.name}</h3>
-                    <p className="text-xs text-white/80 flex items-center gap-1 mt-1">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-0 group-hover:-translate-y-0.5 transition-transform duration-500">
+                    <h3 className="font-serif text-lg font-semibold text-white tracking-tight">{dest.name}</h3>
+                    <p className="text-xs text-white/85 flex items-center gap-1 mt-1">
                       <MapPin className="w-3 h-3" />
                       {dest.state}
                     </p>
