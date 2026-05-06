@@ -1,8 +1,10 @@
 import { useRef } from "react";
 import { format } from "date-fns";
-import { Download, Printer } from "lucide-react";
+import { Printer } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.jpg";
+import { generateUpiQrString, getMerchantUpiId } from "@/lib/upi";
 
 interface InvoiceProps {
   booking: {
@@ -17,18 +19,42 @@ interface InvoiceProps {
     total_amount: number;
     advance_paid: number;
     payment_status: string;
+    notes?: string | null;
     created_at: string;
   };
   batchInfo?: { batch_name: string; start_date: string; end_date: string } | null;
   tripName?: string;
-  companyConfig?: { gst_number: string; company_name: string; company_address: string; company_pan: string };
+  /** Optional override for the customer's full address (single line). */
+  customerAddress?: string | null;
 }
 
-const InvoiceView = ({ booking, batchInfo, tripName, companyConfig }: InvoiceProps) => {
+const fmtINR = (n: number) =>
+  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.max(0, Math.round(n)));
+
+const InvoiceView = ({ booking, batchInfo, tripName, customerAddress }: InvoiceProps) => {
   const printRef = useRef<HTMLDivElement>(null);
 
-  const balanceDue = Math.max(0, booking.total_amount - booking.advance_paid);
-  const invoiceNumber = booking.invoice_number || `GB-${booking.id.slice(0, 8).toUpperCase()}`;
+  const qty = Math.max(1, booking.num_travelers || 1);
+  const pricePerPerson = Math.round((booking.total_amount || 0) / qty);
+  const lineTotal = pricePerPerson * qty;
+  const advancePaid = Math.max(0, booking.advance_paid || 0);
+  const subTotal = Math.max(0, lineTotal - advancePaid); // amount still due
+  const balanceDue = subTotal;
+  const isFullyPaid = balanceDue <= 0;
+
+  const invoiceNumber =
+    booking.invoice_number || `GB-${booking.id.slice(0, 8).toUpperCase()}`;
+
+  // Pricing tier label, if stored in notes ("Option: ...")
+  const tierLabel = (() => {
+    const m = booking.notes?.match(/Option:\s*([^|]+)/i);
+    return m ? m[1].trim() : null;
+  })();
+
+  const upiQr = generateUpiQrString({
+    amount: balanceDue > 0 ? balanceDue : lineTotal,
+    transactionNote: `GoBhraman ${tripName || booking.trip_id} ${invoiceNumber}`,
+  });
 
   const handlePrint = () => {
     const content = printRef.current;
@@ -38,33 +64,90 @@ const InvoiceView = ({ booking, batchInfo, tripName, companyConfig }: InvoicePro
     printWindow.document.write(`
       <html><head><title>Invoice ${invoiceNumber}</title>
       <style>
-        body { font-family: 'Inter', system-ui, sans-serif; margin: 0; padding: 40px; color: #1a1a2e; }
-        .invoice { max-width: 800px; margin: 0 auto; }
-        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
-        th { background: #f8fafc; font-weight: 600; }
+        @page { size: A4; margin: 0; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; margin: 0; padding: 24px; color: #1a1a1a; background: #fafaf7; }
+        .invoice { max-width: 780px; margin: 0 auto; background: #fafaf7; padding: 24px; }
+        .script { font-family: 'Brush Script MT', 'Lucida Handwriting', cursive; color: #f0b429; font-size: 36px; line-height: 1; }
+        .title { font-size: 44px; font-weight: 800; letter-spacing: -1px; margin-top: -4px; }
+        .billed h3, .pay h3 { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
+        .billed p, .pay p { font-size: 13px; margin: 2px 0; color: #1a1a1a; }
+        .pay { text-align: right; }
+        table.items { width: 100%; border-collapse: collapse; margin: 24px 0 8px; }
+        table.items th { background: #ffe082; padding: 12px 14px; text-align: left; font-size: 12px; letter-spacing: 1px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; }
+        table.items td { padding: 12px 14px; font-size: 14px; }
+        .row-adv td { background: #fff8e1; }
+        .row-sub td { background: #ffe082; font-weight: 700; }
         .text-right { text-align: right; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
-        .logo-section { display: flex; align-items: center; gap: 12px; }
-        .logo-section img { width: 48px; height: 48px; border-radius: 8px; }
-        .company-name { font-size: 24px; font-weight: 700; }
-        .tagline { font-size: 11px; color: #64748b; }
-        .invoice-title { font-size: 28px; font-weight: 700; color: #0284c7; text-align: right; }
-        .meta { font-size: 13px; color: #64748b; text-align: right; }
-        .section-title { font-weight: 600; font-size: 14px; margin-top: 24px; margin-bottom: 8px; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-        .detail-label { font-size: 12px; color: #94a3b8; }
-        .detail-value { font-size: 14px; font-weight: 500; }
-        .total-row td { font-weight: 700; font-size: 16px; border-top: 2px solid #0284c7; }
-        .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #94a3b8; text-align: center; }
-        @media print { body { padding: 20px; } }
+        .breakdown { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        .breakdown td { padding: 12px 14px; font-size: 14px; background: #f5e6d3; }
+        .breakdown tr.alt td { background: #efe0cb; }
+        .breakdown tr.bold td { font-weight: 700; }
+        .terms { margin-top: 28px; }
+        .terms h4 { color: #b45309; font-weight: 700; margin: 0 0 6px; font-size: 13px; letter-spacing: 1px; }
+        .terms p { font-size: 13px; margin: 2px 0; }
+        .bank-row { display: flex; gap: 24px; margin-top: 28px; align-items: flex-start; }
+        .bank-row .bank { flex: 1; font-size: 14px; line-height: 1.8; }
+        .bank-row .qr { text-align: center; }
+        .upi-pill { display: inline-block; background: #f0b429; color: #1a1a1a; font-weight: 700; padding: 8px 18px; border-radius: 999px; margin-top: 10px; font-size: 14px; }
+        .logo-block { display: flex; flex-direction: column; align-items: flex-end; }
+        .logo-block img { width: 90px; height: 90px; object-fit: contain; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .meta { font-size: 12px; color: #555; margin-top: 6px; text-align: right; }
+        .pagebreak { page-break-after: always; }
       </style></head><body>
       ${content.innerHTML}
       </body></html>
     `);
     printWindow.document.close();
-    printWindow.print();
+    printWindow.focus();
+    setTimeout(() => printWindow.print(), 300);
   };
+
+  const Page = ({ children }: { children: React.ReactNode }) => (
+    <div className="invoice" style={{ background: "#fafaf7", padding: 28, borderRadius: 12 }}>
+      {/* Header */}
+      <div className="header">
+        <div>
+          <div className="script">Travel</div>
+          <div className="title">INVOICE</div>
+        </div>
+        <div className="logo-block">
+          <img src={logo} alt="GoBhraman" />
+          <div className="meta">
+            <div>#{invoiceNumber}</div>
+            <div>Date: {format(new Date(booking.created_at), "dd MMM yyyy")}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Billed / Payment To */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 28, gap: 24 }}>
+        <div className="billed" style={{ flex: 1 }}>
+          <h3>Billed To : {booking.full_name}</h3>
+          <p>{booking.phone}</p>
+          {customerAddress && <p>{customerAddress}</p>}
+          {booking.pickup_location && !customerAddress && <p>Pickup: {booking.pickup_location}</p>}
+          <p>{booking.email}</p>
+        </div>
+        <div className="pay" style={{ flex: 1 }}>
+          <h3>Payment To : Utkarsh Varma</h3>
+          <p>+91 94150 26522</p>
+          <p>Payment Via UPI</p>
+        </div>
+      </div>
+
+      {children}
+
+      {/* Terms */}
+      <div className="terms">
+        <h4>TERMS AND CONDITIONS</h4>
+        <p>50% Advance on booking confirms your seat.</p>
+        <p>Full balance must be cleared before trip departure.</p>
+        <p>Cancellations within 48 hours of departure are non-refundable.</p>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -75,106 +158,95 @@ const InvoiceView = ({ booking, batchInfo, tripName, companyConfig }: InvoicePro
         </Button>
       </div>
 
-      <div ref={printRef} className="bg-white text-foreground p-8 rounded-xl border border-border max-w-[800px]">
-        <div className="invoice">
-          {/* Header */}
-          <div className="header flex justify-between items-start mb-8">
-            <div className="logo-section flex items-center gap-3">
-              <img src={logo} alt="GoBhraman" className="w-12 h-12 rounded-lg" />
-              <div>
-                <div className="company-name text-2xl font-bold">
-                  {companyConfig?.company_name || "GoBhraman"}
-                </div>
-                <div className="tagline text-xs text-muted-foreground">भ्रमण से मिटे भ्रम</div>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="invoice-title text-2xl font-bold text-primary">INVOICE</div>
-              <div className="meta text-sm text-muted-foreground mt-1">
-                <div>#{invoiceNumber}</div>
-                <div>Date: {format(new Date(booking.created_at), "dd MMM yyyy")}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Company + Customer Details */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div>
-              <div className="section-title text-xs font-semibold uppercase text-muted-foreground mb-2">From</div>
-              <p className="text-sm font-medium">{companyConfig?.company_name || "GoBhraman"}</p>
-              <p className="text-sm text-muted-foreground">{companyConfig?.company_address || "Mumbai & Pune, India"}</p>
-              {companyConfig?.gst_number && <p className="text-sm text-muted-foreground">GST: {companyConfig.gst_number}</p>}
-              {companyConfig?.company_pan && <p className="text-sm text-muted-foreground">PAN: {companyConfig.company_pan}</p>}
-              <p className="text-sm text-muted-foreground">Phone: +91-9415026522</p>
-              <p className="text-sm text-muted-foreground">Email: bhramanbyua@gmail.com</p>
-            </div>
-            <div>
-              <div className="section-title text-xs font-semibold uppercase text-muted-foreground mb-2">Bill To</div>
-              <p className="text-sm font-medium">{booking.full_name}</p>
-              <p className="text-sm text-muted-foreground">{booking.email}</p>
-              <p className="text-sm text-muted-foreground">{booking.phone}</p>
-              {booking.pickup_location && <p className="text-sm text-muted-foreground">Pickup: {booking.pickup_location}</p>}
-            </div>
-          </div>
-
-          {/* Trip Details Table */}
-          <table className="w-full border-collapse mb-6">
+      <div ref={printRef}>
+        {/* Page 1 — Invoice */}
+        <Page>
+          {/* Items table */}
+          <table className="items">
             <thead>
-              <tr className="bg-muted/50">
-                <th className="p-3 text-left text-sm font-semibold">Description</th>
-                <th className="p-3 text-right text-sm font-semibold">Qty</th>
-                <th className="p-3 text-right text-sm font-semibold">Amount</th>
+              <tr>
+                <th style={{ width: "50%" }}>Description</th>
+                <th className="text-right" style={{ width: "10%" }}>Qty</th>
+                <th className="text-right" style={{ width: "20%" }}>Price</th>
+                <th className="text-right" style={{ width: "20%" }}>Total</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-border">
-                <td className="p-3">
-                  <p className="text-sm font-medium">{tripName || booking.trip_id}</p>
+              <tr>
+                <td>
+                  <div style={{ fontWeight: 600 }}>{tripName || booking.trip_id}</div>
                   {batchInfo && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Batch: {batchInfo.batch_name} | {format(new Date(batchInfo.start_date), "dd MMM")} – {format(new Date(batchInfo.end_date), "dd MMM yyyy")}
-                    </p>
+                    <div style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
+                      {batchInfo.batch_name} • {format(new Date(batchInfo.start_date), "dd MMM")} – {format(new Date(batchInfo.end_date), "dd MMM yyyy")}
+                    </div>
+                  )}
+                  {tierLabel && (
+                    <div style={{ fontSize: 12, color: "#555", marginTop: 2 }}>Option: {tierLabel}</div>
                   )}
                 </td>
-                <td className="p-3 text-right text-sm">{booking.num_travelers} pax</td>
-                <td className="p-3 text-right text-sm font-medium">₹{booking.total_amount.toLocaleString("en-IN")}</td>
+                <td className="text-right">{qty}</td>
+                <td className="text-right">{fmtINR(pricePerPerson)} Rs</td>
+                <td className="text-right">{fmtINR(lineTotal)} Rs</td>
+              </tr>
+              {advancePaid > 0 && (
+                <tr className="row-adv">
+                  <td colSpan={3}>Advance</td>
+                  <td className="text-right">- {fmtINR(advancePaid)} Rs</td>
+                </tr>
+              )}
+              <tr className="row-sub">
+                <td colSpan={3} className="text-right">SUB TOTAL :</td>
+                <td className="text-right">{fmtINR(subTotal)} Rs</td>
               </tr>
             </tbody>
           </table>
 
-          {/* Payment Summary */}
-          <div className="flex justify-end">
-            <div className="w-64 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">₹{booking.total_amount.toLocaleString("en-IN")}</span>
-              </div>
-              {companyConfig?.gst_number && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">GST (Included)</span>
-                  <span>Inclusive</span>
-                </div>
-              )}
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Advance Paid</span>
-                <span className="text-green-600 font-medium">- ₹{booking.advance_paid.toLocaleString("en-IN")}</span>
-              </div>
-              <div className="flex justify-between text-sm pt-2 border-t border-border">
-                <span className="font-bold">Balance Due</span>
-                <span className="font-bold text-lg">₹{balanceDue.toLocaleString("en-IN")}</span>
-              </div>
-              <div className="text-xs text-muted-foreground text-right mt-1">
-                Status: {booking.payment_status === "fully_paid" ? "✅ Fully Paid" : "⏳ Balance Pending"}
-              </div>
-            </div>
-          </div>
+          {/* Breakdown card */}
+          <table className="breakdown">
+            <tbody>
+              <tr>
+                <td>Total amount</td>
+                <td className="text-right">{fmtINR(lineTotal)} Rs</td>
+              </tr>
+              <tr className="alt">
+                <td>Advance paid</td>
+                <td className="text-right">- {fmtINR(advancePaid)} Rs</td>
+              </tr>
+              <tr className="bold">
+                <td>{isFullyPaid ? "Status" : "Pending balance"}</td>
+                <td className="text-right">{isFullyPaid ? "FULLY PAID" : `${fmtINR(balanceDue)} Rs`}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Page>
 
-          {/* Footer */}
-          <div className="footer mt-10 pt-4 border-t border-border text-center text-xs text-muted-foreground">
-            <p>Thank you for choosing GoBhraman! For support: +91-9415026522 | bhramanbyua@gmail.com</p>
-            <p className="mt-1">This is a computer-generated invoice and does not require a signature.</p>
-          </div>
-        </div>
+        {/* Page 2 — Payment details */}
+        {!isFullyPaid && (
+          <>
+            <div className="pagebreak" />
+            <div style={{ marginTop: 24 }}>
+              <Page>
+                <div className="bank-row">
+                  <div className="bank">
+                    <p><strong>Account holder name:</strong><br /> Utkarsh Kartika Prasad Verma</p>
+                    <p><strong>Account number:</strong> 188433676328</p>
+                    <p><strong>IFSC code:</strong> INDB0000430</p>
+                    <p><strong>Branch:</strong> Kalbadevi</p>
+                    <div className="upi-pill">{getMerchantUpiId()}</div>
+                  </div>
+                  <div className="qr">
+                    <div style={{ background: "#fff", padding: 12, borderRadius: 12, display: "inline-block" }}>
+                      <QRCodeSVG value={upiQr} size={200} level="M" includeMargin />
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 12, color: "#555" }}>
+                      Scan to pay ₹{fmtINR(balanceDue)}
+                    </div>
+                  </div>
+                </div>
+              </Page>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
