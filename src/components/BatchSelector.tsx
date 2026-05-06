@@ -156,13 +156,22 @@ const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectB
     );
   }
 
+  const visibleBatches = showAll ? batches : batches.slice(0, 3);
+  const hiddenCount = batches.length - visibleBatches.length;
+  const allSoldOut = batches.every((b) => b.available_seats === 0);
+
   return (
     <div className="space-y-3">
       <p className="text-sm font-semibold text-foreground flex items-center gap-2">
         <Calendar className="w-4 h-4 text-primary" />
         Select Departure
+        {batches.length > 1 && (
+          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0 h-4 ml-1">
+            📅 Multiple Dates
+          </Badge>
+        )}
       </p>
-      {batches.map((batch) => {
+      {visibleBatches.map((batch) => {
         const isSoldOut = batch.available_seats === 0;
         const isSelected = selectedBatchId === batch.id;
         const dp = batch.dynamicPrice!;
@@ -175,7 +184,7 @@ const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectB
             onClick={() => onSelectBatch(batch)}
             className={`w-full text-left rounded-xl border-2 p-4 transition-all duration-300 ${
               isSoldOut
-                ? "opacity-50 cursor-not-allowed border-border bg-muted"
+                ? "opacity-60 cursor-not-allowed border-border bg-muted"
                 : isSelected
                 ? "border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20 scale-[1.02]"
                 : "border-border bg-card hover:border-primary/40 hover:shadow-sm"
@@ -185,20 +194,6 @@ const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectB
               <span className="font-semibold text-sm text-card-foreground flex items-center gap-2 flex-wrap">
                 {isSelected && <CheckCircle className="w-4 h-4 text-primary animate-in zoom-in-50 duration-200" />}
                 {batch.batch_name}
-                {batches.length > 1 ? (
-                  <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0 h-4">
-                    📅 Multiple Dates Available
-                  </Badge>
-                ) : (() => {
-                  const startDow = new Date(batch.start_date).getDay();
-                  const endDow = new Date(batch.end_date).getDay();
-                  const overlapsWeekend = [startDow, endDow].some(d => d === 0 || d === 5 || d === 6);
-                  return overlapsWeekend ? (
-                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0 h-4">
-                      🌴 Available Every Weekend
-                    </Badge>
-                  ) : null;
-                })()}
               </span>
               <div className="flex items-center gap-1.5">
                 {getSeatBadge(batch.batch_size, Math.max(0, batch.batch_size - batch.available_seats), batch.available_seats)}
@@ -216,6 +211,50 @@ const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectB
           </button>
         );
       })}
+
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowAll(true)}
+          className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:underline py-1"
+        >
+          <ChevronDown className="w-3.5 h-3.5" />
+          Show {hiddenCount} more date{hiddenCount > 1 ? "s" : ""}
+        </button>
+      )}
+
+      {allSoldOut && (
+        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-3 space-y-2">
+          <p className="text-xs font-semibold text-destructive text-center">
+            All current batches are sold out — next batch coming soon
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-9 text-xs"
+              onClick={() =>
+                sendWhatsApp(
+                  `Hi GoBhraman 👋\n\nI'd like to *Join the Next Batch* for *${tripName ?? "this trip"}*. Please notify me when new dates open.`,
+                )
+              }
+            >
+              <Bell className="w-3.5 h-3.5 mr-1" /> Join Next Batch
+            </Button>
+            <Button
+              size="sm"
+              className="h-9 text-xs bg-[#25D366] hover:bg-[#25D366]/90 text-white"
+              onClick={() =>
+                sendWhatsApp(
+                  `Hi GoBhraman 👋\n\nPlease add me to the *Waitlist* for *${tripName ?? "this trip"}*.`,
+                )
+              }
+            >
+              <MessageCircle className="w-3.5 h-3.5 mr-1" /> Join Waitlist
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
