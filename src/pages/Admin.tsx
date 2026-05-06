@@ -148,6 +148,41 @@ const Admin = () => {
     }
   }, [user, isAdmin, isStaffRole]);
 
+  // Realtime: notify admin on new booking + payment proof uploads
+  useEffect(() => {
+    if (!user || (!isAdmin && !isStaffRole)) return;
+    const channel = supabase
+      .channel("admin-bookings-feed")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "bookings" },
+        (payload: any) => {
+          const b = payload.new;
+          toast({
+            title: "🆕 New booking received",
+            description: `${b.full_name} • ${b.trip_id} • ₹${Number(b.total_amount || 0).toLocaleString()}`,
+          });
+          fetchData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "bookings", filter: "payment_status=eq.pending_advance" },
+        (payload: any) => {
+          const b = payload.new;
+          toast({
+            title: "💳 Payment proof uploaded",
+            description: `${b.full_name} • Awaiting verification`,
+          });
+          fetchData();
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, isAdmin, isStaffRole]);
+
   useEffect(() => {
     let filtered = bookings;
     

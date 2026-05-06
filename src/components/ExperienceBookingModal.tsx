@@ -193,9 +193,30 @@ const ExperienceBookingModal = ({
         console.warn("notification failed", e);
       }
 
+      // Send confirmation email to the user (best-effort)
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "experience-booking-received",
+            recipientEmail: formData.email,
+            idempotencyKey: `exp-booking-${bookingId}`,
+            templateData: {
+              name: formData.name,
+              experienceName,
+              guests: parseInt(formData.travelers),
+              amount: totalPrice,
+              bookingId,
+              tier: selectedTier?.label || null,
+            },
+          },
+        });
+      } catch (e) {
+        console.warn("email send failed", e);
+      }
+
       toast({
-        title: "🎉 Payment submitted successfully!",
-        description: "Your booking is awaiting confirmation from Team GoBhraman.",
+        title: "🎒 Start packing your bags!",
+        description: "You will receive your booking confirmation in the next 15 mins.",
       });
       handleClose();
       navigate(`/my-bookings`);
