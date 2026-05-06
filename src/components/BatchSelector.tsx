@@ -58,10 +58,11 @@ const getSeatBadge = (capacity: number, seatsBooked: number, available: number) 
   );
 };
 
-const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: BatchSelectorProps) => {
+const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectBatch }: BatchSelectorProps) => {
   const [batches, setBatches] = useState<BatchInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     const fetchBatches = async () => {
