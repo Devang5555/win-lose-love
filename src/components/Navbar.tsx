@@ -122,7 +122,7 @@ const Navbar = () => {
                 <DropdownMenuContent align="end" className="w-52">
                   {balance > 0 && (
                     <DropdownMenuItem asChild>
-                      <Link to="/my-bookings?tab=wallet" className="flex items-center gap-2 cursor-pointer">
+                      <Link to="/profile/credits" className="flex items-center gap-2 cursor-pointer">
                         <Wallet className="w-4 h-4 text-primary" />
                         <span>Wallet</span>
                         <span className="ml-auto text-xs font-bold text-primary">₹{balance.toLocaleString()}</span>
@@ -251,7 +251,7 @@ const Navbar = () => {
                   </Link>
                   {balance > 0 && (
                     <Link
-                      to="/my-bookings?tab=wallet"
+                      to="/profile/credits"
                       onClick={() => setIsOpen(false)}
                       className="px-4 py-3 rounded-lg text-sm font-semibold transition-colors text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
                     >
