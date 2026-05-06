@@ -68,13 +68,13 @@ const Index = () => {
       </div>
 
       {/* Featured Trip - Bookable Trips */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 surface-soft">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="w-5 h-5 text-primary" />
-                <span className="text-primary font-bold text-sm uppercase tracking-wider">Live & Bookable</span>
+                <span className="display-eyebrow">Live & Bookable</span>
               </div>
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
                 Start Your Journey Now
@@ -128,7 +128,7 @@ const Index = () => {
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="bg-card rounded-2xl p-6 text-center shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 border border-border"
+                className="surface-elevated rounded-3xl p-6 text-center shadow-soft hover:shadow-card transition-all duration-500 hover:-translate-y-1 border border-border/50"
               >
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="w-8 h-8 text-primary" />
@@ -142,11 +142,11 @@ const Index = () => {
       </section>
 
       {/* Popular Destinations */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 surface-tint">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
-              <span className="text-sunset font-bold text-sm uppercase tracking-wider">Explore India</span>
+              <span className="display-eyebrow !text-sunset">Explore India</span>
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">Popular Destinations</h2>
               <p className="text-muted-foreground mt-2">Discover trips across India's most extraordinary places</p>
             </div>
