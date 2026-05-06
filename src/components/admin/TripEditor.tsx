@@ -149,6 +149,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
           policies: Array.isArray((data as any).policies?.items)
             ? ((data as any).policies.items as string[])
             : [],
+          seo: ((data as any).seo as SeoData) || {},
         });
       }
     } catch (error) {
