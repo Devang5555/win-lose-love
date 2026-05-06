@@ -193,20 +193,25 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans;
+    @apply font-serif;
+    font-feature-settings: "ss01", "ss02";
+    letter-spacing: -0.02em;
   }
 }
 
 @layer components {
-  /* ===== Shared Typography System — Plus Jakarta Sans ===== */
+  /* ===== Shared Typography System — Fraunces (display) + Plus Jakarta Sans (body) ===== */
   .h1 {
-    @apply font-sans font-extrabold tracking-tight text-foreground text-4xl md:text-5xl lg:text-6xl leading-[1.1];
+    @apply font-serif font-bold tracking-tight text-foreground text-4xl md:text-5xl lg:text-6xl leading-[1.05];
+    letter-spacing: -0.025em;
   }
   .h2 {
-    @apply font-sans font-bold tracking-tight text-foreground text-3xl md:text-4xl lg:text-5xl leading-tight;
+    @apply font-serif font-semibold tracking-tight text-foreground text-3xl md:text-4xl lg:text-5xl leading-[1.1];
+    letter-spacing: -0.022em;
   }
   .h3 {
-    @apply font-sans font-bold tracking-tight text-foreground text-xl md:text-2xl leading-snug;
+    @apply font-serif font-semibold tracking-tight text-foreground text-xl md:text-2xl leading-snug;
+    letter-spacing: -0.018em;
   }
   .body {
     @apply font-sans text-base md:text-lg text-muted-foreground leading-relaxed;
@@ -226,6 +231,9 @@
   .nav-link {
     @apply font-sans text-[16px] font-semibold tracking-tight;
   }
+  .display-eyebrow {
+    @apply font-sans text-xs md:text-sm font-semibold uppercase tracking-[0.18em] text-primary;
+  }
 
   /* ===== Premium surface utilities ===== */
   .surface-soft {
@@ -234,10 +242,37 @@
   .surface-tint {
     background: var(--surface-tint);
   }
+  .surface-warm {
+    background: var(--surface-warm);
+  }
+  .surface-cool {
+    background: var(--surface-cool);
+  }
+  .surface-elevated {
+    background: var(--surface-elevated);
+  }
   .glass-panel {
     @apply backdrop-blur-2xl border border-white/50 rounded-2xl;
     background: hsl(0 0% 100% / 0.7);
     box-shadow: var(--shadow-card);
+  }
+  .glass-nav {
+    @apply backdrop-blur-xl border-b border-white/40;
+    background: hsl(0 0% 100% / 0.72);
+    box-shadow: 0 1px 0 0 hsl(210 40% 15% / 0.04), 0 4px 16px -8px hsl(210 40% 15% / 0.06);
+  }
+  .dark .glass-nav {
+    @apply border-white/10;
+    background: hsl(210 40% 10% / 0.7);
+  }
+  .glass-bar {
+    @apply backdrop-blur-2xl border border-white/40 rounded-2xl;
+    background: hsl(0 0% 100% / 0.78);
+    box-shadow: var(--shadow-elevated);
+  }
+  .dark .glass-bar {
+    @apply border-white/10;
+    background: hsl(210 40% 10% / 0.78);
   }
   .dark .glass-panel {
     @apply border-white/10;
@@ -251,6 +286,14 @@
     @apply -translate-y-0.5 border-primary/30;
     box-shadow: var(--shadow-card-hover);
   }
+  .premium-surface {
+    background: var(--surface-elevated);
+    @apply border border-border/50 rounded-2xl;
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
   .cta-gradient {
     background: linear-gradient(135deg, hsl(var(--sunset-light)) 0%, hsl(var(--sunset)) 50%, hsl(var(--accent)) 100%);
     color: hsl(var(--accent-foreground));
@@ -263,6 +306,9 @@
   }
   .section-padding {
     @apply py-12 md:py-20 px-4 md:px-6;
+  }
+  .section-tight {
+    @apply py-8 md:py-14 px-4 md:px-6;
   }
 
   .gradient-hero {
