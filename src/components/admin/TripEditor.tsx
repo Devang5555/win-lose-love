@@ -537,43 +537,18 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
               </div>
             </section>
 
-            {/* Images */}
+            {/* Smart Image Manager: reorder, set hero, alt text */}
             <section>
               <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                 <Image className="w-5 h-5 text-primary" />
-                Images (URLs)
+                Images
               </h3>
-              <div className="flex flex-col sm:flex-row gap-2 mb-3">
-                <div className="flex gap-2 flex-1">
-                  <Input
-                    value={newImage}
-                    onChange={(e) => setNewImage(e.target.value)}
-                    placeholder="Paste image URL..."
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addToArray("images", newImage, setNewImage))}
-                  />
-                  <Button type="button" onClick={() => addToArray("images", newImage, setNewImage)}>
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                <ImageUpload
-                  onUploaded={(url) =>
-                    setFormData((prev) => ({ ...prev, images: [...prev.images, url] }))
-                  }
-                />
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {formData.images.map((url, i) => (
-                  <div key={i} className="relative group">
-                    <img src={url} alt={`Trip image ${i + 1}`} className="w-full h-24 object-cover rounded-lg" />
-                    <button
-                      onClick={() => removeFromArray("images", i)}
-                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <SmartImageManager
+                images={formData.images}
+                alt={formData.seo.image_alt}
+                onImagesChange={(imgs) => setFormData({ ...formData, images: imgs })}
+                onAltChange={(alt) => setFormData({ ...formData, seo: { ...formData.seo, image_alt: alt } })}
+              />
             </section>
 
             {/* Contact */}
