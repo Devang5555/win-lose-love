@@ -19,10 +19,15 @@ const ExperienceDetail = () => {
   const { toast } = useToast();
   const { loading, getTrip, getTripBatches, isTripBookable } = useTrips();
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [showAllSlots, setShowAllSlots] = useState(false);
 
   const experience = getTrip(experienceId || "");
   const slots = getTripBatches(experienceId || "");
   const bookable = experienceId ? isTripBookable(experienceId) : false;
+  const visibleSlots = showAllSlots ? slots : slots.slice(0, 3);
+  const allSoldOut = slots.length > 0 && slots.every((s) => s.batch_size - s.seats_booked <= 0);
+  const sendWhatsApp = (msg: string) =>
+    window.open(`https://wa.me/919415026522?text=${encodeURIComponent(msg)}`, "_blank");
 
   if (loading) {
     return (
