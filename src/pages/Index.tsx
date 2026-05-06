@@ -128,7 +128,7 @@ const Index = () => {
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="bg-card rounded-2xl p-6 text-center shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 border border-border"
+                className="surface-elevated rounded-3xl p-6 text-center shadow-soft hover:shadow-card transition-all duration-500 hover:-translate-y-1 border border-border/50"
               >
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="w-8 h-8 text-primary" />
