@@ -633,9 +633,40 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                   </span>
                 ))}
               </div>
+              {/* Featured / homepage curation toggles (stored as tags) */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-xs font-semibold text-foreground mb-2">Homepage curation</p>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(FEATURED_TAG_LABELS) as FeaturedTagKey[]).map((key) => {
+                    const active = hasFeaturedTag(formData.tags, key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, tags: toggleFeaturedTag(formData.tags, key) })}
+                        className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                          active
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-card text-muted-foreground border-border hover:border-primary/40"
+                        }`}
+                      >
+                        {FEATURED_TAG_LABELS[key]}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Toggles add/remove curation tags. Frontend filters use these to surface trips on the homepage.
+                </p>
+              </div>
             </section>
 
-            {/* Notes */}
+            {/* SEO & Social */}
+            <SeoSection
+              value={formData.seo}
+              onChange={(v) => setFormData({ ...formData, seo: v })}
+              fallbackImage={formData.images[0]}
+            />
             <section>
               <Label className="mb-2 block">Additional Notes</Label>
               <Textarea
