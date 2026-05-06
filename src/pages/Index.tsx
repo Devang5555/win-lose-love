@@ -142,11 +142,7 @@ const Index = () => {
       </section>
 
       {/* Popular Destinations */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-            <div>
-              <span className="text-sunset font-bold text-sm uppercase tracking-wider">Explore India</span>
+      <section className="py-16 md:py-24 surface-tint">
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-2">Popular Destinations</h2>
               <p className="text-muted-foreground mt-2">Discover trips across India's most extraordinary places</p>
             </div>
