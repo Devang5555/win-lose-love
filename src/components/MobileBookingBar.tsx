@@ -48,8 +48,8 @@ const MobileBookingBar = ({
   const seats = selectedBatch?.available_seats ?? 0;
   const isSoldOut = selectedBatch ? seats === 0 : false;
 
-  const barClasses = `fixed bottom-14 left-0 right-0 z-40 lg:hidden bg-card/95 backdrop-blur-lg border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)] px-4 py-3 transition-transform duration-300 ease-out ${
-    visible ? "translate-y-0" : "translate-y-full"
+  const barClasses = `fixed bottom-16 left-3 right-3 z-40 lg:hidden glass-bar px-4 py-3 transition-all duration-300 ease-out ${
+    visible ? "translate-y-0 opacity-100" : "translate-y-[120%] opacity-0"
   }`;
 
   if (loading) {
