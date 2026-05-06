@@ -68,13 +68,7 @@ const Index = () => {
       </div>
 
       {/* Featured Trip - Bookable Trips */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                <span className="text-primary font-bold text-sm uppercase tracking-wider">Live & Bookable</span>
+      <section className="py-16 md:py-24 surface-soft">
               </div>
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
                 Start Your Journey Now
