@@ -405,8 +405,20 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(batch)}>
+                          <Button variant="ghost" size="sm" title="Edit" onClick={() => handleEdit(batch)}>
                             <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Duplicate (+7 days)" onClick={() => handleDuplicate(batch)}>
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title={batch.status === "closed" ? "Reopen Batch" : "Mark Sold Out"}
+                            className="text-orange-600 hover:text-orange-700"
+                            onClick={() => handleToggleSoldOut(batch)}
+                          >
+                            <Ban className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
