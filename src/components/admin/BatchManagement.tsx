@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit, Trash2, Users, Calendar, Save, X, TrendingUp, Sparkles } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Calendar, Save, X, TrendingUp, Sparkles, Copy, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -144,6 +144,46 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
     } else {
       toast({ title: "Success", description: "Batch deleted successfully" });
       onRefresh();
+    }
+  };
+
+  const handleDuplicate = async (batch: Batch) => {
+    // Shift dates +7 days for the duplicate
+    const shift = (d: string) => {
+      const dt = new Date(d);
+      dt.setDate(dt.getDate() + 7);
+      return dt.toISOString().slice(0, 10);
+    };
+    const { error } = await supabase.from("batches").insert({
+      trip_id: batch.trip_id,
+      batch_name: `${batch.batch_name} (Next)`,
+      start_date: shift(batch.start_date),
+      end_date: shift(batch.end_date),
+      batch_size: batch.batch_size,
+      status: "active",
+      auto_shift: batch.auto_shift ?? true,
+      auto_duplicate: batch.auto_duplicate ?? true,
+    });
+    if (error) {
+      toast({ title: "Error", description: "Failed to duplicate batch", variant: "destructive" });
+    } else {
+      toast({ title: "Batch Duplicated", description: "Edit dates if needed" });
+      onRefresh();
+    }
+  };
+
+  const handleToggleSoldOut = async (batch: Batch) => {
+    const isSoldOut = batch.status === "closed" || batch.batch_size - batch.seats_booked <= 0;
+    if (isSoldOut) {
+      // Reopen — restore available seats based on capacity - booked
+      const available = Math.max(0, batch.batch_size - batch.seats_booked);
+      const { error } = await supabase.from("batches").update({ status: "active", available_seats: available }).eq("id", batch.id);
+      if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+      else { toast({ title: "Batch Reopened" }); onRefresh(); }
+    } else {
+      const { error } = await supabase.from("batches").update({ status: "closed", available_seats: 0 }).eq("id", batch.id);
+      if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+      else { toast({ title: "Marked Sold Out" }); onRefresh(); }
     }
   };
 
@@ -365,8 +405,20 @@ const BatchManagement = ({ batches, onRefresh }: BatchManagementProps) => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(batch)}>
+                          <Button variant="ghost" size="sm" title="Edit" onClick={() => handleEdit(batch)}>
                             <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Duplicate (+7 days)" onClick={() => handleDuplicate(batch)}>
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title={batch.status === "closed" ? "Reopen Batch" : "Mark Sold Out"}
+                            className="text-orange-600 hover:text-orange-700"
+                            onClick={() => handleToggleSoldOut(batch)}
+                          >
+                            <Ban className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"

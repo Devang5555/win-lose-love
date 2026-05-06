@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Power, PowerOff, AlertCircle, Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Power, PowerOff, AlertCircle, Plus, Edit, Trash2, Eye, EyeOff, Copy, Search, Ban, ExternalLink, CalendarPlus } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ interface TripManagementProps {
   onRefresh: () => void;
 }
 
+type StatusFilter = "all" | "published" | "draft" | "hidden";
+
 const TripManagement = ({ onRefresh }: TripManagementProps) => {
   const { toast } = useToast();
   const { trips, batches, loading, tripsTableMissing, getAvailableSeats, toggleBookingLive, refetch } = useTrips();
@@ -20,279 +23,250 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingTripId, setEditingTripId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [search, setSearch] = useState("");
 
   const handleToggleBookingLive = async (tripId: string, tripName: string, currentStatus: boolean) => {
-    // Check if trip has batches before enabling
     const tripBatches = batches.filter(b => b.trip_id === tripId && b.status === 'active');
     const availableSeats = getAvailableSeats(tripId);
-
     if (!currentStatus && tripBatches.length === 0) {
-      toast({
-        title: "Cannot Enable Booking",
-        description: "Please add at least one batch before launching this trip.",
-        variant: "destructive",
-      });
+      toast({ title: "Cannot Enable Booking", description: "Add at least one batch first.", variant: "destructive" });
       return;
     }
-
     if (!currentStatus && availableSeats === 0) {
-      toast({
-        title: "Cannot Enable Booking",
-        description: "No available seats in any batch. Please add more seats or create a new batch.",
-        variant: "destructive",
-      });
+      toast({ title: "Cannot Enable Booking", description: "No available seats in any batch.", variant: "destructive" });
       return;
     }
-
     setUpdating(tripId);
-
     const success = await toggleBookingLive(tripId, !currentStatus);
-
     if (success) {
-      toast({
-        title: "Trip booking status updated successfully",
-        description: `Booking ${!currentStatus ? 'enabled' : 'disabled'} for ${tripName}`,
-      });
+      toast({ title: "Updated", description: `Booking ${!currentStatus ? 'enabled' : 'disabled'} for ${tripName}` });
       onRefresh();
     } else {
-      toast({
-        title: "Error",
-        description: "Failed to update booking status. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to update", variant: "destructive" });
     }
-
     setUpdating(null);
   };
 
   const handleToggleActive = async (tripId: string, tripName: string, currentStatus: boolean) => {
     setUpdating(tripId);
-
     try {
-      const { error } = await supabase
-        .from("trips")
-        .update({ is_active: !currentStatus })
-        .eq("trip_id", tripId);
-
+      const { error } = await supabase.from("trips").update({ is_active: !currentStatus }).eq("trip_id", tripId);
       if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `${tripName} is now ${!currentStatus ? 'visible' : 'hidden'}`,
-      });
-      refetch();
-      onRefresh();
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to update trip visibility", variant: "destructive" });
+      toast({ title: "Success", description: `${tripName} is now ${!currentStatus ? 'visible' : 'hidden'}` });
+      refetch(); onRefresh();
+    } catch {
+      toast({ title: "Error", description: "Failed to update visibility", variant: "destructive" });
     }
+    setUpdating(null);
+  };
 
+  const handleDuplicate = async (tripId: string) => {
+    setUpdating(tripId);
+    try {
+      const { data: src, error: fetchErr } = await supabase.from("trips").select("*").eq("trip_id", tripId).maybeSingle();
+      if (fetchErr || !src) throw fetchErr || new Error("Trip not found");
+      const newId = `${src.trip_id}-copy-${Date.now().toString(36).slice(-4)}`;
+      const { id, created_at, updated_at, ...rest } = src as any;
+      const payload = {
+        ...rest,
+        trip_id: newId,
+        trip_name: `${src.trip_name} (Copy)`,
+        slug: src.slug ? `${src.slug}-copy-${Date.now().toString(36).slice(-4)}` : null,
+        is_active: false,
+        booking_live: false,
+      };
+      const { error: insErr } = await supabase.from("trips").insert(payload);
+      if (insErr) throw insErr;
+      toast({ title: "Trip Duplicated", description: "Created as draft (hidden). Edit and publish when ready." });
+      refetch(); onRefresh();
+    } catch (e: any) {
+      toast({ title: "Duplicate failed", description: e?.message || "Try again", variant: "destructive" });
+    }
+    setUpdating(null);
+  };
+
+  const handleMarkSoldOut = async (tripId: string, tripName: string) => {
+    if (!confirm(`Mark all active batches for "${tripName}" as Sold Out? Booking will be disabled.`)) return;
+    setUpdating(tripId);
+    try {
+      const tripBatches = batches.filter(b => b.trip_id === tripId && b.status === 'active');
+      for (const b of tripBatches) {
+        await supabase.from("batches").update({ available_seats: 0, status: 'closed' }).eq("id", b.id);
+      }
+      await supabase.from("trips").update({ booking_live: false }).eq("trip_id", tripId);
+      toast({ title: "Marked Sold Out", description: `${tripName} closed.` });
+      refetch(); onRefresh();
+    } catch {
+      toast({ title: "Error", description: "Failed to mark sold out", variant: "destructive" });
+    }
     setUpdating(null);
   };
 
   const handleDelete = async (tripId: string, tripName: string) => {
-    if (!confirm(`Are you sure you want to delete "${tripName}"? This action cannot be undone.`)) return;
-
+    if (!confirm(`Delete "${tripName}"? This cannot be undone.`)) return;
     try {
-      const { error } = await supabase
-        .from("trips")
-        .delete()
-        .eq("trip_id", tripId);
-
+      const { error } = await supabase.from("trips").delete().eq("trip_id", tripId);
       if (error) throw error;
-
-      toast({ title: "Success", description: "Trip deleted successfully" });
-      refetch();
-      onRefresh();
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to delete trip", variant: "destructive" });
+      toast({ title: "Deleted", description: "Trip removed" });
+      refetch(); onRefresh();
+    } catch {
+      toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
     }
   };
 
-  const handleCreateTrip = () => {
-    setEditingTripId(null);
-    setEditorOpen(true);
-  };
-
-  const handleEditTrip = (tripId: string) => {
-    setEditingTripId(tripId);
-    setEditorOpen(true);
-  };
-
-  const handleEditorClose = () => {
-    setEditorOpen(false);
-    setEditingTripId(null);
-  };
-
-  const handleEditorSave = () => {
-    setEditorOpen(false);
-    setEditingTripId(null);
-    refetch();
-    onRefresh();
-  };
+  const handleCreateTrip = () => { setEditingTripId(null); setEditorOpen(true); };
+  const handleEditTrip = (tripId: string) => { setEditingTripId(tripId); setEditorOpen(true); };
+  const handleEditorClose = () => { setEditorOpen(false); setEditingTripId(null); };
+  const handleEditorSave = () => { setEditorOpen(false); setEditingTripId(null); refetch(); onRefresh(); };
 
   const getBatchStats = (tripId: string) => {
     const tripBatches = batches.filter(b => b.trip_id === tripId);
     const activeBatches = tripBatches.filter(b => b.status === 'active');
     const totalSeats = activeBatches.reduce((sum, b) => sum + b.batch_size, 0);
     const bookedSeats = activeBatches.reduce((sum, b) => sum + b.seats_booked, 0);
-    return { total: tripBatches.length, active: activeBatches.length, totalSeats, bookedSeats };
+    const nextBatch = [...activeBatches]
+      .filter(b => new Date(b.start_date) >= new Date(new Date().toDateString()))
+      .sort((a, b) => a.start_date.localeCompare(b.start_date))[0];
+    return { total: tripBatches.length, active: activeBatches.length, totalSeats, bookedSeats, nextBatch };
   };
 
+  const visibilityStatus = (trip: any): StatusFilter => {
+    if (trip.is_active && trip.booking_live) return "published";
+    if (!trip.is_active) return "hidden";
+    return "draft";
+  };
+
+  const filteredTrips = useMemo(() => {
+    return trips.filter(t => {
+      if (typeFilter !== "all" && t.type !== typeFilter) return false;
+      if (statusFilter !== "all" && visibilityStatus(t) !== statusFilter) return false;
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        const hay = `${t.trip_name} ${t.locations?.join(" ") || ""} ${t.summary || ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [trips, typeFilter, statusFilter, search]);
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
 
-  const filteredTrips = typeFilter === "all" ? trips : trips.filter(t => t.type === typeFilter);
-
   return (
-    <div className="space-y-6">
-      {/* Header with Create Button and Filter */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Trip & Experience Management</h3>
-          <p className="text-sm text-muted-foreground">Create, edit, and manage trips & experiences</p>
+          <h3 className="text-lg font-semibold text-foreground">Control Dashboard</h3>
+          <p className="text-sm text-muted-foreground">Manage trips, batches & visibility — inline.</p>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Type Filter */}
-          <div className="flex rounded-lg border border-border overflow-hidden">
-            {[{ value: "all", label: "All" }, { value: "trip", label: "Trips" }, { value: "experience", label: "Experiences" }].map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setTypeFilter(opt.value)}
-                className={`px-3 py-1.5 text-xs font-semibold transition-colors ${typeFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"}`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          <Button onClick={handleCreateTrip}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create New
-          </Button>
+        <Button onClick={handleCreateTrip}><Plus className="w-4 h-4 mr-2" />Create New</Button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-2 md:items-center bg-card border border-border rounded-xl p-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search trip name, destination..." className="pl-9 h-9" />
+        </div>
+        <div className="flex rounded-lg border border-border overflow-hidden">
+          {[{ v: "all", l: "All" }, { v: "trip", l: "Trips" }, { v: "experience", l: "Experiences" }].map(o => (
+            <button key={o.v} onClick={() => setTypeFilter(o.v)} className={`px-3 py-1.5 text-xs font-semibold ${typeFilter === o.v ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"}`}>{o.l}</button>
+          ))}
+        </div>
+        <div className="flex rounded-lg border border-border overflow-hidden">
+          {[
+            { v: "all", l: "All" },
+            { v: "published", l: "Live" },
+            { v: "draft", l: "Draft" },
+            { v: "hidden", l: "Hidden" },
+          ].map(o => (
+            <button key={o.v} onClick={() => setStatusFilter(o.v as StatusFilter)} className={`px-3 py-1.5 text-xs font-semibold ${statusFilter === o.v ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"}`}>{o.l}</button>
+          ))}
         </div>
       </div>
 
-      {/* Important Notice */}
-      {tripsTableMissing ? (
+      {tripsTableMissing && (
         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-medium text-destructive">Trip table is missing</p>
-            <p className="text-muted-foreground mt-1">
-              The "trips" table needs to be created in your database to manage trips. Please create the table with all required columns.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-medium text-amber-700">Booking Live Logic</p>
-            <p className="text-amber-600 mt-1">
-              A trip is bookable ONLY when: Booking Live is ON + At least one active batch exists + Batch has available seats.
-            </p>
-          </div>
+          <div className="text-sm text-destructive">Trips table missing — please contact support.</div>
         </div>
       )}
 
       {/* Trips List */}
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {filteredTrips.map((trip) => {
           const stats = getBatchStats(trip.trip_id);
           const availableSeats = getAvailableSeats(trip.trip_id);
           const canBook = trip.booking_live && stats.active > 0 && availableSeats > 0;
           const isUpdating = updating === trip.trip_id;
+          const status = visibilityStatus(trip);
+          const remaining = stats.totalSeats - stats.bookedSeats;
+          const availabilityLabel = stats.totalSeats === 0
+            ? "No batches"
+            : remaining === 0 ? "Sold Out"
+            : remaining / stats.totalSeats <= 0.3 ? "Filling Fast"
+            : "Available";
+          const availabilityClass = availabilityLabel === "Sold Out" ? "bg-destructive/10 text-destructive"
+            : availabilityLabel === "Filling Fast" ? "bg-orange-500/10 text-orange-600"
+            : availabilityLabel === "Available" ? "bg-green-500/10 text-green-600"
+            : "bg-muted text-muted-foreground";
 
           return (
-            <div
-              key={trip.trip_id}
-              className={`bg-card border border-border rounded-xl p-4 ${!trip.is_active ? 'opacity-60' : ''}`}
-            >
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                {/* Trip Info */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h4 className="font-semibold text-foreground">{trip.trip_name}</h4>
-                    {trip.type === 'experience' && (
-                      <Badge className="bg-accent/20 text-accent border-accent/30">Experience</Badge>
-                    )}
-                    {canBook ? (
-                      <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
-                        🟢 Booking Open
-                      </Badge>
-                    ) : trip.booking_live ? (
-                      <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30">
-                        ⚠️ No Seats
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">
-                        🟡 Launching Soon
-                      </Badge>
-                    )}
-                    {!trip.is_active && (
-                      <Badge className="bg-muted text-muted-foreground">Hidden</Badge>
+            <div key={trip.trip_id} className={`bg-card border border-border rounded-xl p-4 ${!trip.is_active ? 'opacity-70' : ''}`}>
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <h4 className="font-semibold text-foreground truncate">{trip.trip_name}</h4>
+                    {trip.type === 'experience' && <Badge className="bg-accent/20 text-accent border-accent/30 text-[10px]">Experience</Badge>}
+                    <Badge className={
+                      status === "published" ? "bg-green-500/15 text-green-600 border-green-500/30 text-[10px]"
+                      : status === "draft" ? "bg-yellow-500/15 text-yellow-600 border-yellow-500/30 text-[10px]"
+                      : "bg-muted text-muted-foreground text-[10px]"
+                    }>
+                      {status === "published" ? "🟢 Published" : status === "draft" ? "🟡 Draft" : "⚪ Hidden"}
+                    </Badge>
+                    <Badge className={`text-[10px] border ${availabilityClass}`}>{availabilityLabel}</Badge>
+                    {!canBook && trip.booking_live && (
+                      <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 text-[10px]">⚠️ No Seats</Badge>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                     <span>{trip.duration}</span>
-                    {trip.type === 'experience' && trip.event_time && <span>⏰ {trip.event_time}</span>}
                     <span>₹{trip.price_default.toLocaleString()}</span>
-                    <span>{stats.total} {trip.type === 'experience' ? 'slots' : 'batches'} ({stats.active} active)</span>
-                    <span>{stats.bookedSeats}/{stats.totalSeats} seats booked</span>
+                    <span>{stats.bookedSeats}/{stats.totalSeats} seats</span>
+                    <span>{stats.active} active {trip.type === 'experience' ? 'slots' : 'batches'}</span>
+                    {stats.nextBatch && <span>Next: {new Date(stats.nextBatch.start_date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>}
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-4 flex-wrap">
-                  {/* Visibility Toggle */}
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor={`active-${trip.trip_id}`} className="text-sm font-medium flex items-center gap-1">
-                      {trip.is_active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                      Visible
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-muted/50">
+                    <Label htmlFor={`active-${trip.trip_id}`} className="text-xs flex items-center gap-1 cursor-pointer">
+                      {trip.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}Visible
                     </Label>
-                    <Switch
-                      id={`active-${trip.trip_id}`}
-                      checked={trip.is_active}
-                      onCheckedChange={() => handleToggleActive(trip.trip_id, trip.trip_name, trip.is_active)}
-                      disabled={isUpdating}
-                    />
+                    <Switch id={`active-${trip.trip_id}`} checked={trip.is_active} onCheckedChange={() => handleToggleActive(trip.trip_id, trip.trip_name, trip.is_active)} disabled={isUpdating} />
                   </div>
-
-                  {/* Booking Live Toggle */}
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor={`booking-${trip.trip_id}`} className="text-sm font-medium">
-                      Booking Live
-                    </Label>
-                    <Switch
-                      id={`booking-${trip.trip_id}`}
-                      checked={trip.booking_live}
-                      onCheckedChange={() => handleToggleBookingLive(trip.trip_id, trip.trip_name, trip.booking_live)}
-                      disabled={isUpdating}
-                    />
-                    {trip.booking_live ? (
-                      <Power className="w-5 h-5 text-green-600" />
-                    ) : (
-                      <PowerOff className="w-5 h-5 text-muted-foreground" />
+                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-muted/50">
+                    <Label htmlFor={`booking-${trip.trip_id}`} className="text-xs cursor-pointer">Live</Label>
+                    <Switch id={`booking-${trip.trip_id}`} checked={trip.booking_live} onCheckedChange={() => handleToggleBookingLive(trip.trip_id, trip.trip_name, trip.booking_live)} disabled={isUpdating} />
+                    {trip.booking_live ? <Power className="w-4 h-4 text-green-600" /> : <PowerOff className="w-4 h-4 text-muted-foreground" />}
+                  </div>
+                  <div className="flex gap-0.5">
+                    <Button variant="ghost" size="sm" title="Edit" onClick={() => handleEditTrip(trip.trip_id)}><Edit className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="sm" title="Duplicate Trip" onClick={() => handleDuplicate(trip.trip_id)} disabled={isUpdating}><Copy className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="sm" title="Preview" asChild>
+                      <a href={`/trips/${trip.trip_id}`} target="_blank" rel="noreferrer"><ExternalLink className="w-4 h-4" /></a>
+                    </Button>
+                    {stats.active > 0 && (
+                      <Button variant="ghost" size="sm" title="Mark Sold Out" className="text-orange-600 hover:text-orange-700" onClick={() => handleMarkSoldOut(trip.trip_id, trip.trip_name)} disabled={isUpdating}>
+                        <Ban className="w-4 h-4" />
+                      </Button>
                     )}
-                  </div>
-
-                  {/* Edit/Delete */}
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => handleEditTrip(trip.trip_id)}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(trip.trip_id, trip.trip_name)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <Button variant="ghost" size="sm" title="Delete" className="text-destructive hover:text-destructive" onClick={() => handleDelete(trip.trip_id, trip.trip_name)}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
               </div>
@@ -301,20 +275,14 @@ const TripManagement = ({ onRefresh }: TripManagementProps) => {
         })}
       </div>
 
-      {trips.length === 0 && !tripsTableMissing && (
+      {filteredTrips.length === 0 && !tripsTableMissing && (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No trips found</p>
-          <p className="text-sm mt-1">Create your first trip to get started</p>
+          <p>No trips match the current filters</p>
         </div>
       )}
 
-      {/* Trip Editor Modal */}
       {editorOpen && (
-        <TripEditor
-          tripId={editingTripId}
-          onClose={handleEditorClose}
-          onSave={handleEditorSave}
-        />
+        <TripEditor tripId={editingTripId} onClose={handleEditorClose} onSave={handleEditorSave} />
       )}
     </div>
   );
