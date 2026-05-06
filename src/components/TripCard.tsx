@@ -58,11 +58,11 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
     <Link
       to={`/trips/${tripId}`}
       className={cn(
-        "group block bg-card rounded-2xl overflow-hidden border-2 transition-all duration-300 hover:-translate-y-1",
+        "group block surface-elevated rounded-3xl overflow-hidden border transition-all duration-500 hover:-translate-y-1.5",
         featured && "lg:flex",
-        isBookable 
-          ? "border-primary/30 shadow-lg hover:shadow-2xl hover:border-primary" 
-          : "border-border shadow-card hover:shadow-card-hover"
+        isBookable
+          ? "border-primary/25 shadow-card hover:shadow-card-hover hover:border-primary/50"
+          : "border-border/60 shadow-soft hover:shadow-card"
       )}
     >
       {/* Image */}
