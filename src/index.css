@@ -367,6 +367,27 @@
     0% { background-position: 0% 50%; }
     100% { background-position: 200% 50%; }
   }
+
+  /* Soft section divider — premium gradient blend between sections */
+  .section-fade-top::before {
+    content: "";
+    @apply absolute inset-x-0 top-0 h-12 pointer-events-none;
+    background: linear-gradient(180deg, hsl(var(--background) / 0.6) 0%, transparent 100%);
+  }
+  .section-fade-bottom::after {
+    content: "";
+    @apply absolute inset-x-0 bottom-0 h-12 pointer-events-none;
+    background: linear-gradient(0deg, hsl(var(--background) / 0.6) 0%, transparent 100%);
+  }
+
+  /* Image treatment — subtle saturation lift on hover */
+  .img-premium {
+    @apply transition-all duration-700 ease-out;
+    filter: saturate(1.02) contrast(1.02);
+  }
+  .group:hover .img-premium {
+    filter: saturate(1.12) contrast(1.05);
+  }
 }
 
 @layer utilities {

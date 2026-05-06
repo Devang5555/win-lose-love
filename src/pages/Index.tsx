@@ -58,7 +58,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen pb-20 md:pb-0">
       <Navbar />
       <HeroSection />
 
@@ -116,7 +116,7 @@ const Index = () => {
       <ExperiencesSection />
 
       {/* Why Choose Us */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-muted to-secondary">
+      <section className="py-16 md:py-24 surface-warm">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <span className="text-primary font-bold text-sm uppercase tracking-wider">Why GoBhraman?</span>
@@ -170,23 +170,23 @@ const Index = () => {
                 <Link
                   key={dest.id}
                   to={`/destinations/${dest.slug}`}
-                  className="group relative rounded-2xl overflow-hidden aspect-[4/3] shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+                  className="group relative rounded-3xl overflow-hidden aspect-[4/3] shadow-soft hover:shadow-card-hover transition-all duration-500 hover:-translate-y-1.5 border border-border/40"
                 >
                   <img
                     src={dest.hero_image || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"}
                     alt={dest.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-[1.08] transition-transform duration-[900ms] ease-out"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent group-hover:from-black/75 transition-colors duration-500" />
                   {(dest.trip_count ?? 0) > 0 && (
-                    <Badge className="absolute top-3 right-3 bg-primary/90 text-primary-foreground text-xs font-semibold">
+                    <Badge className="absolute top-3 right-3 bg-primary/95 backdrop-blur-md text-primary-foreground text-xs font-semibold border border-white/20">
                       {dest.trip_count} trip{dest.trip_count !== 1 ? "s" : ""}
                     </Badge>
                   )}
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="font-serif text-lg font-bold text-white">{dest.name}</h3>
-                    <p className="text-xs text-white/80 flex items-center gap-1 mt-1">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-0 group-hover:-translate-y-0.5 transition-transform duration-500">
+                    <h3 className="font-serif text-lg font-semibold text-white tracking-tight">{dest.name}</h3>
+                    <p className="text-xs text-white/85 flex items-center gap-1 mt-1">
                       <MapPin className="w-3 h-3" />
                       {dest.state}
                     </p>
@@ -204,7 +204,7 @@ const Index = () => {
 
       {/* Explore by State */}
       {Object.keys(byState).length > 0 && (
-        <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-background to-muted">
+        <section className="py-16 md:py-24 surface-warm">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <span className="text-primary font-bold text-sm uppercase tracking-wider">PAN India</span>
@@ -215,7 +215,7 @@ const Index = () => {
                 <Link
                   key={state}
                   to={`/destinations?state=${encodeURIComponent(state)}`}
-                  className="group bg-card rounded-2xl p-6 text-center border border-border shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
+                  className="group surface-elevated rounded-3xl p-6 text-center border border-border/50 shadow-soft hover:shadow-card transition-all duration-500 hover:-translate-y-1 hover:border-primary/30"
                 >
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-3">
                     <Mountain className="w-6 h-6 text-primary" />
@@ -230,7 +230,7 @@ const Index = () => {
       )}
 
       {/* Upcoming Trips */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-background to-muted">
+      <section className="py-16 md:py-24 surface-cool">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
