@@ -13,7 +13,20 @@ interface GlobalSearchBarProps {
   onNavigate?: () => void;
 }
 
-const POPULAR_SEARCHES = ["Manali", "Goa", "Alibaug", "Ladakh", "Kerala", "Spiti"];
+const POPULAR_SEARCHES = ["Manali", "Goa", "Alibaug", "Ladakh", "Sahyadri Treks", "Midnight Cycling", "Spiti"];
+const RECENT_KEY = "gb_recent_searches";
+
+const loadRecent = (): string[] => {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]").slice(0, 6); } catch { return []; }
+};
+const saveRecent = (term: string) => {
+  if (!term.trim()) return;
+  try {
+    const cur: string[] = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+    const next = [term.trim(), ...cur.filter((t) => t.toLowerCase() !== term.trim().toLowerCase())].slice(0, 6);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {}
+};
 
 const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSearchBarProps) => {
   const navigate = useNavigate();
@@ -21,6 +34,7 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [recent, setRecent] = useState<string[]>(loadRecent);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -47,6 +61,8 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
   }, [showDropdownState]);
 
   const handleSelect = (result: SearchResult) => {
+    saveRecent(result.title);
+    setRecent(loadRecent());
     const path = result.type === "trip" ? `/trips/${result.slug}` : `/destinations/${result.slug}`;
     navigate(path);
     clearSearch();
@@ -57,10 +73,17 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      saveRecent(query.trim());
+      setRecent(loadRecent());
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
       setIsFocused(false);
       onNavigate?.();
     }
+  };
+
+  const clearRecent = () => {
+    localStorage.removeItem(RECENT_KEY);
+    setRecent([]);
   };
 
   const showDropdown = showDropdownState;
@@ -113,7 +136,26 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
         >
           {query.length === 0 ? (
             <div className="p-3">
-              <p className="badge-text text-muted-foreground px-2 pb-2">Popular searches</p>
+              {recent.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between px-2 pb-2">
+                    <p className="badge-text text-muted-foreground">Recent</p>
+                    <button onClick={clearRecent} className="text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider">Clear</button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 px-2 pb-3">
+                    {recent.map((term) => (
+                      <button
+                        key={"r-" + term}
+                        onClick={() => debouncedSearch(term)}
+                        className="px-3 py-1.5 rounded-full text-xs font-medium bg-accent/15 text-accent-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                      >
+                        ↻ {term}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+              <p className="badge-text text-muted-foreground px-2 pb-2">Trending searches</p>
               <div className="flex flex-wrap gap-2 px-2 pb-3">
                 {POPULAR_SEARCHES.map((term) => (
                   <button

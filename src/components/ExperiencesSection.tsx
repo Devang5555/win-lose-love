@@ -7,7 +7,14 @@ import { useTrips } from "@/hooks/useTrips";
 
 const ExperiencesSection = () => {
   const { loading, getExperiences, batches } = useTrips();
-  const experiences = getExperiences();
+  const allExperiences = getExperiences();
+  // Featured rotation: prioritize Midnight Cycling, then bookable, then rest
+  const experiences = [...allExperiences].sort((a, b) => {
+    const aMid = /mid.?night.*cycl/i.test(a.trip_name) ? 0 : 1;
+    const bMid = /mid.?night.*cycl/i.test(b.trip_name) ? 0 : 1;
+    if (aMid !== bMid) return aMid - bMid;
+    return (b.booking_live ? 1 : 0) - (a.booking_live ? 1 : 0);
+  });
 
   if (!loading && experiences.length === 0) return null;
 

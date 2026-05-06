@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2, Save, Image, MapPin, DollarSign, List, FileText, ShieldCheck, Tag } from "lucide-react";
+import { X, Plus, Trash2, Save, Image, MapPin, DollarSign, List, FileText, ShieldCheck, Tag, Calendar } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import BatchManagement from "./BatchManagement";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,6 +92,15 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<TripFormData>(emptyForm);
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [batchesForTrip, setBatchesForTrip] = useState<any[]>([]);
+
+  const refreshBatches = async () => {
+    if (!tripId) return;
+    const { data } = await supabase.from("batches").select("*").eq("trip_id", tripId).order("start_date");
+    setBatchesForTrip(data || []);
+  };
+  useEffect(() => { if (tripId && showBatchModal) refreshBatches(); }, [tripId, showBatchModal]);
   
   const [newHighlight, setNewHighlight] = useState("");
   const [newInclusion, setNewInclusion] = useState("");
@@ -711,17 +722,39 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end gap-3 p-6 border-t border-border">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} disabled={saving}>
-              <Save className="w-4 h-4 mr-2" />
-              {saving ? "Saving..." : tripId ? "Update Trip" : "Create Trip"}
-            </Button>
+          <div className="flex justify-between items-center gap-3 p-6 border-t border-border flex-wrap">
+            {tripId ? (
+              <Button variant="outline" type="button" onClick={() => setShowBatchModal(true)}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Manage Batches
+              </Button>
+            ) : <span className="text-xs text-muted-foreground">Save first to add batches</span>}
+            <div className="flex gap-3 ml-auto">
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button onClick={handleSubmit} disabled={saving}>
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? "Saving..." : tripId ? "Update Trip" : "Create Trip"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+
+      {tripId && (
+        <Dialog open={showBatchModal} onOpenChange={setShowBatchModal}>
+          <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Batches for {formData.trip_name || tripId}</DialogTitle>
+            </DialogHeader>
+            <BatchManagement
+              batches={batchesForTrip}
+              onRefresh={refreshBatches}
+              defaultTripId={tripId}
+              compact
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

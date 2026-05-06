@@ -202,6 +202,45 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Sahyadri Treks — curated Maharashtra hill experiences */}
+      <section className="py-12 md:py-16 surface-soft">
+        <div className="container mx-auto px-4">
+          <div className="flex items-end justify-between gap-4 mb-6 flex-wrap">
+            <div>
+              <span className="display-eyebrow !text-sunset">Maharashtra • Western Ghats</span>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mt-2 flex items-center gap-2">
+                <Mountain className="w-6 h-6 text-primary" /> Sahyadri Treks & Escapes
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">Weekend-friendly forts, waterfalls & hill villages near Pune & Mumbai</p>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/destinations?state=Maharashtra">Explore Maharashtra <ArrowRight className="ml-2 w-4 h-4" /></Link>
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {(byState["Maharashtra"] || []).slice(0, 4).map((dest) => (
+              <Link
+                key={"sahyadri-" + dest.id}
+                to={`/destinations/${dest.slug}`}
+                className="group relative rounded-2xl overflow-hidden aspect-[4/5] shadow-soft hover:shadow-card-hover transition-all duration-500 hover:-translate-y-1 border border-border/40"
+              >
+                <img
+                  src={dest.hero_image || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"}
+                  alt={dest.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <h3 className="font-serif text-base font-semibold text-white">{dest.name}</h3>
+                  <p className="text-[11px] text-white/80">{dest.trip_count || 0} trip{dest.trip_count !== 1 ? "s" : ""}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Explore by State */}
       {Object.keys(byState).length > 0 && (
         <section className="py-16 md:py-24 surface-warm">
