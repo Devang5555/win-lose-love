@@ -13,7 +13,20 @@ interface GlobalSearchBarProps {
   onNavigate?: () => void;
 }
 
-const POPULAR_SEARCHES = ["Manali", "Goa", "Alibaug", "Ladakh", "Kerala", "Spiti"];
+const POPULAR_SEARCHES = ["Manali", "Goa", "Alibaug", "Ladakh", "Sahyadri Treks", "Midnight Cycling", "Spiti"];
+const RECENT_KEY = "gb_recent_searches";
+
+const loadRecent = (): string[] => {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]").slice(0, 6); } catch { return []; }
+};
+const saveRecent = (term: string) => {
+  if (!term.trim()) return;
+  try {
+    const cur: string[] = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+    const next = [term.trim(), ...cur.filter((t) => t.toLowerCase() !== term.trim().toLowerCase())].slice(0, 6);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {}
+};
 
 const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSearchBarProps) => {
   const navigate = useNavigate();
@@ -21,6 +34,7 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [recent, setRecent] = useState<string[]>(loadRecent);
 
   // Close dropdown on outside click
   useEffect(() => {
