@@ -136,7 +136,26 @@ const GlobalSearchBar = ({ variant = "navbar", className, onNavigate }: GlobalSe
         >
           {query.length === 0 ? (
             <div className="p-3">
-              <p className="badge-text text-muted-foreground px-2 pb-2">Popular searches</p>
+              {recent.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between px-2 pb-2">
+                    <p className="badge-text text-muted-foreground">Recent</p>
+                    <button onClick={clearRecent} className="text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider">Clear</button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 px-2 pb-3">
+                    {recent.map((term) => (
+                      <button
+                        key={"r-" + term}
+                        onClick={() => debouncedSearch(term)}
+                        className="px-3 py-1.5 rounded-full text-xs font-medium bg-accent/15 text-accent-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                      >
+                        ↻ {term}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+              <p className="badge-text text-muted-foreground px-2 pb-2">Trending searches</p>
               <div className="flex flex-wrap gap-2 px-2 pb-3">
                 {POPULAR_SEARCHES.map((term) => (
                   <button
