@@ -343,6 +343,10 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
     setScreenshotPreview(null);
     setBookingId(null);
     setUseWalletCredits(false);
+    setCouponInput("");
+    setCouponDiscount(0);
+    setCouponCode(null);
+    setCouponError(null);
     onClose();
   };
 
