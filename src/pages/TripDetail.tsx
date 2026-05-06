@@ -624,6 +624,7 @@ const TripDetail = () => {
                     <div className="mb-6">
                       <BatchSelector
                         tripId={tripId}
+                        tripName={tripName}
                         basePrice={displayPrice}
                         selectedBatchId={selectedBatch?.id ?? null}
                         onSelectBatch={setSelectedBatch}
