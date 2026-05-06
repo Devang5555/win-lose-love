@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import TrustIndicators from "@/components/TrustIndicators";
+import ExperienceBookingModal from "@/components/ExperienceBookingModal";
 
 interface PricingTier { label: string; price: number; description?: string }
 
@@ -23,6 +24,7 @@ const ExperienceDetail = () => {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [showAllSlots, setShowAllSlots] = useState(false);
   const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
   const experience = getTrip(experienceId || "");
   const pricingTiers: PricingTier[] = Array.isArray((experience as any)?.pricing_tiers)
@@ -70,11 +72,10 @@ const ExperienceDetail = () => {
       toast({ title: "Select a date", description: "Please pick a slot before booking.", variant: "destructive" });
       return;
     }
-    const slot = slots.find((s) => s.id === selectedSlot);
-    const tierLine = pricingTiers.length > 0 ? `\nOption: ${pricingTiers[selectedTierIdx].label}` : "";
-    const whatsappMsg = `Hi! I'd like to book *${experience.trip_name}* on ${slot?.start_date}.${tierLine}\nPrice: ₹${effectivePrice}. My name: ${user.email}`;
-    window.open(`https://wa.me/919415026522?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
+    setIsBookingOpen(true);
   };
+
+  const slotForBooking = slots.find((s) => s.id === selectedSlot);
 
   return (
     <div className="min-h-screen bg-background">
@@ -317,6 +318,30 @@ const ExperienceDetail = () => {
       </div>
 
       <Footer />
+
+      {experience && (
+        <ExperienceBookingModal
+          experienceId={experience.trip_id}
+          experienceName={experience.trip_name}
+          duration={experience.duration}
+          pricePerPerson={effectivePrice}
+          selectedTier={pricingTiers.length > 0 ? pricingTiers[selectedTierIdx] : null}
+          selectedSlot={
+            slotForBooking
+              ? {
+                  id: slotForBooking.id,
+                  batch_name: slotForBooking.batch_name,
+                  start_date: slotForBooking.start_date,
+                  end_date: slotForBooking.end_date,
+                  batch_size: slotForBooking.batch_size,
+                  available_seats: Math.max(0, slotForBooking.batch_size - slotForBooking.seats_booked),
+                }
+              : null
+          }
+          isOpen={isBookingOpen}
+          onClose={() => setIsBookingOpen(false)}
+        />
+      )}
     </div>
   );
 };
