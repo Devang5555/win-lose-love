@@ -186,16 +186,20 @@ const ExperienceDetail = () => {
                 <div>
                   <p className="text-sm font-semibold text-foreground mb-2">📅 Available Slots</p>
                   {slots.length > 0 ? (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {slots.map((slot) => {
+                    <div className="space-y-2">
+                      {visibleSlots.map((slot) => {
                         const seatsLeft = Math.max(0, slot.batch_size - slot.seats_booked);
+                        const isSoldOut = seatsLeft <= 0;
                         return (
                           <button
                             key={slot.id}
-                            onClick={() => setSelectedSlot(slot.id)}
+                            onClick={() => !isSoldOut && setSelectedSlot(slot.id)}
+                            disabled={isSoldOut}
                             className={cn(
                               "w-full text-left p-3 rounded-lg border transition-all text-sm",
-                              selectedSlot === slot.id
+                              isSoldOut
+                                ? "opacity-60 cursor-not-allowed border-border bg-muted"
+                                : selectedSlot === slot.id
                                 ? "border-primary bg-primary/10"
                                 : "border-border hover:border-primary/40"
                             )}
@@ -205,13 +209,40 @@ const ExperienceDetail = () => {
                                 {new Date(slot.start_date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
                               </span>
                               <Badge variant={seatsLeft <= 5 ? "destructive" : "secondary"} className="text-xs">
-                                {seatsLeft <= 0 ? "Full" : `${seatsLeft} seats left`}
+                                {isSoldOut ? "Sold Out" : seatsLeft <= 5 ? `Only ${seatsLeft} left` : `${seatsLeft} seats`}
                               </Badge>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">{slot.batch_name}</p>
                           </button>
                         );
                       })}
+                      {!showAllSlots && slots.length > 3 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllSlots(true)}
+                          className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:underline py-1"
+                        >
+                          <ChevronDown className="w-3.5 h-3.5" />
+                          Show {slots.length - 3} more
+                        </button>
+                      )}
+                      {allSoldOut && (
+                        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 space-y-2">
+                          <p className="text-xs font-semibold text-destructive text-center">
+                            Sold Out – Next Batch Available Soon
+                          </p>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button size="sm" variant="outline" className="h-9 text-xs"
+                              onClick={() => sendWhatsApp(`Hi GoBhraman 👋\n\nPlease *Notify Me* when new dates open for *${experience.trip_name}*.`)}>
+                              <Bell className="w-3.5 h-3.5 mr-1" /> Notify Me
+                            </Button>
+                            <Button size="sm" className="h-9 text-xs bg-[#25D366] hover:bg-[#25D366]/90 text-white"
+                              onClick={() => sendWhatsApp(`Hi GoBhraman 👋\n\nAdd me to the *Waitlist* for *${experience.trip_name}*.`)}>
+                              <MessageCircle className="w-3.5 h-3.5 mr-1" /> Waitlist
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg text-center">
@@ -223,10 +254,12 @@ const ExperienceDetail = () => {
                 <Button
                   onClick={handleBooking}
                   className="w-full font-bold text-lg py-6"
-                  disabled={!bookable || slots.length === 0}
+                  disabled={!bookable || slots.length === 0 || allSoldOut}
                 >
-                  {bookable ? "Book Now via WhatsApp" : "Coming Soon"}
+                  {!bookable ? "Coming Soon" : allSoldOut ? "Sold Out" : "Reserve Your Spot"}
                 </Button>
+
+                <TrustIndicators className="mt-2" />
 
                 <div className="text-center space-y-1 pt-2 border-t border-border">
                   <p className="text-xs text-muted-foreground">Need help?</p>
