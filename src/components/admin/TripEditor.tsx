@@ -196,6 +196,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       safety_info: [...formData.safety_info],
       itinerary_data: formData.itinerary_data ?? null,
       policies: formData.policies.length > 0 ? { items: formData.policies.filter((p) => p.trim()) } : null,
+      seo: formData.seo && Object.values(formData.seo).some((v) => v && (typeof v !== "object" || Object.keys(v).length)) ? formData.seo : null,
     };
 
     try {
