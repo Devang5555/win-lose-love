@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Calendar, AlertTriangle, CheckCircle } from "lucide-react";
+import { Calendar, AlertTriangle, CheckCircle, Bell, MessageCircle, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
