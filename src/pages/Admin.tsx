@@ -330,12 +330,23 @@ const Admin = () => {
     }
     setProcessingAction(true);
     try {
+      // If not yet confirmed, atomically deduct seats via RPC
+      if (booking.booking_status !== "confirmed") {
+        const { error: rpcErr } = await supabase.rpc("confirm_booking_after_payment", { p_booking_id: booking.id });
+        if (rpcErr) {
+          toast({ title: "Seats unavailable", description: rpcErr.message, variant: "destructive" });
+          setProcessingAction(false);
+          return;
+        }
+      }
+
       const { error } = await supabase
         .from("bookings")
         .update({
           booking_status: "confirmed",
           payment_status: "advance_verified",
           verified_by_admin_id: user.id,
+          rejection_reason: null,
         })
         .eq("id", booking.id);
 
