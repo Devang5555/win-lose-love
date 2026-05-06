@@ -24,6 +24,7 @@ const ExperienceDetail = () => {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [showAllSlots, setShowAllSlots] = useState(false);
   const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
   const experience = getTrip(experienceId || "");
   const pricingTiers: PricingTier[] = Array.isArray((experience as any)?.pricing_tiers)
