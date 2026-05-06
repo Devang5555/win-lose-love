@@ -318,6 +318,30 @@ const ExperienceDetail = () => {
       </div>
 
       <Footer />
+
+      {experience && (
+        <ExperienceBookingModal
+          experienceId={experience.trip_id}
+          experienceName={experience.trip_name}
+          duration={experience.duration}
+          pricePerPerson={effectivePrice}
+          selectedTier={pricingTiers.length > 0 ? pricingTiers[selectedTierIdx] : null}
+          selectedSlot={
+            slotForBooking
+              ? {
+                  id: slotForBooking.id,
+                  batch_name: slotForBooking.batch_name,
+                  start_date: slotForBooking.start_date,
+                  end_date: slotForBooking.end_date,
+                  batch_size: slotForBooking.batch_size,
+                  available_seats: Math.max(0, slotForBooking.batch_size - slotForBooking.seats_booked),
+                }
+              : null
+          }
+          isOpen={isBookingOpen}
+          onClose={() => setIsBookingOpen(false)}
+        />
+      )}
     </div>
   );
 };
