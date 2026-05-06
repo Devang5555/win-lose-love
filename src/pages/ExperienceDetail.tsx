@@ -184,11 +184,26 @@ const ExperienceDetail = () => {
 
           {/* Sidebar — Booking */}
           <div className="space-y-6">
-            <Card className="sticky top-24 border-2 border-primary/30 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
+            <Card className="sticky top-24 border-2 border-primary/30 shadow-lg overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10 pb-4">
+                <div className="flex flex-wrap justify-center gap-1.5 mb-2">
+                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px] font-bold uppercase tracking-wide">
+                    ✨ Early Access Offer
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] font-semibold border-primary/40 text-primary">
+                    Available Every Weekend
+                  </Badge>
+                </div>
                 <CardTitle className="font-serif text-center">
-                  <span className="text-3xl font-bold text-primary">₹{effectivePrice.toLocaleString("en-IN")}</span>
-                  <span className="text-sm text-muted-foreground ml-2">per person</span>
+                  <div className="flex items-baseline justify-center gap-2">
+                    <span className="text-3xl font-bold text-primary">₹{effectivePrice.toLocaleString("en-IN")}</span>
+                    {effectivePrice < 599 && (
+                      <span className="text-base text-muted-foreground line-through">₹599</span>
+                    )}
+                  </div>
+                  <span className="block text-xs text-muted-foreground font-normal mt-1">
+                    per person • Limited Weekend Launch
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
