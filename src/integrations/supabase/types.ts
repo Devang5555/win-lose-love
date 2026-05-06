@@ -211,6 +211,8 @@ export type Database = {
           booking_status: string
           cancellation_reason: string | null
           cancelled_at: string | null
+          coupon_code: string | null
+          coupon_discount: number | null
           created_at: string | null
           deleted_at: string | null
           deleted_by: string | null
@@ -246,6 +248,8 @@ export type Database = {
           booking_status?: string
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          coupon_code?: string | null
+          coupon_discount?: number | null
           created_at?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
@@ -281,6 +285,8 @@ export type Database = {
           booking_status?: string
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          coupon_code?: string | null
+          coupon_discount?: number | null
           created_at?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
@@ -361,6 +367,87 @@ export type Database = {
           sent_count?: number
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      coupon_redemptions: {
+        Row: {
+          booking_id: string | null
+          coupon_id: string
+          created_at: string
+          discount_applied: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          coupon_id: string
+          created_at?: string
+          discount_applied?: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          coupon_id?: string
+          created_at?: string
+          discount_applied?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_discount: number | null
+          min_order_amount: number
+          updated_at: string
+          usage_limit: number | null
+          usage_per_user: number | null
+          used_count: number
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          min_order_amount?: number
+          updated_at?: string
+          usage_limit?: number | null
+          usage_per_user?: number | null
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          min_order_amount?: number
+          updated_at?: string
+          usage_limit?: number | null
+          usage_per_user?: number | null
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
         }
         Relationships: []
       }
@@ -1290,6 +1377,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      apply_coupon_to_booking: {
+        Args: { p_booking_id: string; p_code: string; p_user_id: string }
+        Returns: Json
+      }
       apply_wallet_to_booking: {
         Args: { p_amount: number; p_booking_id: string; p_user_id: string }
         Returns: boolean
@@ -1360,6 +1451,10 @@ export type Database = {
       increment_seats_booked: {
         Args: { batch_id_param: string; seats_count: number }
         Returns: undefined
+      }
+      process_pending_referrals_for_booking: {
+        Args: { p_booking_id: string }
+        Returns: number
       }
       restore_experience: {
         Args: { p_experience_id: string }

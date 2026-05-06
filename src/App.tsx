@@ -33,6 +33,9 @@ const FAQ = lazy(() => import("./pages/FAQ"));
 const Stories = lazy(() => import("./pages/Stories"));
 const InvoicePage = lazy(() => import("./pages/Invoice"));
 const Profile = lazy(() => import("./pages/Profile"));
+const ProfileAccount = lazy(() => import("./pages/ProfileAccount"));
+const ProfileCredits = lazy(() => import("./pages/ProfileCredits"));
+const ProfileHelp = lazy(() => import("./pages/ProfileHelp"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const ExperiencesPage = lazy(() => import("./pages/Experiences"));
 const ExperienceDetailPage = lazy(() => import("./pages/ExperienceDetail"));
@@ -84,6 +87,10 @@ const App = () => (
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/stories" element={<Stories />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/account" element={<ProfileAccount />} />
+                <Route path="/profile/credits" element={<ProfileCredits />} />
+                <Route path="/profile/bookings" element={<MyBookings />} />
+                <Route path="/profile/help" element={<ProfileHelp />} />
                 <Route path="/invoice/:bookingId" element={<InvoicePage />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/experiences" element={<ExperiencesPage />} />
