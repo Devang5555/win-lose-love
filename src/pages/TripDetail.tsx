@@ -31,6 +31,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
+import SmartDateStrip from "@/components/SmartDateStrip";
 import { getTripItinerary } from "@/data/tripItineraries";
 import { adaptAdminItinerary, isAdminItineraryUsable } from "@/lib/tripItineraryAdapter";
 import { resolveTripPolicies } from "@/lib/tripPolicies";
@@ -612,6 +613,11 @@ const TripDetail = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Smart Date Strip — quick travel-window picker */}
+                  {tripId && (
+                    <SmartDateStrip tripId={tripId} tripName={tripName} />
+                  )}
 
                   {/* Batch Selector */}
                   {isBookable && tripId && (
