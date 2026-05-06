@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import TrustIndicators from "@/components/TrustIndicators";
+import ExperienceBookingModal from "@/components/ExperienceBookingModal";
 
 interface PricingTier { label: string; price: number; description?: string }
 
