@@ -13,6 +13,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import TrustIndicators from "@/components/TrustIndicators";
 
+interface PricingTier { label: string; price: number; description?: string }
+
 const ExperienceDetail = () => {
   const { experienceId } = useParams<{ experienceId: string }>();
   const { user } = useAuth();
@@ -20,8 +22,13 @@ const ExperienceDetail = () => {
   const { loading, getTrip, getTripBatches, isTripBookable } = useTrips();
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [showAllSlots, setShowAllSlots] = useState(false);
+  const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
 
   const experience = getTrip(experienceId || "");
+  const pricingTiers: PricingTier[] = Array.isArray((experience as any)?.pricing_tiers)
+    ? ((experience as any).pricing_tiers as PricingTier[]).filter((t) => t.label && t.price > 0)
+    : [];
+  const effectivePrice = pricingTiers.length > 0 ? pricingTiers[selectedTierIdx]?.price ?? experience?.price_default ?? 0 : experience?.price_default ?? 0;
   const slots = getTripBatches(experienceId || "");
   const bookable = experienceId ? isTripBookable(experienceId) : false;
   const visibleSlots = showAllSlots ? slots : slots.slice(0, 3);
