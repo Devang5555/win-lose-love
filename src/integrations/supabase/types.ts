@@ -1035,6 +1035,7 @@ export type Database = {
           price_default: number
           price_from_mumbai: number | null
           price_from_pune: number | null
+          pricing_tiers: Json | null
           safety_info: string[] | null
           seo: Json | null
           short_duration: string | null
@@ -1076,6 +1077,7 @@ export type Database = {
           price_default?: number
           price_from_mumbai?: number | null
           price_from_pune?: number | null
+          pricing_tiers?: Json | null
           safety_info?: string[] | null
           seo?: Json | null
           short_duration?: string | null
@@ -1117,6 +1119,7 @@ export type Database = {
           price_default?: number
           price_from_mumbai?: number | null
           price_from_pune?: number | null
+          pricing_tiers?: Json | null
           safety_info?: string[] | null
           seo?: Json | null
           short_duration?: string | null
