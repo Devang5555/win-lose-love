@@ -116,7 +116,7 @@ const Index = () => {
       <ExperiencesSection />
 
       {/* Why Choose Us */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-muted to-secondary">
+      <section className="py-16 md:py-24 surface-warm">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <span className="text-primary font-bold text-sm uppercase tracking-wider">Why GoBhraman?</span>
@@ -204,7 +204,7 @@ const Index = () => {
 
       {/* Explore by State */}
       {Object.keys(byState).length > 0 && (
-        <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-background to-muted">
+        <section className="py-16 md:py-24 surface-warm">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <span className="text-primary font-bold text-sm uppercase tracking-wider">PAN India</span>
@@ -215,7 +215,7 @@ const Index = () => {
                 <Link
                   key={state}
                   to={`/destinations?state=${encodeURIComponent(state)}`}
-                  className="group bg-card rounded-2xl p-6 text-center border border-border shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
+                  className="group surface-elevated rounded-3xl p-6 text-center border border-border/50 shadow-soft hover:shadow-card transition-all duration-500 hover:-translate-y-1 hover:border-primary/30"
                 >
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-3">
                     <Mountain className="w-6 h-6 text-primary" />
@@ -230,7 +230,7 @@ const Index = () => {
       )}
 
       {/* Upcoming Trips */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-secondary via-background to-muted">
+      <section className="py-16 md:py-24 surface-cool">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
