@@ -177,13 +177,17 @@ const BatchSelector = ({ tripId, basePrice, selectedBatchId, onSelectBatch }: Ba
               <span className="font-semibold text-sm text-card-foreground flex items-center gap-2 flex-wrap">
                 {isSelected && <CheckCircle className="w-4 h-4 text-primary animate-in zoom-in-50 duration-200" />}
                 {batch.batch_name}
-                {(() => {
-                  const startDow = new Date(batch.start_date).getDay(); // 0=Sun..6=Sat
+                {batches.length > 1 ? (
+                  <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0 h-4">
+                    📅 Multiple Dates Available
+                  </Badge>
+                ) : (() => {
+                  const startDow = new Date(batch.start_date).getDay();
                   const endDow = new Date(batch.end_date).getDay();
                   const overlapsWeekend = [startDow, endDow].some(d => d === 0 || d === 5 || d === 6);
                   return overlapsWeekend ? (
                     <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0 h-4">
-                      🌴 Perfect Weekend Escape
+                      🌴 Available Every Weekend
                     </Badge>
                   ) : null;
                 })()}

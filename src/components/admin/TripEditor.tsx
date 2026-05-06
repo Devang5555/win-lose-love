@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import TripItineraryEditor from "./TripItineraryEditor";
 import type { RawItineraryJson } from "@/lib/tripItineraryAdapter";
+import ImageUpload from "./ImageUpload";
 
 interface TripFormData {
   trip_id: string;
@@ -535,16 +536,23 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                 <Image className="w-5 h-5 text-primary" />
                 Images (URLs)
               </h3>
-              <div className="flex gap-2 mb-3">
-                <Input
-                  value={newImage}
-                  onChange={(e) => setNewImage(e.target.value)}
-                  placeholder="Paste image URL..."
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addToArray("images", newImage, setNewImage))}
+              <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                <div className="flex gap-2 flex-1">
+                  <Input
+                    value={newImage}
+                    onChange={(e) => setNewImage(e.target.value)}
+                    placeholder="Paste image URL..."
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addToArray("images", newImage, setNewImage))}
+                  />
+                  <Button type="button" onClick={() => addToArray("images", newImage, setNewImage)}>
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                <ImageUpload
+                  onUploaded={(url) =>
+                    setFormData((prev) => ({ ...prev, images: [...prev.images, url] }))
+                  }
                 />
-                <Button type="button" onClick={() => addToArray("images", newImage, setNewImage)}>
-                  <Plus className="w-4 h-4" />
-                </Button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {formData.images.map((url, i) => (
