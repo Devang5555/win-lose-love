@@ -12,6 +12,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import TripItineraryEditor from "./TripItineraryEditor";
 import type { RawItineraryJson } from "@/lib/tripItineraryAdapter";
 import ImageUpload from "./ImageUpload";
+import SmartImageManager from "./SmartImageManager";
+import SeoSection, { SeoData } from "./SeoSection";
+import { FEATURED_TAG_LABELS, FEATURED_TAGS, FeaturedTagKey, hasFeaturedTag, toggleFeaturedTag, ALL_FEATURED_TAGS } from "@/lib/featuredTags";
 
 interface TripFormData {
   trip_id: string;
