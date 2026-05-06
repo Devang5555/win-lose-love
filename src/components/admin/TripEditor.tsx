@@ -44,6 +44,7 @@ interface TripFormData {
   safety_info: string[];
   itinerary_data: RawItineraryJson | null;
   policies: string[];
+  seo: SeoData;
 }
 
 interface TripEditorProps {
