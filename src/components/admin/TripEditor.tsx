@@ -92,6 +92,15 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<TripFormData>(emptyForm);
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [batchesForTrip, setBatchesForTrip] = useState<any[]>([]);
+
+  const refreshBatches = async () => {
+    if (!tripId) return;
+    const { data } = await supabase.from("batches").select("*").eq("trip_id", tripId).order("start_date");
+    setBatchesForTrip(data || []);
+  };
+  useEffect(() => { if (tripId && showBatchModal) refreshBatches(); }, [tripId, showBatchModal]);
   
   const [newHighlight, setNewHighlight] = useState("");
   const [newInclusion, setNewInclusion] = useState("");
