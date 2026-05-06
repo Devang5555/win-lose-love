@@ -60,15 +60,19 @@
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(200 25% 98%) 100%);
     --gradient-bold: linear-gradient(135deg, hsl(200 95% 45%) 0%, hsl(175 70% 40%) 50%, hsl(20 95% 55%) 100%);
 
-    /* Enhanced Shadows - softer, premium */
-    --shadow-card: 0 2px 8px -2px hsl(210 40% 15% / 0.06), 0 8px 24px -8px hsl(210 40% 15% / 0.08);
-    --shadow-card-hover: 0 8px 16px -4px hsl(200 80% 30% / 0.1), 0 20px 48px -12px hsl(200 95% 45% / 0.18);
+    /* Enhanced Shadows - softer, premium, layered */
+    --shadow-card: 0 1px 2px -1px hsl(210 40% 15% / 0.04), 0 4px 12px -4px hsl(210 40% 15% / 0.06), 0 12px 32px -12px hsl(210 40% 15% / 0.08);
+    --shadow-card-hover: 0 2px 4px -2px hsl(200 80% 30% / 0.08), 0 12px 24px -8px hsl(200 80% 30% / 0.12), 0 24px 56px -16px hsl(200 95% 45% / 0.2);
     --shadow-button: 0 4px 14px 0 hsl(200 95% 45% / 0.28);
-    --shadow-soft: 0 1px 2px hsl(210 40% 15% / 0.04), 0 2px 8px hsl(210 40% 15% / 0.04);
+    --shadow-soft: 0 1px 2px hsl(210 40% 15% / 0.03), 0 2px 8px hsl(210 40% 15% / 0.04);
+    --shadow-elevated: 0 8px 24px -8px hsl(210 40% 15% / 0.1), 0 24px 64px -24px hsl(210 40% 15% / 0.12);
 
     /* Premium soft surfaces */
     --surface-soft: linear-gradient(180deg, hsl(200 30% 99%) 0%, hsl(200 25% 96%) 100%);
     --surface-tint: linear-gradient(180deg, hsl(200 50% 98%) 0%, hsl(38 40% 97%) 100%);
+    --surface-warm: linear-gradient(180deg, hsl(38 50% 98%) 0%, hsl(35 40% 95%) 100%);
+    --surface-cool: linear-gradient(180deg, hsl(195 40% 98%) 0%, hsl(200 30% 95%) 100%);
+    --surface-elevated: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(200 25% 98.5%) 100%);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 210 50% 10%;
