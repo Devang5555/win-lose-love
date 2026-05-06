@@ -47,6 +47,7 @@ interface TripFormData {
   itinerary_data: RawItineraryJson | null;
   policies: string[];
   seo: SeoData;
+  pricing_tiers: { label: string; price: number; description?: string }[];
 }
 
 interface TripEditorProps {
@@ -84,6 +85,7 @@ const emptyForm: TripFormData = {
   itinerary_data: null,
   policies: [],
   seo: {},
+  pricing_tiers: [],
 };
 
 const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
@@ -161,6 +163,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
             ? ((data as any).policies.items as string[])
             : [],
           seo: ((data as any).seo as SeoData) || {},
+          pricing_tiers: Array.isArray((data as any).pricing_tiers) ? (data as any).pricing_tiers : [],
         });
       }
     } catch (error) {
@@ -208,6 +211,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       itinerary_data: formData.itinerary_data ?? null,
       policies: formData.policies.length > 0 ? { items: formData.policies.filter((p) => p.trim()) } : null,
       seo: formData.seo && Object.values(formData.seo).some((v) => v && (typeof v !== "object" || Object.keys(v).length)) ? formData.seo : null,
+      pricing_tiers: formData.pricing_tiers.filter((t) => t.label && t.price > 0),
     };
 
     try {
@@ -438,7 +442,70 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
               </div>
             </section>
 
-            {/* Highlights */}
+            {/* Pricing Tiers (multi-option pricing, e.g. With cycle vs BYO cycle) */}
+            <section>
+              <h3 className="text-lg font-medium text-foreground mb-2 flex items-center gap-2">
+                <Tag className="w-5 h-5 text-primary" />
+                Pricing Tiers <span className="text-xs text-muted-foreground font-normal">(optional — show multiple price options to customers)</span>
+              </h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                Example: <em>"With cycle &amp; gear — ₹555"</em> and <em>"Bring your own cycle — ₹299"</em>. If left empty, the Default Price above is used.
+              </p>
+              <div className="space-y-2">
+                {formData.pricing_tiers.map((tier, idx) => (
+                  <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-start bg-muted/40 p-3 rounded-lg">
+                    <Input
+                      className="md:col-span-4"
+                      placeholder="Label (e.g. With cycle & gear)"
+                      value={tier.label}
+                      onChange={(e) => {
+                        const next = [...formData.pricing_tiers];
+                        next[idx] = { ...next[idx], label: e.target.value };
+                        setFormData({ ...formData, pricing_tiers: next });
+                      }}
+                    />
+                    <Input
+                      className="md:col-span-2"
+                      type="number"
+                      placeholder="Price (₹)"
+                      value={tier.price || ""}
+                      onChange={(e) => {
+                        const next = [...formData.pricing_tiers];
+                        next[idx] = { ...next[idx], price: parseInt(e.target.value) || 0 };
+                        setFormData({ ...formData, pricing_tiers: next });
+                      }}
+                    />
+                    <Input
+                      className="md:col-span-5"
+                      placeholder="Description (optional, e.g. Cycle, helmet, lights included)"
+                      value={tier.description || ""}
+                      onChange={(e) => {
+                        const next = [...formData.pricing_tiers];
+                        next[idx] = { ...next[idx], description: e.target.value };
+                        setFormData({ ...formData, pricing_tiers: next });
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="md:col-span-1 text-destructive"
+                      onClick={() => setFormData({ ...formData, pricing_tiers: formData.pricing_tiers.filter((_, i) => i !== idx) })}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFormData({ ...formData, pricing_tiers: [...formData.pricing_tiers, { label: "", price: 0, description: "" }] })}
+                >
+                  <Plus className="w-4 h-4 mr-1" /> Add Pricing Tier
+                </Button>
+              </div>
+            </section>
             <section>
               <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                 <List className="w-5 h-5 text-primary" />

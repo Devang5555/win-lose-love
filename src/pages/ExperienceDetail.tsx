@@ -13,6 +13,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import TrustIndicators from "@/components/TrustIndicators";
 
+interface PricingTier { label: string; price: number; description?: string }
+
 const ExperienceDetail = () => {
   const { experienceId } = useParams<{ experienceId: string }>();
   const { user } = useAuth();
@@ -20,8 +22,13 @@ const ExperienceDetail = () => {
   const { loading, getTrip, getTripBatches, isTripBookable } = useTrips();
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [showAllSlots, setShowAllSlots] = useState(false);
+  const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
 
   const experience = getTrip(experienceId || "");
+  const pricingTiers: PricingTier[] = Array.isArray((experience as any)?.pricing_tiers)
+    ? ((experience as any).pricing_tiers as PricingTier[]).filter((t) => t.label && t.price > 0)
+    : [];
+  const effectivePrice = pricingTiers.length > 0 ? pricingTiers[selectedTierIdx]?.price ?? experience?.price_default ?? 0 : experience?.price_default ?? 0;
   const slots = getTripBatches(experienceId || "");
   const bookable = experienceId ? isTripBookable(experienceId) : false;
   const visibleSlots = showAllSlots ? slots : slots.slice(0, 3);
@@ -64,7 +71,8 @@ const ExperienceDetail = () => {
       return;
     }
     const slot = slots.find((s) => s.id === selectedSlot);
-    const whatsappMsg = `Hi! I'd like to book *${experience.trip_name}* on ${slot?.start_date}. Price: ₹${experience.price_default}. My name: ${user.email}`;
+    const tierLine = pricingTiers.length > 0 ? `\nOption: ${pricingTiers[selectedTierIdx].label}` : "";
+    const whatsappMsg = `Hi! I'd like to book *${experience.trip_name}* on ${slot?.start_date}.${tierLine}\nPrice: ₹${effectivePrice}. My name: ${user.email}`;
     window.open(`https://wa.me/919415026522?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
   };
 
@@ -178,11 +186,39 @@ const ExperienceDetail = () => {
             <Card className="sticky top-24 border-2 border-primary/30 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
                 <CardTitle className="font-serif text-center">
-                  <span className="text-3xl font-bold text-primary">₹{experience.price_default.toLocaleString("en-IN")}</span>
+                  <span className="text-3xl font-bold text-primary">₹{effectivePrice.toLocaleString("en-IN")}</span>
                   <span className="text-sm text-muted-foreground ml-2">per person</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
+                {pricingTiers.length > 0 && (
+                  <div>
+                    <p className="text-sm font-semibold text-foreground mb-2">💰 Choose Your Option</p>
+                    <div className="space-y-2">
+                      {pricingTiers.map((tier, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setSelectedTierIdx(i)}
+                          className={cn(
+                            "w-full text-left p-3 rounded-lg border transition-all",
+                            selectedTierIdx === i
+                              ? "border-primary bg-primary/10 ring-1 ring-primary/30"
+                              : "border-border hover:border-primary/40"
+                          )}
+                        >
+                          <div className="flex justify-between items-center gap-2">
+                            <span className="font-semibold text-sm text-foreground">{tier.label}</span>
+                            <span className="text-sm font-bold text-primary">₹{tier.price.toLocaleString("en-IN")}</span>
+                          </div>
+                          {tier.description && (
+                            <p className="text-xs text-muted-foreground mt-1">{tier.description}</p>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm font-semibold text-foreground mb-2">📅 Available Slots</p>
                   {slots.length > 0 ? (
