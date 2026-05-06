@@ -186,20 +186,22 @@ const ExperienceDetail = () => {
           <div className="space-y-6">
             <Card className="sticky top-24 border-2 border-primary/30 shadow-lg overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10 pb-4">
-                <div className="flex justify-center mb-2">
-                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs font-bold uppercase tracking-wide flex items-center gap-2 px-3 py-1.5">
-                    <span>✨ Early Access Offer</span>
-                    <span className="font-extrabold">₹{effectivePrice.toLocaleString("en-IN")}</span>
+                <div className="flex flex-col items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    <span>✨</span> Early Access Offer
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-serif text-3xl font-bold text-primary leading-none">
+                      ₹{effectivePrice.toLocaleString("en-IN")}
+                    </span>
                     {effectivePrice < 599 && (
-                      <span className="line-through opacity-80 font-semibold">₹599</span>
+                      <span className="text-sm text-muted-foreground line-through">₹599</span>
                     )}
-                  </Badge>
-                </div>
-                <CardTitle className="font-serif text-center">
-                  <span className="block text-xs text-muted-foreground font-normal mt-1">
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">
                     per person • Available Every Weekend
                   </span>
-                </CardTitle>
+                </div>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
                 {pricingTiers.length > 0 && (
