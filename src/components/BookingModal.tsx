@@ -79,11 +79,13 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
   })();
 
   const totalPrice = selectedPrice * parseInt(formData.travelers);
-  const walletApplicable = (useWalletCredits && !isFrozen) ? Math.min(balance, totalPrice) : 0;
-  const effectiveTotalPrice = totalPrice - walletApplicable;
+  const walletApplicable = useWalletCredits
+    ? computeWalletApplicable(balance, totalPrice, isFrozen)
+    : 0;
+  const effectiveTotalPrice = Math.max(0, totalPrice - walletApplicable - couponDiscount);
   const advanceAmount = trip.booking?.advance || 2000;
-  const totalAdvance = Math.max(0, advanceAmount * parseInt(formData.travelers) - walletApplicable);
-  const remainingAmount = effectiveTotalPrice - totalAdvance;
+  const totalAdvance = Math.max(0, advanceAmount * parseInt(formData.travelers) - walletApplicable - couponDiscount);
+  const remainingAmount = Math.max(0, effectiveTotalPrice - totalAdvance);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
