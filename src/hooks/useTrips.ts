@@ -31,6 +31,7 @@ export interface DatabaseTrip {
   experience_category: string | null;
   tags: string[];
   safety_info: string[];
+  pricing_tiers?: Array<{ label: string; price: number; description?: string }>;
 }
 
 interface Batch {
@@ -152,6 +153,7 @@ export const useTrips = () => {
             experience_category: t.experience_category,
             tags: t.tags || [],
             safety_info: t.safety_info || [],
+            pricing_tiers: Array.isArray(t.pricing_tiers) ? t.pricing_tiers : [],
           }));
           tripData.forEach((t: any) => {
             bookingStatusMap[t.trip_id] = !!t.booking_live;
