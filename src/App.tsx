@@ -87,6 +87,10 @@ const App = () => (
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/stories" element={<Stories />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/account" element={<ProfileAccount />} />
+                <Route path="/profile/credits" element={<ProfileCredits />} />
+                <Route path="/profile/bookings" element={<MyBookings />} />
+                <Route path="/profile/help" element={<ProfileHelp />} />
                 <Route path="/invoice/:bookingId" element={<InvoicePage />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/experiences" element={<ExperiencesPage />} />
