@@ -23,7 +23,7 @@ const WalletBanner = () => {
         </div>
       </div>
       <Link
-        to="/my-bookings?tab=wallet"
+        to="/profile/credits"
         className="text-primary text-sm font-semibold hover:underline flex items-center gap-1 flex-shrink-0"
       >
         View <ArrowRight className="w-3 h-3" />
