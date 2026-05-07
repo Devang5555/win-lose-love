@@ -1098,8 +1098,18 @@ For queries, please contact us.
                     Wallets
                   </TabsTrigger>
                 )}
+                {roles.includes('super_admin') && (
+                  <TabsTrigger value="reset-tools" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <Shield className="w-3.5 h-3.5" />
+                    Reset Tools
+                  </TabsTrigger>
+                )}
               </TabsList>
             </div>
+
+            <TabsContent value="reset-tools">
+              <SuperAdminResetTools roles={roles} onAfterAction={fetchData} />
+            </TabsContent>
 
             {/* Analytics Tab */}
             <TabsContent value="analytics">
