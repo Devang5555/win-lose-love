@@ -615,11 +615,6 @@ const TripDetail = () => {
                     )}
                   </div>
 
-                  {/* Smart Date Strip — quick travel-window picker */}
-                  {tripId && (
-                    <SmartDateStrip tripId={tripId} tripName={tripName} />
-                  )}
-
                   {/* Batch Selector */}
                   {isBookable && tripId && (
                     <div className="mb-6">
