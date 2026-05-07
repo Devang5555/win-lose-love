@@ -38,7 +38,7 @@ export interface ReferralEarning {
 
 /**
  * Compute how much wallet credit can be applied to a booking.
- * Rules: max ₹300, only on bookings ≥ ₹5000, never more than balance/total.
+ * Rules: max ₹300, Trips only, only on bookings ≥ ₹3499, never more than balance/total.
  */
 export const computeWalletApplicable = (balance: number, totalAmount: number, isFrozen: boolean) => {
   if (isFrozen || balance <= 0) return 0;
