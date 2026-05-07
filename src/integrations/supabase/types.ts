@@ -1391,6 +1391,10 @@ export type Database = {
       auto_archive_expired_batches: { Args: never; Returns: number }
       auto_duplicate_batches: { Args: never; Returns: number }
       auto_shift_empty_batches: { Args: never; Returns: number }
+      calculate_referral_reward: {
+        Args: { p_booking_id: string }
+        Returns: number
+      }
       cancel_booking_with_seat_release: {
         Args: {
           p_booking_id: string

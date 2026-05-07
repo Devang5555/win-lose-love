@@ -103,7 +103,7 @@ const ExitIntentPopup = () => {
       }
 
       setSubmitted(true);
-      toast({ title: "Welcome! 🎉", description: "You've been added. ₹300 travel credit will be applied to your first booking!" });
+      toast({ title: "Welcome! 🎉", description: "You've been added. ₹101 travel credit will be applied to your first booking!" });
     } catch (err: any) {
       console.error("Lead capture error:", err);
       toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
@@ -133,7 +133,7 @@ const ExitIntentPopup = () => {
             Wait! Don't Go Yet 🎁
           </h2>
           <p className="text-primary-foreground/90 text-sm">
-            Get <span className="font-bold text-lg">₹300 travel credit</span> + exclusive early access to upcoming trips!
+            Get <span className="font-bold text-lg">₹101 travel credit</span> + exclusive early access to upcoming trips!
           </p>
         </div>
 
@@ -143,7 +143,7 @@ const ExitIntentPopup = () => {
               <Sparkles className="w-12 h-12 text-primary mx-auto mb-3" />
               <h3 className="font-serif text-xl font-bold text-card-foreground mb-2">You're In! 🎉</h3>
               <p className="text-muted-foreground text-sm mb-4">
-                Your ₹300 travel credit will be applied when you sign up and make your first booking.
+                Your ₹101 travel credit will be applied when you sign up and make your first booking.
               </p>
               <Button onClick={handleClose} className="w-full">
                 Explore Trips
@@ -188,7 +188,7 @@ const ExitIntentPopup = () => {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? "Submitting..." : "Claim ₹300 Credit"}
+                {submitting ? "Submitting..." : "Claim ₹101 Credit"}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
                 No spam, ever. Just travel inspiration & exclusive deals.

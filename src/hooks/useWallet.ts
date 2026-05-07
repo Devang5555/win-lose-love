@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export const WALLET_MAX_PER_BOOKING = 300;
-export const WALLET_MIN_ORDER_AMOUNT = 5000;
+export const WALLET_MIN_ORDER_AMOUNT = 3499;
+export const WALLET_SIGNUP_BONUS = 101;
+export const WALLET_EXPIRY_DAYS = 180;
 
 export interface WalletData {
   id: string;
@@ -36,7 +38,7 @@ export interface ReferralEarning {
 
 /**
  * Compute how much wallet credit can be applied to a booking.
- * Rules: max ₹300, only on bookings ≥ ₹5000, never more than balance/total.
+ * Rules: max ₹300, Trips only, only on bookings ≥ ₹3499, never more than balance/total.
  */
 export const computeWalletApplicable = (balance: number, totalAmount: number, isFrozen: boolean) => {
   if (isFrozen || balance <= 0) return 0;

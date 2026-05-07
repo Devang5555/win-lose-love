@@ -69,7 +69,7 @@ const ProfileCredits = () => {
           <div className="bg-muted/40 rounded-xl p-4 text-xs text-muted-foreground space-y-1">
             <p>• Max <span className="font-semibold text-foreground">₹{WALLET_MAX_PER_BOOKING}</span> credits applicable per booking</p>
             <p>• Usable only on bookings above <span className="font-semibold text-foreground">₹{WALLET_MIN_ORDER_AMOUNT.toLocaleString()}</span></p>
-            <p>• Credits expire <span className="font-semibold text-foreground">6 months</span> after they are earned</p>
+            <p>• Credits expire <span className="font-semibold text-foreground">180 days</span> after they are earned</p>
           </div>
 
           <ReferralCard />
