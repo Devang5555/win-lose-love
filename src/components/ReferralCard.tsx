@@ -28,10 +28,10 @@ const ReferralCard = () => {
         </div>
         <div>
           <h3 className="font-serif text-lg font-bold text-foreground">
-            Invite Friends & Earn ₹250
+            Invite Friends & Earn up to ₹150
           </h3>
           <p className="text-sm text-muted-foreground">
-            Share your referral link — earn ₹250 travel credit per booking
+            Share your referral link — earn ₹50–₹150 per friend's confirmed trip
           </p>
         </div>
       </div>
