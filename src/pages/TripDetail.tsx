@@ -31,7 +31,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
-import SmartDateStrip from "@/components/SmartDateStrip";
+
 import TrustIndicators from "@/components/TrustIndicators";
 import { getTripItinerary } from "@/data/tripItineraries";
 import { adaptAdminItinerary, isAdminItineraryUsable } from "@/lib/tripItineraryAdapter";
