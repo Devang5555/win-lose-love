@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export const WALLET_MAX_PER_BOOKING = 300;
-export const WALLET_MIN_ORDER_AMOUNT = 5000;
+export const WALLET_MIN_ORDER_AMOUNT = 3499;
+export const WALLET_SIGNUP_BONUS = 101;
+export const WALLET_EXPIRY_DAYS = 180;
 
 export interface WalletData {
   id: string;
