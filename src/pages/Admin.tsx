@@ -26,6 +26,7 @@ import LeadsCaptureManagement from "@/components/admin/LeadsCaptureManagement";
 import DepartureOps from "@/components/admin/DepartureOps";
 
 import WalletManagement from "@/components/admin/WalletManagement";
+import SuperAdminResetTools from "@/components/admin/SuperAdminResetTools";
 import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
   openWhatsAppAdvanceVerified, 
