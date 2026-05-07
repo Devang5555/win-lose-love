@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-import { Calendar, AlertTriangle, CheckCircle, Bell, MessageCircle, ChevronDown } from "lucide-react";
+import { AlertTriangle, Bell, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import { formatPrice } from "@/data/trips";
 import { calculateDynamicPrice, DynamicPriceResult } from "@/lib/dynamicPricing";
 import { autoShiftEmptyBatches } from "@/lib/autoShiftBatches";
 import { autoDuplicateBatches } from "@/lib/autoDuplicateBatches";
-import { getSeatStatus } from "@/lib/seatStatus";
+import DepartureStrip from "@/components/DepartureStrip";
 
 export interface BatchInfo {
   id: string;
