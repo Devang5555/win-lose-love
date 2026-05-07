@@ -76,10 +76,7 @@ const DepartureStrip = ({ batches, selectedBatchId, onSelectBatch, limit = 5 }: 
     <div className="space-y-3">
       <p className="text-sm font-semibold text-foreground flex items-center gap-2">
         <CalendarDays className="w-4 h-4 text-primary" />
-        Upcoming Departures
-        <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0 h-4 ml-1">
-          Next {upcoming.length}
-        </Badge>
+        Choose Your Departure
       </p>
 
       <div className="-mx-1 px-1 flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 scroll-smooth">
