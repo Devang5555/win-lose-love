@@ -32,14 +32,6 @@ const WHATSAPP_NUMBER = "919415026522";
 const sendWhatsApp = (msg: string) => {
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
 };
-
-const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-
 const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectBatch }: BatchSelectorProps) => {
   const [batches, setBatches] = useState<BatchInfo[]>([]);
   const [loading, setLoading] = useState(true);
