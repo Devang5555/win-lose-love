@@ -40,27 +40,10 @@ const formatDate = (dateString: string) =>
     year: "numeric",
   });
 
-const getSeatBadge = (capacity: number, seatsBooked: number, available: number) => {
-  const status = getSeatStatus(capacity, seatsBooked);
-  if (status.label) {
-    return (
-      <Badge className={`${status.className} font-semibold text-xs ${status.level === "low" ? "animate-pulse" : ""}`}>
-        {status.label}
-      </Badge>
-    );
-  }
-  return (
-    <Badge variant="secondary" className="text-xs font-medium">
-      {available} seats available
-    </Badge>
-  );
-};
-
 const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectBatch }: BatchSelectorProps) => {
   const [batches, setBatches] = useState<BatchInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -104,35 +87,27 @@ const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectB
 
     fetchBatches();
 
-    // Realtime subscription for batch updates from admin
     const channel = supabase
       .channel(`batches-${tripId}`)
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'batches',
-          filter: `trip_id=eq.${tripId}`,
-        },
-        () => {
-          fetchBatches();
-        }
+        { event: '*', schema: 'public', table: 'batches', filter: `trip_id=eq.${tripId}` },
+        () => { fetchBatches(); }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [tripId]);
 
   if (loading) {
     return (
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-muted-foreground">Departure Dates</p>
-        {[1, 2].map((i) => (
-          <Skeleton key={i} className="h-20 w-full rounded-xl" />
-        ))}
+        <p className="text-sm font-semibold text-muted-foreground">Upcoming Departures</p>
+        <div className="flex gap-3 overflow-x-auto pb-2">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-32 w-[180px] flex-shrink-0 rounded-2xl" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -154,72 +129,15 @@ const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectB
     );
   }
 
-  const visibleBatches = showAll ? batches : batches.slice(0, 3);
-  const hiddenCount = batches.length - visibleBatches.length;
   const allSoldOut = batches.every((b) => b.available_seats === 0);
 
   return (
     <div className="space-y-3">
-      <p className="text-sm font-semibold text-foreground flex items-center gap-2">
-        <Calendar className="w-4 h-4 text-primary" />
-        Select Departure
-        {batches.length > 1 && (
-          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0 h-4 ml-1">
-            📅 Multiple Dates
-          </Badge>
-        )}
-      </p>
-      {visibleBatches.map((batch) => {
-        const isSoldOut = batch.available_seats === 0;
-        const isSelected = selectedBatchId === batch.id;
-        const dp = batch.dynamicPrice!;
-
-        return (
-          <button
-            key={batch.id}
-            type="button"
-            disabled={isSoldOut}
-            onClick={() => onSelectBatch(batch)}
-            className={`w-full text-left rounded-2xl border p-4 transition-all duration-300 ${
-              isSoldOut
-                ? "opacity-60 cursor-not-allowed border-border bg-muted"
-                : isSelected
-                ? "border-primary/60 bg-primary/5 shadow-card ring-2 ring-primary/15 scale-[1.015]"
-                : "border-border/60 surface-elevated hover:border-primary/40 hover:shadow-soft"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-              <span className="font-semibold text-sm text-card-foreground flex items-center gap-2 flex-wrap">
-                {isSelected && <CheckCircle className="w-4 h-4 text-primary animate-in zoom-in-50 duration-200" />}
-                {batch.batch_name}
-              </span>
-              <div className="flex items-center gap-1.5">
-                {getSeatBadge(batch.batch_size, Math.max(0, batch.batch_size - batch.available_seats), batch.available_seats)}
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" />
-                {formatDate(batch.start_date)} – {formatDate(batch.end_date)}
-              </span>
-              <span className="text-sm font-bold text-primary">
-                {formatPrice(dp.effectivePrice)}
-              </span>
-            </div>
-          </button>
-        );
-      })}
-
-      {hiddenCount > 0 && (
-        <button
-          type="button"
-          onClick={() => setShowAll(true)}
-          className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:underline py-1"
-        >
-          <ChevronDown className="w-3.5 h-3.5" />
-          Show {hiddenCount} more date{hiddenCount > 1 ? "s" : ""}
-        </button>
-      )}
+      <DepartureStrip
+        batches={batches}
+        selectedBatchId={selectedBatchId}
+        onSelectBatch={onSelectBatch}
+      />
 
       {allSoldOut && (
         <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-3 space-y-2">
