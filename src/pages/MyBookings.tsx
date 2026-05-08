@@ -127,7 +127,8 @@ const MyBookings = () => {
 
     try {
       const fileExt = screenshotFile.name.split('.').pop();
-      const fileName = `${user.id}/remaining_${Date.now()}.${fileExt}`;
+      const isInitiated = showPaymentModal?.booking_status === "initiated";
+      const fileName = `${user.id}/${isInitiated ? 'advance' : 'remaining'}_${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('payment-screenshots')
@@ -135,23 +136,43 @@ const MyBookings = () => {
 
       if (uploadError) throw uploadError;
 
-      // Update booking with screenshot URL and set remaining_payment_status to 'uploaded'
+      const updatePayload = isInitiated
+        ? {
+            advance_screenshot_url: fileName,
+            payment_status: "pending_advance",
+            booking_status: "pending",
+            advance_paid: showPaymentModal!.total_amount, // full payment for experiences/initial proof
+            rejection_reason: null,
+          }
+        : {
+            remaining_screenshot_url: fileName,
+            remaining_payment_status: "uploaded",
+            remaining_payment_uploaded_at: new Date().toISOString(),
+            payment_status: "balance_pending",
+            rejection_reason: null,
+          };
+
       const { error: updateError } = await supabase
         .from("bookings")
-        .update({ 
-          remaining_screenshot_url: fileName,
-          remaining_payment_status: "uploaded",
-          remaining_payment_uploaded_at: new Date().toISOString(),
-          payment_status: "balance_pending",
-          rejection_reason: null // Clear any previous rejection reason
-        })
+        .update(updatePayload)
         .eq("id", bookingId);
 
       if (updateError) throw updateError;
 
+      // Notify admin via WhatsApp/Email pipeline (best-effort)
+      try {
+        await supabase.functions.invoke("send-booking-notification", {
+          body: { booking_id: bookingId },
+        });
+      } catch (e) {
+        console.warn("notification failed", e);
+      }
+
       toast({
-        title: "Success!",
-        description: "Your payment screenshot has been uploaded. We'll verify it shortly.",
+        title: isInitiated ? "🎉 Payment proof submitted!" : "Success!",
+        description: isInitiated
+          ? "Team GoBhraman is verifying your booking — confirmation will be shared shortly on WhatsApp."
+          : "Your payment screenshot has been uploaded. We'll verify it shortly.",
       });
 
       setShowPaymentModal(null);
