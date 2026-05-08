@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import WishlistButton from "@/components/WishlistButton";
+import MarketingTagBadge from "@/components/MarketingTagBadge";
 import { getAggregateSeatStatus } from "@/lib/seatStatus";
+import { getMarketingTagDefs } from "@/lib/marketingTags";
 
 interface TripCardProps {
   trip: Trip | DatabaseTrip;
@@ -39,6 +41,8 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
   const capacity = isDatabaseTrip(trip) ? trip.capacity : trip.capacity;
   const images = trip.images;
   const highlights = isDatabaseTrip(trip) ? trip.highlights : trip.highlights;
+  const tripTags = isDatabaseTrip(trip) ? trip.tags : (trip as any).tags;
+  const marketingDefs = getMarketingTagDefs(tripTags);
   
   // Price handling
   const price = isDatabaseTrip(trip) ? trip.price_default : getTripPrice(trip);
@@ -161,8 +165,13 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
           )}
         </div>
 
-        {/* Filling Fast / Sold Out indicator (uses live batch data) */}
-        {isBookable && seatStatus.label && (
+        {/* Manual marketing chips (admin-controlled) override auto seatStatus */}
+        {isBookable && marketingDefs.length > 0 && (
+          <MarketingTagBadge tags={tripTags} className="mb-3" />
+        )}
+
+        {/* Filling Fast / Sold Out indicator (uses live batch data) — fallback only */}
+        {isBookable && marketingDefs.length === 0 && seatStatus.label && (
           <div className="mb-3">
             <Badge className={cn("font-semibold text-xs", seatStatus.className)}>
               {seatStatus.label}
@@ -171,7 +180,7 @@ const TripCard = ({ trip, featured = false, isBookable: isBookableProp, onRegist
         )}
 
         {/* Limited seats micro-text — shown only when no urgent indicator */}
-        {isBookable && !seatStatus.label && (
+        {isBookable && marketingDefs.length === 0 && !seatStatus.label && (
           <p className="text-xs text-accent mb-3 font-medium">
             Limited seats • Handpicked experiences
           </p>

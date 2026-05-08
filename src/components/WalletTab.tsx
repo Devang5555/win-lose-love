@@ -70,6 +70,23 @@ const WalletTab = () => {
       <ReferralCard />
 
       {/* Referral Earnings */}
+      {referralEarnings.length > 0 && (() => {
+        const credited = referralEarnings.filter((e) => e.status === "credited").length;
+        const pending = referralEarnings.filter((e) => e.status === "pending").length;
+        return (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-border bg-card p-3">
+              <p className="text-xs text-muted-foreground">Successful invites</p>
+              <p className="text-2xl font-bold text-primary">{credited}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-3">
+              <p className="text-xs text-muted-foreground">Pending (awaiting trip confirmation)</p>
+              <p className="text-2xl font-bold text-foreground">{pending}</p>
+            </div>
+          </div>
+        );
+      })()}
+
       {referralEarnings.length > 0 && (
         <div>
           <h3 className="font-serif text-lg font-bold text-foreground mb-3 flex items-center gap-2">

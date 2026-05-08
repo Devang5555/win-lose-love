@@ -9,7 +9,7 @@ interface AuthContextType {
   isAdmin: boolean;
   roles: AppRole[];
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, referralCode?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -70,9 +70,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, referralCode?: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -83,7 +83,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       },
     });
-    
+
+    // Best-effort referral linking — do not fail signup on errors.
+    if (!error && referralCode && referralCode.trim().length > 0) {
+      try {
+        // Wait briefly for the auth session/profile trigger to settle
+        await new Promise((r) => setTimeout(r, 600));
+        await supabase.rpc("link_referral_on_signup", { p_code: referralCode.trim().toUpperCase() });
+      } catch (e) {
+        console.warn("Referral linking failed:", e);
+      }
+    }
+
     return { error: error as Error | null };
   };
 

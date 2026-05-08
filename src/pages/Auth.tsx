@@ -24,14 +24,18 @@ const Auth = () => {
     email: "",
     password: "",
     fullName: "",
+    referralCode: "",
   });
 
-  // useEffect for popup handling
+  // Auto-detect ?ref=CODE and surface popup state
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const showPopup = params.get("showInterestPopup");
-    if (showPopup === "true") {
-      setShowInterestPopup(true);
+    if (showPopup === "true") setShowInterestPopup(true);
+    const ref = params.get("ref");
+    if (ref) {
+      setFormData((p) => ({ ...p, referralCode: ref.toUpperCase() }));
+      setIsLogin(false);
     }
   }, []);
 
@@ -72,7 +76,7 @@ const Auth = () => {
           return;
         }
 
-        const { error } = await signUp(formData.email, formData.password, formData.fullName);
+        const { error } = await signUp(formData.email, formData.password, formData.fullName, formData.referralCode);
         if (error) {
           if (error.message.includes("already registered")) {
             toast({
@@ -142,6 +146,25 @@ const Auth = () => {
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     placeholder="Enter your full name"
                   />
+                </div>
+              )}
+
+              {!isLogin && (
+                <div>
+                  <Label htmlFor="referralCode" className="flex items-center gap-2 mb-2">
+                    <span className="text-primary">🎁</span> Referral Code <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
+                  </Label>
+                  <Input
+                    id="referralCode"
+                    type="text"
+                    value={formData.referralCode}
+                    onChange={(e) => setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })}
+                    placeholder="e.g. DEVANG741"
+                    className="uppercase"
+                  />
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Your friend earns rewards after your first verified Trip booking.
+                  </p>
                 </div>
               )}
 

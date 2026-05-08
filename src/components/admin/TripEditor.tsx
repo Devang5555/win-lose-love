@@ -17,6 +17,7 @@ import ImageUpload from "./ImageUpload";
 import SmartImageManager from "./SmartImageManager";
 import SeoSection, { SeoData } from "./SeoSection";
 import { FEATURED_TAG_LABELS, FEATURED_TAGS, FeaturedTagKey, hasFeaturedTag, toggleFeaturedTag, ALL_FEATURED_TAGS } from "@/lib/featuredTags";
+import MarketingTagPicker from "@/components/MarketingTagPicker";
 
 interface TripFormData {
   trip_id: string;
@@ -736,6 +737,14 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                 <p className="text-[11px] text-muted-foreground mt-1.5">
                   Toggles add/remove curation tags. Frontend filters use these to surface trips on the homepage.
                 </p>
+              </div>
+
+              {/* Manual urgency / marketing chips */}
+              <div className="mt-4">
+                <MarketingTagPicker
+                  value={formData.tags}
+                  onChange={(next) => setFormData({ ...formData, tags: next })}
+                />
               </div>
             </section>
 

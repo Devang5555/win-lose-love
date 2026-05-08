@@ -54,6 +54,7 @@ export type Database = {
           created_at: string | null
           end_date: string
           id: string
+          marketing_tags: string[]
           price_override: number | null
           seats_booked: number
           start_date: string
@@ -70,6 +71,7 @@ export type Database = {
           created_at?: string | null
           end_date: string
           id?: string
+          marketing_tags?: string[]
           price_override?: number | null
           seats_booked?: number
           start_date: string
@@ -86,6 +88,7 @@ export type Database = {
           created_at?: string | null
           end_date?: string
           id?: string
+          marketing_tags?: string[]
           price_override?: number | null
           seats_booked?: number
           start_date?: string
@@ -846,6 +849,8 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          referred_by_code: string | null
+          referred_by_user_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -855,6 +860,8 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          referred_by_code?: string | null
+          referred_by_user_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -864,6 +871,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          referred_by_code?: string | null
+          referred_by_user_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1459,10 +1468,12 @@ export type Database = {
         Args: { batch_id_param: string; seats_count: number }
         Returns: undefined
       }
+      link_referral_on_signup: { Args: { p_code: string }; Returns: boolean }
       process_pending_referrals_for_booking: {
         Args: { p_booking_id: string }
         Returns: number
       }
+      recalculate_batch_seats: { Args: { p_batch_id: string }; Returns: number }
       restore_experience: {
         Args: { p_experience_id: string }
         Returns: undefined
