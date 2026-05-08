@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { DatabaseTrip } from "@/hooks/useTrips";
 import { getAggregateSeatStatus } from "@/lib/seatStatus";
+import MarketingTagBadge from "@/components/MarketingTagBadge";
+import { getMarketingTagDefs } from "@/lib/marketingTags";
 
 const categoryEmoji: Record<string, string> = {
   cycling: "🚴",
@@ -79,13 +81,15 @@ const ExperienceCard = ({ experience, batches }: ExperienceCardProps) => {
           )}
         </div>
 
-        {experience.booking_live && seatStatus.label && (
+        {experience.booking_live && getMarketingTagDefs(experience.tags).length > 0 ? (
+          <MarketingTagBadge tags={experience.tags} className="mb-3" />
+        ) : experience.booking_live && seatStatus.label ? (
           <div className="mb-3">
             <Badge className={cn("font-semibold text-xs", seatStatus.className)}>
               {seatStatus.label}
             </Badge>
           </div>
-        )}
+        ) : null}
 
         {/* Price & CTA */}
         <div className="flex items-end justify-between pt-3 border-t border-border gap-2">
