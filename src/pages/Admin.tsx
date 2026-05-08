@@ -353,6 +353,16 @@ const Admin = () => {
         title: "Success",
         description: `Booking ${bookingStatus === "confirmed" ? "confirmed" : "updated"}`,
       });
+      // Auto-trigger WhatsApp + email confirmation when booking becomes confirmed
+      if (bookingStatus === "confirmed") {
+        try {
+          await supabase.functions.invoke("send-booking-notification", {
+            body: { booking_id: bookingId, type: "confirmed" },
+          });
+        } catch (e) {
+          console.error("Auto-notify failed:", e);
+        }
+      }
       fetchData();
       setSelectedBooking(null);
     }
