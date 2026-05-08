@@ -796,13 +796,17 @@ const MyBookings = () => {
           <div className="relative w-full max-w-lg bg-card rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-border">
               <h2 className="font-serif text-xl font-bold text-card-foreground">
-                {showPaymentModal.remaining_payment_status === "rejected" 
-                  ? "Re-upload Payment Screenshot" 
-                  : "Pay Remaining Balance"
-                }
+                {showPaymentModal.booking_status === "initiated"
+                  ? "Upload Payment Proof"
+                  : showPaymentModal.remaining_payment_status === "rejected"
+                  ? "Re-upload Payment Screenshot"
+                  : "Pay Remaining Balance"}
               </h2>
               <p className="text-sm text-muted-foreground">
-                ₹{(showPaymentModal.total_amount - showPaymentModal.advance_paid).toLocaleString()} for {showPaymentModal.trip_id}
+                ₹{(showPaymentModal.booking_status === "initiated"
+                    ? showPaymentModal.total_amount
+                    : showPaymentModal.total_amount - showPaymentModal.advance_paid
+                  ).toLocaleString()} for {showPaymentModal.trip_id}
               </p>
             </div>
 
@@ -817,12 +821,14 @@ const MyBookings = () => {
 
               {/* UPI QR Code */}
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-4">Scan QR code to pay via UPI</p>
+                <p className="text-sm text-muted-foreground mb-4">Scan QR code to pay via UPI (skip if already paid)</p>
                 <div className="inline-block p-4 bg-white rounded-xl">
                   <QRCodeSVG 
                     value={generateUpiQrString({
-                      amount: showPaymentModal.total_amount - showPaymentModal.advance_paid,
-                      transactionNote: `${showPaymentModal.trip_id} - ${showPaymentModal.full_name} - Balance`
+                      amount: showPaymentModal.booking_status === "initiated"
+                        ? showPaymentModal.total_amount
+                        : showPaymentModal.total_amount - showPaymentModal.advance_paid,
+                      transactionNote: `${showPaymentModal.trip_id} - ${showPaymentModal.full_name}${showPaymentModal.booking_status === "initiated" ? "" : " - Balance"}`
                     })}
                     size={180}
                   />
@@ -831,7 +837,10 @@ const MyBookings = () => {
                   UPI ID: <span className="font-mono font-medium text-foreground">{getMerchantUpiId()}</span>
                 </p>
                 <p className="text-lg font-bold text-primary mt-2">
-                  ₹{(showPaymentModal.total_amount - showPaymentModal.advance_paid).toLocaleString()}
+                  ₹{(showPaymentModal.booking_status === "initiated"
+                      ? showPaymentModal.total_amount
+                      : showPaymentModal.total_amount - showPaymentModal.advance_paid
+                    ).toLocaleString()}
                 </p>
               </div>
 
