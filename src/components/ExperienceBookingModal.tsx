@@ -225,10 +225,10 @@ const ExperienceBookingModal = ({
       }
 
       toast({
-        title: "🎒 Start packing your bags!",
-        description: "You will receive your booking confirmation in the next 15 mins.",
+        title: "🎉 Payment proof submitted successfully!",
+        description: "Team GoBhraman is verifying your booking — confirmation will be shared shortly on WhatsApp.",
       });
-      handleClose();
+      handleClose(true);
       navigate(`/my-bookings`);
     } catch (err: any) {
       toast({ title: "Booking failed", description: err?.message || "Try again", variant: "destructive" });
