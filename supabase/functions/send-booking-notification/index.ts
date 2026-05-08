@@ -65,13 +65,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { booking_id } = await req.json();
+    const { booking_id, type } = await req.json();
     if (!booking_id) {
       return new Response(JSON.stringify({ error: "booking_id is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const notifType = type || "submitted";
 
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
