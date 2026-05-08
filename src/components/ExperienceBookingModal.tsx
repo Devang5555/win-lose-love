@@ -376,7 +376,7 @@ const ExperienceBookingModal = ({
 
               <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
                 <p className="text-sm text-accent-foreground">
-                  <strong>Next:</strong> After paying, click below to upload your payment screenshot.
+                  <strong>Done paying?</strong> Tap <em>"I Have Completed Payment"</em> below to upload your screenshot. Your booking is held until proof is submitted.
                 </p>
               </div>
             </div>
