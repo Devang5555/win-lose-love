@@ -108,19 +108,35 @@ Deno.serve(async (req) => {
     const userPhone = cleanPhone.startsWith("91") ? cleanPhone : `91${cleanPhone}`;
 
     // ===== USER MESSAGE =====
-    const userMessage = [
-      `🎉 Payment proof received successfully by Team GoBhraman.`,
-      ``,
-      `Hi ${booking.full_name}, your booking for *${booking.trip_id}* is currently under verification. Confirmation will be shared shortly.`,
-      ``,
-      `🧾 Booking ID: ${booking.id}`,
-      `👥 Guests: ${booking.num_travelers}`,
-      batchInfo || null,
-      `💰 Amount: ₹${booking.total_amount.toLocaleString()}`,
-      ``,
-      `For queries, reply here or call +91-9415026522`,
-      `— Team GoBhraman 🌊`,
-    ].filter(Boolean).join("\n");
+    const userMessage = notifType === "confirmed"
+      ? [
+          `✅ Booking Confirmed!`,
+          ``,
+          `Hi ${booking.full_name}, your booking for *${booking.trip_id}* is *CONFIRMED* 🎉`,
+          ``,
+          `🧾 Booking ID: ${booking.id}`,
+          `👥 Guests: ${booking.num_travelers}`,
+          batchInfo || null,
+          `💰 Paid: ₹${booking.advance_paid.toLocaleString()}`,
+          remainingAmount > 0 ? `💳 Balance: ₹${remainingAmount.toLocaleString()}` : null,
+          ``,
+          `We'll share trip details & joining instructions soon.`,
+          `For queries: +91-9415026522`,
+          `— Team GoBhraman 🌊`,
+        ].filter(Boolean).join("\n")
+      : [
+          `🎉 Payment proof received successfully by Team GoBhraman.`,
+          ``,
+          `Hi ${booking.full_name}, your booking for *${booking.trip_id}* is currently under verification. Confirmation will be shared shortly.`,
+          ``,
+          `🧾 Booking ID: ${booking.id}`,
+          `👥 Guests: ${booking.num_travelers}`,
+          batchInfo || null,
+          `💰 Amount: ₹${booking.total_amount.toLocaleString()}`,
+          ``,
+          `For queries, reply here or call +91-9415026522`,
+          `— Team GoBhraman 🌊`,
+        ].filter(Boolean).join("\n");
 
     // ===== ADMIN MESSAGE =====
     const adminMessage = [
