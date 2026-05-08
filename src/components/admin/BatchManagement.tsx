@@ -334,6 +334,13 @@ const BatchManagement = ({ batches, onRefresh, defaultTripId, compact }: BatchMa
             <input type="checkbox" checked={formData.auto_duplicate} onChange={(e) => setFormData({ ...formData, auto_duplicate: e.target.checked })} className="h-4 w-4 rounded border-border" />
             <span className="text-sm text-foreground">Auto-create next batch <span className="text-muted-foreground">(creates a new +7-day batch when this one is sold out or its date passes)</span></span>
           </label>
+          <div className="mt-4">
+            <MarketingTagPicker
+              value={formData.marketing_tags}
+              onChange={(next) => setFormData({ ...formData, marketing_tags: next })}
+              title="Departure-level urgency chips (optional)"
+            />
+          </div>
           <div className="flex gap-2 mt-4">
             <Button onClick={handleSubmit}><Save className="w-4 h-4 mr-2" />{editingId ? "Update Batch" : "Create Batch"}</Button>
             <Button variant="outline" onClick={resetForm}><X className="w-4 h-4 mr-2" />Cancel</Button>
@@ -390,7 +397,12 @@ const BatchManagement = ({ batches, onRefresh, defaultTripId, compact }: BatchMa
 
                     return (
                       <tr key={batch.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="px-4 py-3 font-medium text-foreground">{batch.batch_name}</td>
+                        <td className="px-4 py-3 font-medium text-foreground">
+                          <div className="flex flex-col gap-1">
+                            <span>{batch.batch_name}</span>
+                            <MarketingTagBadge tags={batch.marketing_tags} size="xs" single />
+                          </div>
+                        </td>
                         <td className="px-4 py-3 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
