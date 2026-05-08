@@ -127,7 +127,8 @@ const MyBookings = () => {
 
     try {
       const fileExt = screenshotFile.name.split('.').pop();
-      const fileName = `${user.id}/remaining_${Date.now()}.${fileExt}`;
+      const isInitiated = showPaymentModal?.booking_status === "initiated";
+      const fileName = `${user.id}/${isInitiated ? 'advance' : 'remaining'}_${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('payment-screenshots')
@@ -135,23 +136,43 @@ const MyBookings = () => {
 
       if (uploadError) throw uploadError;
 
-      // Update booking with screenshot URL and set remaining_payment_status to 'uploaded'
+      const updatePayload = isInitiated
+        ? {
+            advance_screenshot_url: fileName,
+            payment_status: "pending_advance",
+            booking_status: "pending",
+            advance_paid: showPaymentModal!.total_amount, // full payment for experiences/initial proof
+            rejection_reason: null,
+          }
+        : {
+            remaining_screenshot_url: fileName,
+            remaining_payment_status: "uploaded",
+            remaining_payment_uploaded_at: new Date().toISOString(),
+            payment_status: "balance_pending",
+            rejection_reason: null,
+          };
+
       const { error: updateError } = await supabase
         .from("bookings")
-        .update({ 
-          remaining_screenshot_url: fileName,
-          remaining_payment_status: "uploaded",
-          remaining_payment_uploaded_at: new Date().toISOString(),
-          payment_status: "balance_pending",
-          rejection_reason: null // Clear any previous rejection reason
-        })
+        .update(updatePayload)
         .eq("id", bookingId);
 
       if (updateError) throw updateError;
 
+      // Notify admin via WhatsApp/Email pipeline (best-effort)
+      try {
+        await supabase.functions.invoke("send-booking-notification", {
+          body: { booking_id: bookingId },
+        });
+      } catch (e) {
+        console.warn("notification failed", e);
+      }
+
       toast({
-        title: "Success!",
-        description: "Your payment screenshot has been uploaded. We'll verify it shortly.",
+        title: isInitiated ? "🎉 Payment proof submitted!" : "Success!",
+        description: isInitiated
+          ? "Team GoBhraman is verifying your booking — confirmation will be shared shortly on WhatsApp."
+          : "Your payment screenshot has been uploaded. We'll verify it shortly.",
       });
 
       setShowPaymentModal(null);
@@ -563,11 +584,21 @@ const MyBookings = () => {
                       
                       {/* Status Messages */}
                       {booking.booking_status === "initiated" && (
-                        <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 flex items-center gap-2">
-                          <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                          <p className="text-sm text-blue-700 dark:text-blue-400">
-                            Booking initiated — please complete your payment to reserve your spot.
-                          </p>
+                        <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                            <p className="text-sm text-blue-700 dark:text-blue-400">
+                              Booking initiated — already paid? Upload your payment screenshot to confirm.
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => setShowPaymentModal(booking)}
+                            className="gap-2"
+                          >
+                            <Upload className="w-4 h-4" />
+                            Upload Payment Proof
+                          </Button>
                         </div>
                       )}
 
@@ -765,13 +796,17 @@ const MyBookings = () => {
           <div className="relative w-full max-w-lg bg-card rounded-2xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-border">
               <h2 className="font-serif text-xl font-bold text-card-foreground">
-                {showPaymentModal.remaining_payment_status === "rejected" 
-                  ? "Re-upload Payment Screenshot" 
-                  : "Pay Remaining Balance"
-                }
+                {showPaymentModal.booking_status === "initiated"
+                  ? "Upload Payment Proof"
+                  : showPaymentModal.remaining_payment_status === "rejected"
+                  ? "Re-upload Payment Screenshot"
+                  : "Pay Remaining Balance"}
               </h2>
               <p className="text-sm text-muted-foreground">
-                ₹{(showPaymentModal.total_amount - showPaymentModal.advance_paid).toLocaleString()} for {showPaymentModal.trip_id}
+                ₹{(showPaymentModal.booking_status === "initiated"
+                    ? showPaymentModal.total_amount
+                    : showPaymentModal.total_amount - showPaymentModal.advance_paid
+                  ).toLocaleString()} for {showPaymentModal.trip_id}
               </p>
             </div>
 
@@ -786,12 +821,14 @@ const MyBookings = () => {
 
               {/* UPI QR Code */}
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-4">Scan QR code to pay via UPI</p>
+                <p className="text-sm text-muted-foreground mb-4">Scan QR code to pay via UPI (skip if already paid)</p>
                 <div className="inline-block p-4 bg-white rounded-xl">
                   <QRCodeSVG 
                     value={generateUpiQrString({
-                      amount: showPaymentModal.total_amount - showPaymentModal.advance_paid,
-                      transactionNote: `${showPaymentModal.trip_id} - ${showPaymentModal.full_name} - Balance`
+                      amount: showPaymentModal.booking_status === "initiated"
+                        ? showPaymentModal.total_amount
+                        : showPaymentModal.total_amount - showPaymentModal.advance_paid,
+                      transactionNote: `${showPaymentModal.trip_id} - ${showPaymentModal.full_name}${showPaymentModal.booking_status === "initiated" ? "" : " - Balance"}`
                     })}
                     size={180}
                   />
@@ -800,7 +837,10 @@ const MyBookings = () => {
                   UPI ID: <span className="font-mono font-medium text-foreground">{getMerchantUpiId()}</span>
                 </p>
                 <p className="text-lg font-bold text-primary mt-2">
-                  ₹{(showPaymentModal.total_amount - showPaymentModal.advance_paid).toLocaleString()}
+                  ₹{(showPaymentModal.booking_status === "initiated"
+                      ? showPaymentModal.total_amount
+                      : showPaymentModal.total_amount - showPaymentModal.advance_paid
+                    ).toLocaleString()}
                 </p>
               </div>
 
