@@ -159,7 +159,7 @@ const Auth = () => {
                     type="text"
                     value={formData.referralCode}
                     onChange={(e) => setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })}
-                    placeholder="e.g. DEVANG741"
+                    placeholder="e.g. Bhraman26"
                     className="uppercase"
                   />
                   <p className="text-[11px] text-muted-foreground mt-1">
