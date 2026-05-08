@@ -17,6 +17,7 @@ import ImageUpload from "./ImageUpload";
 import SmartImageManager from "./SmartImageManager";
 import SeoSection, { SeoData } from "./SeoSection";
 import { FEATURED_TAG_LABELS, FEATURED_TAGS, FeaturedTagKey, hasFeaturedTag, toggleFeaturedTag, ALL_FEATURED_TAGS } from "@/lib/featuredTags";
+import MarketingTagPicker from "@/components/MarketingTagPicker";
 
 interface TripFormData {
   trip_id: string;
