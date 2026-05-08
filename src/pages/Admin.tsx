@@ -439,6 +439,33 @@ const Admin = () => {
         console.warn("confirmation email failed", e);
       }
 
+      // Credit referrer (if any). Safe: existing RPC enforces trip-only, one-time, confirmed only.
+      try {
+        const { data: bookingRow } = await supabase
+          .from("bookings")
+          .select("referral_code_used, user_id")
+          .eq("id", booking.id)
+          .maybeSingle();
+        let code: string | null = bookingRow?.referral_code_used ?? null;
+        if (!code && bookingRow?.user_id) {
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("referred_by_code")
+            .eq("id", bookingRow.user_id)
+            .maybeSingle();
+          code = (prof as any)?.referred_by_code ?? null;
+        }
+        if (code && bookingRow?.user_id) {
+          await supabase.rpc("credit_referral_reward", {
+            p_referrer_code: code,
+            p_referred_user_id: bookingRow.user_id,
+            p_booking_id: booking.id,
+          });
+        }
+      } catch (e) {
+        console.warn("referral credit failed", e);
+      }
+
       fetchData();
       setSelectedBooking(null);
     } catch (error) {
