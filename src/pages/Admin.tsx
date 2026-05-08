@@ -358,10 +358,10 @@ const Admin = () => {
   };
 
   // Verify advance payment with audit logging
-  const verifyAdvancePayment = async (booking: Booking) => {
+  const verifyAdvancePayment = async (booking: Booking, opts?: { skipScreenshotCheck?: boolean }) => {
     if (!user) return;
-    const isSuperAdmin = roles?.includes("super_admin");
-    if (!advanceScreenshotUrl && !isSuperAdmin) {
+    const isPrivileged = roles?.includes("super_admin") || roles?.includes("admin");
+    if (!advanceScreenshotUrl && !opts?.skipScreenshotCheck && !isPrivileged) {
       toast({ title: "Error", description: "No advance payment screenshot uploaded. Cannot verify.", variant: "destructive" });
       return;
     }
@@ -410,6 +410,34 @@ const Admin = () => {
         phone: booking.phone,
       };
       openWhatsAppAdvanceVerified(booking.phone, bookingDetails);
+
+      // Fire automated booking-confirmed WhatsApp + email notifications
+      try {
+        await supabase.functions.invoke("send-booking-notification", {
+          body: { booking_id: booking.id, type: "confirmed" },
+        });
+      } catch (e) {
+        console.warn("confirmation notification failed", e);
+      }
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "booking-confirmed",
+            recipientEmail: booking.email,
+            idempotencyKey: `booking-confirmed-${booking.id}`,
+            templateData: {
+              name: booking.full_name,
+              tripName: booking.trip_id,
+              guests: booking.num_travelers,
+              amount: booking.total_amount,
+              advancePaid: booking.advance_paid,
+              bookingId: booking.id,
+            },
+          },
+        });
+      } catch (e) {
+        console.warn("confirmation email failed", e);
+      }
 
       fetchData();
       setSelectedBooking(null);
@@ -1929,22 +1957,22 @@ For queries, please contact us.
                       </>
                     )}
 
-                    {/* Super Admin override — confirm booking even without uploaded proof
-                        (for users who paid successfully but proof upload failed) */}
-                    {roles?.includes("super_admin") &&
-                     selectedBooking.booking_status !== "confirmed" &&
+                    {/* Admin override — confirm booking even without uploaded proof
+                        (when payment gateway redirected user away before screenshot upload) */}
+                    {(roles?.includes("super_admin") || roles?.includes("admin")) &&
                      selectedBooking.booking_status !== "cancelled" &&
                      selectedBooking.payment_status !== "advance_verified" &&
-                     selectedBooking.payment_status !== "fully_paid" && (
+                     selectedBooking.payment_status !== "fully_paid" &&
+                     !advanceScreenshotUrl && (
                       <Button
                         variant="outline"
                         className="flex-1 border-amber-500 text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950"
                         disabled={processingAction}
                         onClick={() => {
                           if (window.confirm(
-                            "SUPER ADMIN OVERRIDE\n\nConfirm this booking and mark Payment Received WITHOUT screenshot proof?\n\nUse only when payment is verified in bank account."
+                            "ADMIN OVERRIDE\n\nConfirm this booking and mark Payment Received WITHOUT screenshot proof?\n\nUse only when payment is verified in bank account (e.g. UPI gateway redirected user before upload)."
                           )) {
-                            verifyAdvancePayment(selectedBooking);
+                            verifyAdvancePayment(selectedBooking, { skipScreenshotCheck: true });
                           }
                         }}
                       >
