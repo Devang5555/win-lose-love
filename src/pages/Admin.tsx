@@ -360,7 +360,8 @@ const Admin = () => {
   // Verify advance payment with audit logging
   const verifyAdvancePayment = async (booking: Booking) => {
     if (!user) return;
-    if (!advanceScreenshotUrl) {
+    const isSuperAdmin = roles?.includes("super_admin");
+    if (!advanceScreenshotUrl && !isSuperAdmin) {
       toast({ title: "Error", description: "No advance payment screenshot uploaded. Cannot verify.", variant: "destructive" });
       return;
     }
