@@ -44,7 +44,7 @@ const ExperienceCard = ({ experience, batches }: ExperienceCardProps) => {
 
         {/* Tags */}
         <div className="absolute top-3 left-3 z-20 flex flex-wrap gap-1.5">
-          {experience.tags?.slice(0, 2).map((tag) => (
+          {experience.tags?.filter((t) => !t.startsWith("mkt:")).slice(0, 2).map((tag) => (
             <Badge key={tag} className="bg-primary/90 text-primary-foreground text-xs font-bold px-2 py-0.5">
               {tag}
             </Badge>
