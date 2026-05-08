@@ -1,69 +1,84 @@
 ## Scope
 
-Two upgrades, lightweight and reusable. Reuse existing `batches` + `experience_slots` tables, existing admin pages, existing analytics. No new tables.
+Three operational upgrades using existing tables/components. No new tables — reuse `tags[]` (trips, experiences), `batches`, `audit_logs`, `referral_codes`, `referral_earnings`. No backend complexity beyond one tiny migration to add a `marketing_tags text[]` column to `batches` (trips/experiences already have `tags[]`).
 
 ---
 
-## 1. Premium Departure Selector (Trips + Experiences)
+## 1. Manual Urgency/Marketing Tags
 
-**New component:** `src/components/DepartureStrip.tsx`
-- Horizontal swipeable pill-cards (snap-x, overflow-x-auto, mobile-first)
-- Shows next 3–5 upcoming batches only (filter `start_date >= today`, limit 5)
-- Each card: date (large), seats-left chip, status badge, selected state with ring/glow
-- Smart badges (computed client-side, no DB changes):
-  - "This Weekend" — start_date is Sat/Sun within 7 days
-  - "Filling Fast" / "Limited Seats" — reuses `getSeatStatus`
-  - "New Batch" — created within last 3 days
-  - "🔥 Popular" — highest seats_booked among visible
-- Soft shadows, rounded-2xl, primary glow on active
-- Realtime subscription preserved
-- Reusable: accepts `source: "trips" | "experiences"` + IDs, queries correct table
+**Single source of truth:** `src/lib/marketingTags.ts` (new)
+- Constant list of 10 tags with label + emoji + tone class (token-based, no hex)
+- Helpers: `getMarketingTags(tags[])`, `setMarketingTags(tags[], selected[])`, max 2 active
+- Tags stored as prefixed strings inside existing `tags[]` array (`mkt:filling-fast`, etc.) → zero schema change for trips/experiences
+- For batches: add `marketing_tags text[]` column (single small migration)
 
-**Integration:**
-- `BatchSelector.tsx` → swap visual rendering to use `DepartureStrip` internally (keep existing API, so `TripDetail` and others don't break)
-- `ExperienceDetail.tsx` / `ExperienceBookingModal.tsx` → wire same component for experience_slots
-- Keep "Join Waitlist" / "Plan Your Own Date" fallback when all sold out
+**New reusable UI:** `src/components/MarketingTagPicker.tsx`
+- Chip selector with max-2 enforcement, used inside admin editors
+- `src/components/MarketingTagBadge.tsx` — single badge renderer
+
+**Integrations (read-only display):**
+- `TripCard.tsx`, `ExperienceCard.tsx`, `DepartureStrip.tsx`, `BatchSelector.tsx`, `MobileBookingBar.tsx`, `HeroSection.tsx`/featured sections → render `<MarketingTagBadge>` if any present (top-left overlay or near price)
+- Existing auto-computed badges (Filling Fast from seat math) stay as fallback only when no manual tag set
+
+**Admin editors:**
+- `TripEditor.tsx`, experience editor, `BatchManagement.tsx` → drop in `<MarketingTagPicker>`
 
 ---
 
-## 2. Admin Analytics + Cleanup
+## 2. SuperAdmin Sync + Visibility
 
-**Analytics fixes (`src/components/admin/AdminAnalytics.tsx` / `AdvancedAnalytics.tsx`):**
-- Compute: total revenue (confirmed+completed), pending revenue (initiated/pending), confirmed bookings, refunds total, split by trips vs experiences (lookup via `trip_id` against `experiences.experience_id`), monthly breakdown (last 12 months)
-- Add filters: status, type (trip/experience), date range
-- Reuse existing chart components
+**No new tables.** Surface what already exists.
 
-**SuperAdmin Reset Tools (new section in admin):**
-- "Clear Test Bookings" — delete bookings where `notes ILIKE '%test%'` or flagged `is_deleted=true` permanently — super_admin only via existing RLS
-- Confirmation modal with typed phrase ("DELETE TEST DATA")
-- Audit log every action via `create_audit_log`
+- New tab in `Admin.tsx` (visible only to `super_admin`): **"SuperAdmin Console"**
+  - **Activity Feed**: live query on `audit_logs` (already populated by every privileged action) with filters: actor, entity_type, action_type, date range
+  - **Cross-section snapshot**: counts of bookings by status, pending payment proofs (uploaded but not verified), pending refunds, pending referrals, frozen wallets, recent fraud_flags — each linking to existing admin sub-pages
+  - **Override tools**: 
+    - manual booking status fix (already exists via `verifyAdvancePayment` skip-screenshot path → expose for any booking)
+    - resync seats: recompute `seats_booked` for a batch from `bookings` table (one RPC)
+    - force re-trigger WhatsApp/email notification for a booking
+- Extend `SuperAdminResetTools.tsx` with: "Recalculate batch seats" and "Reprocess pending referrals" buttons (call existing `process_pending_referrals_for_booking` per pending row)
+- Ensure all admin actions write to `audit_logs` (audit current admin code; add `create_audit_log` calls where missing — booking edits, refund processing, batch edits)
 
-**Bulk Booking Management (`src/components/admin/...` - extend existing booking list):**
-- Add checkbox column + select-all
-- Bulk action bar: Cancel, Soft Delete, Mark Refunded
-- Calls existing `cancel_booking_with_seat_release` per booking (loop)
-- Confirmation dialog with count
+---
 
-**Auto data sync:**
-- Analytics already computed live from bookings table → no orphan data possible
-- After bulk action, invalidate React Query caches
+## 3. Referral Usage Flow
 
-**Smart Admin Helper (lightweight):**
-- In `TripItineraryEditor` / `ImageUpload`: when multiple images uploaded, auto-distribute first → hero, rest → gallery (only if those slots empty). Single small change.
+**Schema:** add nullable `referred_by_code text` and `referred_by_user_id uuid` to `profiles` (one tiny migration). `bookings.referral_code_used` already exists.
+
+**Signup (`src/pages/Auth.tsx`):**
+- New optional "Referral Code" input
+- Auto-fill from `?ref=CODE` URL param (already used in share links via `useWallet.getReferralLink`)
+- On successful signup → upsert into `profiles.referred_by_code` via new RPC `link_referral_on_signup(p_code)` that:
+  - validates code exists, is not user's own
+  - blocks if already linked
+  - stores referrer link only (NO wallet credit)
+
+**Booking flow:**
+- When creating a booking, auto-copy `profiles.referred_by_code` into `bookings.referral_code_used` if blank
+- After admin verifies advance payment (in `verifyAdvancePayment`) → call existing `credit_referral_reward(referral_code_used, user_id, booking_id)` — this already enforces trip-only, one-time, and wallet credit
+- Already gated to `confirmed/completed` Trips in existing function
+
+**Visibility:**
+- User: `WalletTab.tsx` already shows referral code + link + earnings; add "Successful invites: N" + "Pending: M" counts (derived from `referral_earnings`)
+- Admin: new compact section in admin `WalletManagement.tsx` (or new tab) showing all `referral_earnings` rows joined to bookings — code used, status, booking value, referrer/referred names
 
 ---
 
 ## Technical Details
 
-- No DB migration required (all data already exists)
-- New file: `src/components/DepartureStrip.tsx` (~150 lines)
-- Edits: `BatchSelector.tsx`, `ExperienceBookingModal.tsx`, `ExperienceDetail.tsx`, `AdminAnalytics.tsx`, admin booking management component, `ImageUpload.tsx`
-- New file: `src/components/admin/SuperAdminResetTools.tsx`
-- Permissions: gated via existing `usePermissions` (`super_admin` role only for reset tools)
-
----
+- One DB migration: 
+  - `ALTER TABLE batches ADD COLUMN marketing_tags text[] DEFAULT '{}';`
+  - `ALTER TABLE profiles ADD COLUMN referred_by_code text, ADD COLUMN referred_by_user_id uuid;`
+  - New RPC `link_referral_on_signup(p_code text)` — security definer, validates and links
+  - New RPC `recalculate_batch_seats(p_batch_id uuid)` — sums confirmed bookings
+- New files:
+  - `src/lib/marketingTags.ts`
+  - `src/components/MarketingTagPicker.tsx`
+  - `src/components/MarketingTagBadge.tsx`
+  - `src/components/admin/SuperAdminConsole.tsx`
+- Edits: TripCard, ExperienceCard, DepartureStrip, BatchSelector, TripEditor, BatchManagement, experience editor, Admin.tsx (new tab), Auth.tsx (referral input), WalletTab.tsx (counts), useAuth.tsx (call link RPC after signup), MyBookings/booking creation (copy referral code), verifyAdvancePayment (trigger credit)
 
 ## Out of Scope
-- No changes to booking/payment lifecycle
-- No new tables, no schema changes
-- No changes to RLS policies
+- No payment-system changes
+- No new analytics infra (reuse existing AdminAnalytics)
+- No redesign of existing components — pure additive layer
