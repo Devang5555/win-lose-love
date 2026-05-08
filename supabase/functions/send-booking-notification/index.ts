@@ -108,21 +108,39 @@ Deno.serve(async (req) => {
     const userPhone = cleanPhone.startsWith("91") ? cleanPhone : `91${cleanPhone}`;
 
     // ===== USER MESSAGE =====
+    // Resolve a friendly display name for the trip/experience
+    let displayName = booking.trip_id;
+    {
+      const { data: tripRow } = await supabase
+        .from("trips").select("trip_name").eq("trip_id", booking.trip_id).maybeSingle();
+      if (tripRow?.trip_name) {
+        displayName = tripRow.trip_name;
+      } else {
+        const { data: expRow } = await supabase
+          .from("experiences").select("name").eq("experience_id", booking.trip_id).maybeSingle();
+        if (expRow?.name) displayName = expRow.name;
+      }
+    }
+
     const userMessage = notifType === "confirmed"
       ? [
-          `✅ Booking Confirmed!`,
+          `Hi ${booking.full_name} 👋`,
           ``,
-          `Hi ${booking.full_name}, your booking for *${booking.trip_id}* is *CONFIRMED* 🎉`,
+          `🎉 Your payment for *${displayName}* has been successfully verified and your booking is now confirmed!`,
           ``,
           `🧾 Booking ID: ${booking.id}`,
+          `💳 Amount Received: ₹${booking.advance_paid.toLocaleString()}`,
           `👥 Guests: ${booking.num_travelers}`,
-          batchInfo || null,
-          `💰 Paid: ₹${booking.advance_paid.toLocaleString()}`,
-          remainingAmount > 0 ? `💳 Balance: ₹${remainingAmount.toLocaleString()}` : null,
+          batchInfo ? batchInfo.trim() : null,
+          remainingAmount > 0 ? `💰 Balance Due: ₹${remainingAmount.toLocaleString()}` : null,
           ``,
-          `We'll share trip details & joining instructions soon.`,
-          `For queries: +91-9415026522`,
-          `— Team GoBhraman 🌊`,
+          `Thank you for choosing GoBhraman 💙`,
+          `We're excited to have you join us for this experience!`,
+          ``,
+          `Further trip details, reporting instructions, and important updates will be shared with you shortly.`,
+          ``,
+          `For any assistance, feel free to reach out anytime.`,
+          `— Team GoBhraman`,
         ].filter(Boolean).join("\n")
       : [
           `🎉 Payment proof received successfully by Team GoBhraman.`,
