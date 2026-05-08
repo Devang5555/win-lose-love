@@ -76,12 +76,23 @@ const ExperienceBookingModal = ({
   const seatsLeft = selectedSlot?.available_seats ?? 0;
   const maxTravelers = Math.min(8, Math.max(1, seatsLeft));
 
-  const handleClose = () => {
+  const resetAll = () => {
     setStep(1);
     setBookingId(null);
     setScreenshotFile(null);
     setScreenshotPreview(null);
     setFormData({ name: "", email: user?.email || "", phone: "", travelers: "1", upiTransactionId: "", whatsappOptin: true });
+  };
+
+  const handleClose = (force = false) => {
+    // Protect payment session: if user is on the QR/Proof step, confirm before closing
+    if (!force && (step === 2 || step === 3)) {
+      const ok = window.confirm(
+        "Your payment session is active. If you've already paid, please upload the screenshot to confirm your booking.\n\nClose anyway?"
+      );
+      if (!ok) return;
+    }
+    resetAll();
     onClose();
   };
 
