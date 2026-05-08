@@ -421,8 +421,8 @@ const ExperienceBookingModal = ({
             {step > 1 && (
               <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(step - 1)}>Back</Button>
             )}
-            <Button type="submit" className="flex-1" disabled={loading || (step === 1 && !selectedSlot)}>
-              {loading ? "Processing…" : step === 1 ? "Continue to Pay" : step === 2 ? "I've Paid" : "Confirm Booking"}
+            <Button type="submit" className="flex-1" disabled={loading || (step === 1 && !selectedSlot) || (step === 3 && !screenshotFile)}>
+              {loading ? "Processing…" : step === 1 ? "Continue to Pay" : step === 2 ? "I Have Completed Payment" : "Submit Proof & Confirm"}
             </Button>
           </div>
         </form>
