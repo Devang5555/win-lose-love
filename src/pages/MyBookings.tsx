@@ -584,11 +584,21 @@ const MyBookings = () => {
                       
                       {/* Status Messages */}
                       {booking.booking_status === "initiated" && (
-                        <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 flex items-center gap-2">
-                          <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                          <p className="text-sm text-blue-700 dark:text-blue-400">
-                            Booking initiated — please complete your payment to reserve your spot.
-                          </p>
+                        <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                            <p className="text-sm text-blue-700 dark:text-blue-400">
+                              Booking initiated — already paid? Upload your payment screenshot to confirm.
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => setShowPaymentModal(booking)}
+                            className="gap-2"
+                          >
+                            <Upload className="w-4 h-4" />
+                            Upload Payment Proof
+                          </Button>
                         </div>
                       )}
 
