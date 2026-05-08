@@ -738,6 +738,14 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                   Toggles add/remove curation tags. Frontend filters use these to surface trips on the homepage.
                 </p>
               </div>
+
+              {/* Manual urgency / marketing chips */}
+              <div className="mt-4">
+                <MarketingTagPicker
+                  value={formData.tags}
+                  onChange={(next) => setFormData({ ...formData, tags: next })}
+                />
+              </div>
             </section>
 
             {/* SEO & Social */}
