@@ -27,6 +27,7 @@ import DepartureOps from "@/components/admin/DepartureOps";
 
 import WalletManagement from "@/components/admin/WalletManagement";
 import SuperAdminResetTools from "@/components/admin/SuperAdminResetTools";
+import SuperAdminConsole from "@/components/admin/SuperAdminConsole";
 import { usePermissions, getRoleLabel } from "@/hooks/usePermissions";
 import { 
   openWhatsAppAdvanceVerified, 
@@ -1156,6 +1157,12 @@ For queries, please contact us.
                   </TabsTrigger>
                 )}
                 {roles.includes('super_admin') && (
+                  <TabsTrigger value="super-console" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    SuperAdmin
+                  </TabsTrigger>
+                )}
+                {roles.includes('super_admin') && (
                   <TabsTrigger value="reset-tools" className="gap-1.5 text-xs md:text-sm whitespace-nowrap px-2.5 py-1.5 rounded-lg">
                     <Shield className="w-3.5 h-3.5" />
                     Reset Tools
@@ -1163,6 +1170,10 @@ For queries, please contact us.
                 )}
               </TabsList>
             </div>
+
+            <TabsContent value="super-console">
+              <SuperAdminConsole />
+            </TabsContent>
 
             <TabsContent value="reset-tools">
               <SuperAdminResetTools roles={roles} onAfterAction={fetchData} />
