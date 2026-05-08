@@ -61,21 +61,27 @@ export const openWhatsAppPaymentUploaded = (phone: string, userName: string, tri
   openWhatsApp(phone, getPaymentUploadedMessage(userName, tripName));
 };
 
-// ========== ADVANCE PAYMENT VERIFIED MESSAGE ==========
+// ========== ADVANCE PAYMENT VERIFIED / BOOKING CONFIRMED MESSAGE ==========
 export const getAdvanceVerifiedMessage = (details: BookingDetails): string => {
-  return `Hi ${details.userName},
-
-✅ Your advance payment for *${details.tripName}* has been verified!
-
-📋 Booking ID: ${details.bookingId}
-💰 Advance Paid: ₹${details.advanceAmount.toLocaleString()}
-💳 Remaining Balance: ₹${details.remainingAmount.toLocaleString()}
-
-Thank you for booking with GoBhraman! 🌊
-
-For any queries, feel free to reach out.
-
-– Team GoBhraman`;
+  return [
+    `Hi ${details.userName} 👋`,
+    ``,
+    `🎉 Your payment for *${details.tripName}* has been successfully verified and your booking is now confirmed!`,
+    ``,
+    `🧾 Booking ID: ${details.bookingId}`,
+    `💳 Amount Received: ₹${details.advanceAmount.toLocaleString()}`,
+    details.remainingAmount > 0
+      ? `💰 Balance Due: ₹${details.remainingAmount.toLocaleString()}`
+      : null,
+    ``,
+    `Thank you for choosing GoBhraman 💙`,
+    `We're excited to have you join us for this experience!`,
+    ``,
+    `Further trip details, reporting instructions, and important updates will be shared with you shortly.`,
+    ``,
+    `For any assistance, feel free to reach out anytime.`,
+    `— Team GoBhraman`,
+  ].filter(Boolean).join("\n");
 };
 
 export const openWhatsAppAdvanceVerified = (phone: string, details: BookingDetails) => {
@@ -84,18 +90,22 @@ export const openWhatsAppAdvanceVerified = (phone: string, details: BookingDetai
 
 // ========== FULLY PAID MESSAGE ==========
 export const getFullyPaidMessage = (details: BookingDetails): string => {
-  return `🎉 Booking Confirmed!
-
-Hi ${details.userName},
-
-Your booking for *${details.tripName}* is fully paid! ✨
-
-📋 Booking ID: ${details.bookingId}
-💰 Total Amount: ₹${(details.advanceAmount + details.remainingAmount).toLocaleString()}
-
-Get ready for an amazing adventure! 🌴
-
-Team GoBhraman`;
+  return [
+    `Hi ${details.userName} 👋`,
+    ``,
+    `🎉 Your payment for *${details.tripName}* has been successfully verified and your booking is now *fully paid & confirmed*!`,
+    ``,
+    `🧾 Booking ID: ${details.bookingId}`,
+    `💳 Total Received: ₹${(details.advanceAmount + details.remainingAmount).toLocaleString()}`,
+    ``,
+    `Thank you for choosing GoBhraman 💙`,
+    `We're excited to have you join us for this experience!`,
+    ``,
+    `Further trip details, reporting instructions, and important updates will be shared with you shortly.`,
+    ``,
+    `For any assistance, feel free to reach out anytime.`,
+    `— Team GoBhraman`,
+  ].join("\n");
 };
 
 export const openWhatsAppFullyPaid = (phone: string, details: BookingDetails) => {
