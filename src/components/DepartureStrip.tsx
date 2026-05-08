@@ -3,6 +3,7 @@ import { CheckCircle2, Flame, Sparkles, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/data/trips";
 import { getSeatStatus } from "@/lib/seatStatus";
+import { getMarketingTagDefs } from "@/lib/marketingTags";
 import type { BatchInfo } from "@/components/BatchSelector";
 
 interface DepartureStripProps {
@@ -86,6 +87,7 @@ const DepartureStrip = ({ batches, selectedBatchId, onSelectBatch, limit = 5 }: 
           const seatStatus = getSeatStatus(batch.batch_size, seatsBooked);
           const isSoldOut = batch.available_seats === 0;
           const smart = computeSmartBadge(batch, mostBookedId);
+          const mktDefs = getMarketingTagDefs(batch.marketing_tags);
           const dp = batch.dynamicPrice;
 
           return (
@@ -106,11 +108,15 @@ const DepartureStrip = ({ batches, selectedBatchId, onSelectBatch, limit = 5 }: 
                 <CheckCircle2 className="w-4 h-4 text-primary absolute top-2 right-2 animate-in zoom-in-50" />
               )}
 
-              {smart && (
+              {mktDefs.length > 0 ? (
+                <Badge className={`${mktDefs[0].className} text-[9px] px-1.5 py-0 h-4 mb-2 font-semibold border`}>
+                  {mktDefs[0].label}
+                </Badge>
+              ) : smart ? (
                 <Badge className={`${smart.className} text-[9px] px-1.5 py-0 h-4 mb-2 font-semibold border`}>
                   {smart.label}
                 </Badge>
-              )}
+              ) : null}
 
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
                 {fmtWeekday(batch.start_date)}
