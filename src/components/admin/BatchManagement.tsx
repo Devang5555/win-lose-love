@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/trips";
 import { calculateDynamicPrice } from "@/lib/dynamicPricing";
+import MarketingTagPicker from "@/components/MarketingTagPicker";
+import MarketingTagBadge from "@/components/MarketingTagBadge";
 
 interface Batch {
   id: string;
@@ -21,6 +23,7 @@ interface Batch {
   status: string;
   auto_shift?: boolean;
   auto_duplicate?: boolean;
+  marketing_tags?: string[] | null;
 }
 
 interface ParentOption {
@@ -56,6 +59,7 @@ const BatchManagement = ({ batches, onRefresh, defaultTripId, compact }: BatchMa
     status: "active",
     auto_shift: true,
     auto_duplicate: true,
+    marketing_tags: [] as string[],
   });
 
   // Load DB trips + experiences as parent options (source of truth)
@@ -113,6 +117,7 @@ const BatchManagement = ({ batches, onRefresh, defaultTripId, compact }: BatchMa
       status: "active",
       auto_shift: true,
       auto_duplicate: true,
+      marketing_tags: [],
     });
     setIsAdding(false);
     setEditingId(null);
@@ -142,7 +147,8 @@ const BatchManagement = ({ batches, onRefresh, defaultTripId, compact }: BatchMa
           status: formData.status,
           auto_shift: formData.auto_shift,
           auto_duplicate: formData.auto_duplicate,
-        })
+          marketing_tags: formData.marketing_tags,
+        } as any)
         .eq("id", editingId);
 
       if (error) {
@@ -162,7 +168,8 @@ const BatchManagement = ({ batches, onRefresh, defaultTripId, compact }: BatchMa
         status: formData.status,
         auto_shift: formData.auto_shift,
         auto_duplicate: formData.auto_duplicate,
-      });
+        marketing_tags: formData.marketing_tags,
+      } as any);
 
       if (error) {
         toast({ title: "Error", description: "Failed to create batch", variant: "destructive" });
@@ -185,6 +192,7 @@ const BatchManagement = ({ batches, onRefresh, defaultTripId, compact }: BatchMa
       status: batch.status,
       auto_shift: batch.auto_shift ?? true,
       auto_duplicate: batch.auto_duplicate ?? true,
+      marketing_tags: batch.marketing_tags ?? [],
     });
     setIsAdding(true);
   };
