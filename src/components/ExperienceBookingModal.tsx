@@ -411,7 +411,7 @@ const ExperienceBookingModal = ({
               </div>
               <div className="bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/20">
                 <p className="text-xs text-yellow-700 dark:text-yellow-400">
-                  Booking confirms instantly after upload. Our team will verify the payment shortly.
+                  Booking will be marked <strong>Verification Pending</strong>. Our team verifies & confirms within 15 mins on WhatsApp.
                 </p>
               </div>
             </div>
