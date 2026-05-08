@@ -259,10 +259,10 @@ const ExperienceBookingModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm animate-fade-in" onClick={handleClose} />
+      <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm animate-fade-in" onClick={() => handleClose()} />
       <div className="relative w-full max-w-lg bg-card rounded-2xl shadow-xl overflow-hidden animate-scale-in max-h-[90vh] overflow-y-auto">
         <div className="relative px-6 py-4 border-b border-border">
-          <button onClick={handleClose} className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted">
+          <button type="button" onClick={() => handleClose()} className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted">
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
           <h2 className="font-serif text-xl font-bold text-card-foreground pr-8">Book: {experienceName}</h2>
