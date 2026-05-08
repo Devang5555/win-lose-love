@@ -17,6 +17,7 @@ export interface BatchInfo {
   available_seats: number;
   price_override: number | null;
   status: string;
+  marketing_tags?: string[] | null;
   dynamicPrice?: DynamicPriceResult;
 }
 
@@ -47,7 +48,7 @@ const BatchSelector = ({ tripId, tripName, basePrice, selectedBatchId, onSelectB
 
       const { data, error: fetchError } = await supabase
         .from("batches")
-        .select("id, batch_name, start_date, end_date, batch_size, available_seats, price_override, status")
+        .select("id, batch_name, start_date, end_date, batch_size, available_seats, price_override, status, marketing_tags")
         .eq("trip_id", tripId)
         .eq("status", "active")
         .order("start_date", { ascending: true });
