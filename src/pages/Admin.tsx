@@ -411,6 +411,34 @@ const Admin = () => {
       };
       openWhatsAppAdvanceVerified(booking.phone, bookingDetails);
 
+      // Fire automated booking-confirmed WhatsApp + email notifications
+      try {
+        await supabase.functions.invoke("send-booking-notification", {
+          body: { booking_id: booking.id, type: "confirmed" },
+        });
+      } catch (e) {
+        console.warn("confirmation notification failed", e);
+      }
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "booking-confirmed",
+            recipientEmail: booking.email,
+            idempotencyKey: `booking-confirmed-${booking.id}`,
+            templateData: {
+              name: booking.full_name,
+              tripName: booking.trip_id,
+              guests: booking.num_travelers,
+              amount: booking.total_amount,
+              advancePaid: booking.advance_paid,
+              bookingId: booking.id,
+            },
+          },
+        });
+      } catch (e) {
+        console.warn("confirmation email failed", e);
+      }
+
       fetchData();
       setSelectedBooking(null);
     } catch (error) {
