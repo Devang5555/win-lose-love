@@ -76,12 +76,23 @@ const ExperienceBookingModal = ({
   const seatsLeft = selectedSlot?.available_seats ?? 0;
   const maxTravelers = Math.min(8, Math.max(1, seatsLeft));
 
-  const handleClose = () => {
+  const resetAll = () => {
     setStep(1);
     setBookingId(null);
     setScreenshotFile(null);
     setScreenshotPreview(null);
     setFormData({ name: "", email: user?.email || "", phone: "", travelers: "1", upiTransactionId: "", whatsappOptin: true });
+  };
+
+  const handleClose = (force = false) => {
+    // Protect payment session: if user is on the QR/Proof step, confirm before closing
+    if (!force && (step === 2 || step === 3)) {
+      const ok = window.confirm(
+        "Your payment session is active. If you've already paid, please upload the screenshot to confirm your booking.\n\nClose anyway?"
+      );
+      if (!ok) return;
+    }
+    resetAll();
     onClose();
   };
 
@@ -214,10 +225,10 @@ const ExperienceBookingModal = ({
       }
 
       toast({
-        title: "🎒 Start packing your bags!",
-        description: "You will receive your booking confirmation in the next 15 mins.",
+        title: "🎉 Payment proof submitted successfully!",
+        description: "Team GoBhraman is verifying your booking — confirmation will be shared shortly on WhatsApp.",
       });
-      handleClose();
+      handleClose(true);
       navigate(`/my-bookings`);
     } catch (err: any) {
       toast({ title: "Booking failed", description: err?.message || "Try again", variant: "destructive" });
@@ -248,10 +259,10 @@ const ExperienceBookingModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm animate-fade-in" onClick={handleClose} />
+      <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm animate-fade-in" onClick={() => handleClose()} />
       <div className="relative w-full max-w-lg bg-card rounded-2xl shadow-xl overflow-hidden animate-scale-in max-h-[90vh] overflow-y-auto">
         <div className="relative px-6 py-4 border-b border-border">
-          <button onClick={handleClose} className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted">
+          <button type="button" onClick={() => handleClose()} className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted">
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
           <h2 className="font-serif text-xl font-bold text-card-foreground pr-8">Book: {experienceName}</h2>
@@ -365,7 +376,7 @@ const ExperienceBookingModal = ({
 
               <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
                 <p className="text-sm text-accent-foreground">
-                  <strong>Next:</strong> After paying, click below to upload your payment screenshot.
+                  <strong>Done paying?</strong> Tap <em>"I Have Completed Payment"</em> below to upload your screenshot. Your booking is held until proof is submitted.
                 </p>
               </div>
             </div>
@@ -400,7 +411,7 @@ const ExperienceBookingModal = ({
               </div>
               <div className="bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/20">
                 <p className="text-xs text-yellow-700 dark:text-yellow-400">
-                  Booking confirms instantly after upload. Our team will verify the payment shortly.
+                  Booking will be marked <strong>Verification Pending</strong>. Our team verifies & confirms within 15 mins on WhatsApp.
                 </p>
               </div>
             </div>
@@ -410,8 +421,8 @@ const ExperienceBookingModal = ({
             {step > 1 && (
               <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(step - 1)}>Back</Button>
             )}
-            <Button type="submit" className="flex-1" disabled={loading || (step === 1 && !selectedSlot)}>
-              {loading ? "Processing…" : step === 1 ? "Continue to Pay" : step === 2 ? "I've Paid" : "Confirm Booking"}
+            <Button type="submit" className="flex-1" disabled={loading || (step === 1 && !selectedSlot) || (step === 3 && !screenshotFile)}>
+              {loading ? "Processing…" : step === 1 ? "Continue to Pay" : step === 2 ? "I Have Completed Payment" : "Submit Proof & Confirm"}
             </Button>
           </div>
         </form>

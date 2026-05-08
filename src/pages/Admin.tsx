@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, Activity, IndianRupee, FileText, Send, Gift, Trash2, ArchiveX, Plane, TrendingDown, Zap } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, Search, Filter, Users, Phone, Calendar, Wallet, UserCheck, PhoneCall, XOctagon, MessageCircle, Layers, MapPin, Image, AlertTriangle, ExternalLink, RefreshCw, Download, BarChart3, Star, Ban, DollarSign, History, Shield, ShieldCheck, Activity, IndianRupee, FileText, Send, Gift, Trash2, ArchiveX, Plane, TrendingDown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -360,7 +360,8 @@ const Admin = () => {
   // Verify advance payment with audit logging
   const verifyAdvancePayment = async (booking: Booking) => {
     if (!user) return;
-    if (!advanceScreenshotUrl) {
+    const isSuperAdmin = roles?.includes("super_admin");
+    if (!advanceScreenshotUrl && !isSuperAdmin) {
       toast({ title: "Error", description: "No advance payment screenshot uploaded. Cannot verify.", variant: "destructive" });
       return;
     }
@@ -1926,6 +1927,30 @@ For queries, please contact us.
                           Reject Advance
                         </Button>
                       </>
+                    )}
+
+                    {/* Super Admin override — confirm booking even without uploaded proof
+                        (for users who paid successfully but proof upload failed) */}
+                    {roles?.includes("super_admin") &&
+                     selectedBooking.booking_status !== "confirmed" &&
+                     selectedBooking.booking_status !== "cancelled" &&
+                     selectedBooking.payment_status !== "advance_verified" &&
+                     selectedBooking.payment_status !== "fully_paid" && (
+                      <Button
+                        variant="outline"
+                        className="flex-1 border-amber-500 text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950"
+                        disabled={processingAction}
+                        onClick={() => {
+                          if (window.confirm(
+                            "SUPER ADMIN OVERRIDE\n\nConfirm this booking and mark Payment Received WITHOUT screenshot proof?\n\nUse only when payment is verified in bank account."
+                          )) {
+                            verifyAdvancePayment(selectedBooking);
+                          }
+                        }}
+                      >
+                        <ShieldCheck className="w-4 h-4 mr-2" />
+                        Manual Confirm (Payment Received)
+                      </Button>
                     )}
 
                     {/* Legacy pending status */}
