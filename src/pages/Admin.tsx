@@ -1929,22 +1929,22 @@ For queries, please contact us.
                       </>
                     )}
 
-                    {/* Super Admin override — confirm booking even without uploaded proof
-                        (for users who paid successfully but proof upload failed) */}
-                    {roles?.includes("super_admin") &&
-                     selectedBooking.booking_status !== "confirmed" &&
+                    {/* Admin override — confirm booking even without uploaded proof
+                        (when payment gateway redirected user away before screenshot upload) */}
+                    {(roles?.includes("super_admin") || roles?.includes("admin")) &&
                      selectedBooking.booking_status !== "cancelled" &&
                      selectedBooking.payment_status !== "advance_verified" &&
-                     selectedBooking.payment_status !== "fully_paid" && (
+                     selectedBooking.payment_status !== "fully_paid" &&
+                     !advanceScreenshotUrl && (
                       <Button
                         variant="outline"
                         className="flex-1 border-amber-500 text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950"
                         disabled={processingAction}
                         onClick={() => {
                           if (window.confirm(
-                            "SUPER ADMIN OVERRIDE\n\nConfirm this booking and mark Payment Received WITHOUT screenshot proof?\n\nUse only when payment is verified in bank account."
+                            "ADMIN OVERRIDE\n\nConfirm this booking and mark Payment Received WITHOUT screenshot proof?\n\nUse only when payment is verified in bank account (e.g. UPI gateway redirected user before upload)."
                           )) {
-                            verifyAdvancePayment(selectedBooking);
+                            verifyAdvancePayment(selectedBooking, { skipScreenshotCheck: true });
                           }
                         }}
                       >
