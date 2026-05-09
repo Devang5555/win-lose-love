@@ -452,35 +452,68 @@ const MyBookings = () => {
                       </div>
 
                       {/* Payment Details */}
-                      <div className="bg-muted/50 rounded-lg p-4 mt-2">
-                        <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
-                          <CreditCard className="w-4 h-4 text-primary" />
-                          Payment Details
-                        </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <p className="text-muted-foreground">Total Trip Price</p>
-                            <p className="font-bold text-foreground">₹{booking.total_amount.toLocaleString()}</p>
+                      {(() => {
+                        const fullyPaidUpfront =
+                          balanceAmount === 0 &&
+                          booking.advance_paid >= booking.total_amount &&
+                          booking.booking_status === "confirmed";
+
+                        if (fullyPaidUpfront) {
+                          return (
+                            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mt-2">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                                  <div>
+                                    <p className="text-sm font-semibold text-green-700 dark:text-green-400">
+                                      Payment Received
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      ₹{booking.total_amount.toLocaleString()} paid in full
+                                    </p>
+                                  </div>
+                                </div>
+                                <Badge className="bg-green-500/20 text-green-700 border-green-500/30 self-start sm:self-auto">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Booking Confirmed
+                                </Badge>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="bg-muted/50 rounded-lg p-4 mt-2">
+                            <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                              <CreditCard className="w-4 h-4 text-primary" />
+                              Payment Details
+                            </h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <p className="text-muted-foreground">Total Trip Price</p>
+                                <p className="font-bold text-foreground">₹{booking.total_amount.toLocaleString()}</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground">Advance Paid</p>
+                                <p className="font-bold text-green-600">₹{booking.advance_paid.toLocaleString()}</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground">Remaining Balance</p>
+                                <p className={`font-bold ${isFullyPaid(booking) ? 'text-green-600' : 'text-amber-600'}`}>
+                                  {isFullyPaid(booking) ? "₹0" : `₹${balanceAmount.toLocaleString()}`}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground">Payment Status</p>
+                                <Badge className={getPaymentStatusColor(booking.payment_status)}>
+                                  <Wallet className="w-3 h-3 mr-1" />
+                                  {getPaymentStatusLabel(booking.payment_status)}
+                                </Badge>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-muted-foreground">Advance Paid</p>
-                            <p className="font-bold text-green-600">₹{booking.advance_paid.toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Remaining Balance</p>
-                            <p className={`font-bold ${isFullyPaid(booking) ? 'text-green-600' : 'text-amber-600'}`}>
-                              {isFullyPaid(booking) ? "₹0" : `₹${balanceAmount.toLocaleString()}`}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Payment Status</p>
-                            <Badge className={getPaymentStatusColor(booking.payment_status)}>
-                              <Wallet className="w-3 h-3 mr-1" />
-                              {getPaymentStatusLabel(booking.payment_status)}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
+                        );
+                      })()}
 
                       {/* Cancellation Details */}
                       {(booking.booking_status === "cancelled" || booking.booking_status === "refunded") && (
