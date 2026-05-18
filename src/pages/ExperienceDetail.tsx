@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import TrustIndicators from "@/components/TrustIndicators";
 import ExperienceBookingModal from "@/components/ExperienceBookingModal";
+import DepartureSelectorModal from "@/components/DepartureSelectorModal";
 
 interface PricingTier { label: string; price: number; description?: string }
 
