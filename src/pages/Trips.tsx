@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SeoMeta from "@/components/SeoMeta";
 import TripCard from "@/components/TripCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
