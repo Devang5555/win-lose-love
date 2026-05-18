@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Star, Shield, Users, Headphones, Sparkles, Compass, Calendar, MapPin, Mountain } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SeoMeta from "@/components/SeoMeta";
 import HeroSection from "@/components/HeroSection";
 import TripCard from "@/components/TripCard";
 import InterestPopup from "@/components/InterestPopup";
@@ -59,6 +60,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
+      <SeoMeta
+        title="GoBhraman (गोभ्रमण) | Curated Group Trips Across India"
+        description="GoBhraman — curated group trips across India with verified stays, no hidden costs, and seamless booking. Bhraman se hi mite bhram."
+        url="https://win-lose-love.lovable.app/"
+      />
       <Navbar />
       <HeroSection />
 

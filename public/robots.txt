@@ -12,3 +12,12 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /auth
+Disallow: /my-bookings
+Disallow: /profile
+Disallow: /invoice
+Disallow: /reset-password
+Disallow: /booking-success
+
+Sitemap: https://win-lose-love.lovable.app/sitemap.xml

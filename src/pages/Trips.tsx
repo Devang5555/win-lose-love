@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SeoMeta from "@/components/SeoMeta";
 import TripCard from "@/components/TripCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,11 @@ const Trips = () => {
 
   return (
     <div className="min-h-screen">
+      <SeoMeta
+        title="Curated Group Trips Across India | GoBhraman"
+        description="Browse GoBhraman's curated group trips across India — Himalayas, Konkan, weekend getaways and more. Verified stays, transparent pricing."
+        url="https://win-lose-love.lovable.app/trips"
+      />
       <Navbar />
       
       {/* Header */}

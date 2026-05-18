@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail, Phone, MapPin, Send, MessageCircle, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SeoMeta from "@/components/SeoMeta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,6 +49,11 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SeoMeta
+        title="Contact GoBhraman | Plan Your Curated India Journey"
+        description="Talk to GoBhraman about curated group trips across India. WhatsApp, email, or our contact form — we reply within 24 hours."
+        url="https://win-lose-love.lovable.app/contact"
+      />
       <Navbar />
 
       {/* Hero */}

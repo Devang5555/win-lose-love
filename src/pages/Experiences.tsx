@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SeoMeta from "@/components/SeoMeta";
 import ExperienceCard from "@/components/ExperienceCard";
 import { useTrips } from "@/hooks/useTrips";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +26,11 @@ const Experiences = () => {
 
   return (
     <div className="min-h-screen relative">
+      <SeoMeta
+        title="Mini Experiences & Weekend Getaways | GoBhraman"
+        description="Discover short experiences and weekend getaways curated by GoBhraman — quick escapes with verified hosts and transparent pricing."
+        url="https://win-lose-love.lovable.app/experiences"
+      />
       <Navbar />
       {/* Scenic background — soft, faded, slightly blurred */}
       <div

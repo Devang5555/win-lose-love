@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { MapPin, ArrowRight, Mountain } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SeoMeta from "@/components/SeoMeta";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDestinations } from "@/hooks/useDestinations";
@@ -13,6 +14,11 @@ const Destinations = () => {
 
   return (
     <div className="min-h-screen">
+      <SeoMeta
+        title="India Travel Destinations | GoBhraman"
+        description="Explore India travel destinations curated by GoBhraman — from Konkan beaches to Himalayan peaks, find your next group journey."
+        url="https://win-lose-love.lovable.app/destinations"
+      />
       <Navbar />
 
       {/* Hero */}

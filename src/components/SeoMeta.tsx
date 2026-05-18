@@ -6,9 +6,12 @@ interface SeoMetaProps {
   image?: string;
   url?: string;
   type?: string;
+  canonical?: string;
 }
 
-const SeoMeta = ({ title, description, image, url, type = "website" }: SeoMetaProps) => {
+const SITE_ORIGIN = "https://win-lose-love.lovable.app";
+
+const SeoMeta = ({ title, description, image, url, type = "website", canonical }: SeoMetaProps) => {
   useEffect(() => {
     const setMeta = (property: string, content: string) => {
       let el = document.querySelector(`meta[property="${property}"]`) || document.querySelector(`meta[name="${property}"]`);
@@ -24,13 +27,18 @@ const SeoMeta = ({ title, description, image, url, type = "website" }: SeoMetaPr
       el.setAttribute("content", content);
     };
 
+    const resolvedUrl = url || (typeof window !== "undefined" ? window.location.origin + window.location.pathname : undefined);
+    const resolvedCanonical = canonical || resolvedUrl || (typeof window !== "undefined"
+      ? SITE_ORIGIN + window.location.pathname
+      : undefined);
+
     document.title = title;
 
     setMeta("og:title", title);
     setMeta("og:description", description);
     setMeta("og:type", type);
     if (image) setMeta("og:image", image);
-    if (url) setMeta("og:url", url);
+    if (resolvedUrl) setMeta("og:url", resolvedUrl);
 
     setMeta("twitter:card", image ? "summary_large_image" : "summary");
     setMeta("twitter:title", title);
@@ -39,10 +47,20 @@ const SeoMeta = ({ title, description, image, url, type = "website" }: SeoMetaPr
 
     setMeta("description", description);
 
+    if (resolvedCanonical) {
+      let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement("link");
+        link.setAttribute("rel", "canonical");
+        document.head.appendChild(link);
+      }
+      link.setAttribute("href", resolvedCanonical);
+    }
+
     return () => {
       document.title = "GoBhraman | Curated Trips Across India";
     };
-  }, [title, description, image, url, type]);
+  }, [title, description, image, url, type, canonical]);
 
   return null;
 };
