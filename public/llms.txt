@@ -1,0 +1,21 @@
+# GoBhraman
+
+> GoBhraman (गोभ्रमण) — curated group trips across India with verified stays, transparent pricing, and seamless booking. Bhraman se hi mite bhram.
+
+## Pages
+
+- [Home](/): Curated group trips across India.
+- [Trips](/trips): Browse curated multi-day group journeys.
+- [Experiences](/experiences): Short experiences and weekend getaways.
+- [Destinations](/destinations): Explore India destinations from Konkan to the Himalayas.
+- [Blog](/blog): Travel stories, guides, and tips.
+- [Stories](/stories): Traveler stories from past journeys.
+- [About](/about): Our story and mission.
+- [Contact](/contact): Get in touch with GoBhraman.
+- [FAQ](/faq): Frequently asked questions.
+
+## Optional
+
+- [Cancellation Policy](/policy): Booking and cancellation terms.
+- [Privacy Policy](/privacy): How we handle your data.
+- [Terms of Service](/terms): Platform usage terms.
