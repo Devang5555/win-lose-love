@@ -49,6 +49,11 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SeoMeta
+        title="Contact GoBhraman | Plan Your Curated India Journey"
+        description="Talk to GoBhraman about curated group trips across India. WhatsApp, email, or our contact form — we reply within 24 hours."
+        url="https://win-lose-love.lovable.app/contact"
+      />
       <Navbar />
 
       {/* Hero */}
