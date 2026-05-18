@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { MapPin, ArrowRight, Mountain } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SeoMeta from "@/components/SeoMeta";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDestinations } from "@/hooks/useDestinations";
