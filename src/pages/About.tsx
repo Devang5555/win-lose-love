@@ -9,6 +9,12 @@ import aboutHero from "@/assets/about-hero.jpg";
 const About = () => {
   return (
     <div className="min-h-screen">
+      <SeoMeta
+        title="About GoBhraman | Curated Group Trips Across India"
+        description="GoBhraman crafts curated group trips across India — verified stays, transparent pricing, and meaningful travel. Bhraman se hi mite bhram."
+        url="https://win-lose-love.lovable.app/about"
+        image="https://win-lose-love.lovable.app/og-about.jpg"
+      />
       <Navbar />
 
       {/* Hero */}
