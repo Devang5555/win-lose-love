@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Star, Shield, Users, Headphones, Sparkles, Compass, Calendar, MapPin, Mountain } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SeoMeta from "@/components/SeoMeta";
 import HeroSection from "@/components/HeroSection";
 import TripCard from "@/components/TripCard";
 import InterestPopup from "@/components/InterestPopup";
