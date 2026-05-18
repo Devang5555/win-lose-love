@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import TrustIndicators from "@/components/TrustIndicators";
 import ExperienceBookingModal from "@/components/ExperienceBookingModal";
+import DepartureSelectorModal from "@/components/DepartureSelectorModal";
 
 interface PricingTier { label: string; price: number; description?: string }
 
@@ -25,6 +26,7 @@ const ExperienceDetail = () => {
   const [showAllSlots, setShowAllSlots] = useState(false);
   const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isDepartureOpen, setIsDepartureOpen] = useState(false);
 
   const experience = getTrip(experienceId || "");
   const pricingTiers: PricingTier[] = Array.isArray((experience as any)?.pricing_tiers)
@@ -233,7 +235,18 @@ const ExperienceDetail = () => {
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-semibold text-foreground mb-2">📅 Available Slots</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-foreground">📅 Available Slots</p>
+                    {slots.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsDepartureOpen(true)}
+                        className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                      >
+                        View all departures →
+                      </button>
+                    )}
+                  </div>
                   {slots.length > 0 ? (
                     <div className="space-y-2">
                       {visibleSlots.map((slot) => {
@@ -352,6 +365,39 @@ const ExperienceDetail = () => {
           }
           isOpen={isBookingOpen}
           onClose={() => setIsBookingOpen(false)}
+        />
+      )}
+
+      {experience && (
+        <DepartureSelectorModal
+          isOpen={isDepartureOpen}
+          onClose={() => setIsDepartureOpen(false)}
+          tripName={experience.trip_name}
+          image={experience.images?.[0]}
+          duration={experience.duration}
+          pickup={experience.locations?.[0]}
+          price={effectivePrice}
+          difficulty={(experience as any).difficulty}
+          slots={slots.map((s) => ({
+            id: s.id,
+            batch_name: s.batch_name,
+            start_date: s.start_date,
+            end_date: s.end_date,
+            batch_size: s.batch_size,
+            seats_booked: s.seats_booked,
+            price: (s as any).price_override ?? effectivePrice,
+          }))}
+          selectedSlotId={selectedSlot}
+          onSelectSlot={(id) => setSelectedSlot(id)}
+          onContinue={() => {
+            setIsDepartureOpen(false);
+            handleBooking();
+          }}
+          timeline={
+            experience.duration?.toLowerCase().includes("night")
+              ? ["Late Night Departure", "Night Experience", "Dawn Return"]
+              : ["Friday Departure", "Saturday Experience", "Sunday Return"]
+          }
         />
       )}
     </div>
