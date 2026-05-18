@@ -367,6 +367,39 @@ const ExperienceDetail = () => {
           onClose={() => setIsBookingOpen(false)}
         />
       )}
+
+      {experience && (
+        <DepartureSelectorModal
+          isOpen={isDepartureOpen}
+          onClose={() => setIsDepartureOpen(false)}
+          tripName={experience.trip_name}
+          image={experience.images?.[0]}
+          duration={experience.duration}
+          pickup={experience.locations?.[0]}
+          price={effectivePrice}
+          difficulty={(experience as any).difficulty}
+          slots={slots.map((s) => ({
+            id: s.id,
+            batch_name: s.batch_name,
+            start_date: s.start_date,
+            end_date: s.end_date,
+            batch_size: s.batch_size,
+            seats_booked: s.seats_booked,
+            price: (s as any).price_override ?? effectivePrice,
+          }))}
+          selectedSlotId={selectedSlot}
+          onSelectSlot={(id) => setSelectedSlot(id)}
+          onContinue={() => {
+            setIsDepartureOpen(false);
+            handleBooking();
+          }}
+          timeline={
+            experience.duration?.toLowerCase().includes("night")
+              ? ["Late Night Departure", "Night Experience", "Dawn Return"]
+              : ["Friday Departure", "Saturday Experience", "Sunday Return"]
+          }
+        />
+      )}
     </div>
   );
 };
