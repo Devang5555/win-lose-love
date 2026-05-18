@@ -235,7 +235,18 @@ const ExperienceDetail = () => {
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-semibold text-foreground mb-2">📅 Available Slots</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-foreground">📅 Available Slots</p>
+                    {slots.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsDepartureOpen(true)}
+                        className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                      >
+                        View all departures →
+                      </button>
+                    )}
+                  </div>
                   {slots.length > 0 ? (
                     <div className="space-y-2">
                       {visibleSlots.map((slot) => {
