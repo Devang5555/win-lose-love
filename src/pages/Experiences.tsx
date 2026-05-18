@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SeoMeta from "@/components/SeoMeta";
 import ExperienceCard from "@/components/ExperienceCard";
 import { useTrips } from "@/hooks/useTrips";
 import { Skeleton } from "@/components/ui/skeleton";
