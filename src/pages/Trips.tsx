@@ -56,6 +56,11 @@ const Trips = () => {
 
   return (
     <div className="min-h-screen">
+      <SeoMeta
+        title="Curated Group Trips Across India | GoBhraman"
+        description="Browse GoBhraman's curated group trips across India — Himalayas, Konkan, weekend getaways and more. Verified stays, transparent pricing."
+        url="https://win-lose-love.lovable.app/trips"
+      />
       <Navbar />
       
       {/* Header */}
