@@ -362,6 +362,7 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch, availableAddons = 
     setCouponDiscount(0);
     setCouponCode(null);
     setCouponError(null);
+    setSelectedAddons([]);
     onClose();
   };
 
