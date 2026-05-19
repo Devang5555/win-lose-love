@@ -649,14 +649,14 @@ const TripDetail = () => {
                   )}
 
                   {isBookable && (
-                    <p className="text-xs text-accent mb-4 font-medium text-center">
+                    <p className="text-xs text-accent mb-4 font-medium text-center hidden lg:block">
                       Limited seats • Handpicked experiences
                     </p>
                   )}
 
-                  {/* Wallet Credit Nudge */}
+                  {/* Wallet Credit Nudge — desktop only (mobile shown elsewhere) */}
                   {user && balance > 0 && isBookable && (
-                    <div className="bg-primary/10 rounded-xl p-4 mb-4 border border-primary/20">
+                    <div className="bg-primary/10 rounded-xl p-4 mb-4 border border-primary/20 hidden lg:block">
                       <p className="text-sm text-primary font-semibold flex items-center gap-2">
                         💰 Use ₹{Math.min(balance, displayPrice).toLocaleString()} travel credits on this booking
                       </p>
@@ -664,13 +664,15 @@ const TripDetail = () => {
                   )}
 
                   {isBookable && (
-                    <div className="bg-primary/10 rounded-xl p-4 mb-6 border border-primary/20">
+                    <div className="bg-primary/10 rounded-xl p-3 lg:p-4 mb-4 lg:mb-6 border border-primary/20">
                       <p className="text-sm text-primary font-semibold">
                         ✨ Reserve with just {formatPrice(advanceAmount)} advance
                       </p>
                     </div>
                   )}
 
+                  {/* Desktop CTA — mobile uses sticky MobileBookingBar */}
+                  <div className="hidden lg:block">
                   {isBookable ? (
                     selectedBatch ? (
                       <Button 
@@ -707,6 +709,19 @@ const TripDetail = () => {
                       Notify Me
                     </Button>
                   )}
+                  </div>
+
+                  {/* Mobile: only show Notify-Me CTA when trip isn't bookable (sticky bar hidden in that case) */}
+                  {!isBookable && (
+                    <Button 
+                      className="w-full mb-3 h-12 text-lg font-bold bg-sunset hover:bg-sunset/90 lg:hidden" 
+                      size="lg"
+                      onClick={() => setIsInterestOpen(true)}
+                    >
+                      <Bell className="w-5 h-5 mr-2" />
+                      Notify Me
+                    </Button>
+                  )}
 
                   <Button 
                     variant="outline" 
@@ -716,7 +731,7 @@ const TripDetail = () => {
                     <MessageCircle className="w-4 h-4 mr-2" />
                     Chat on WhatsApp
                   </Button>
-                  <p className="text-xs text-center text-muted-foreground mb-3">
+                  <p className="text-xs text-center text-muted-foreground mb-3 hidden lg:block">
                     💬 Chat on WhatsApp to get instant details
                   </p>
 
