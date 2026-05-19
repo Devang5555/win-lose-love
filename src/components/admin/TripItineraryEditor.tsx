@@ -148,14 +148,34 @@ const TripItineraryEditor = ({
     <div className="space-y-8">
       {/* ——— Itinerary ——— */}
       <section>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <h3 className="text-lg font-medium text-foreground flex items-center gap-2">
             <Calendar className="w-5 h-5 text-primary" />
             Day-wise Itinerary
           </h3>
-          <Button type="button" size="sm" variant="outline" onClick={addDay}>
-            <Plus className="w-4 h-4 mr-1" /> Add Day
-          </Button>
+          <div className="flex gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleOcrFile(e.target.files[0])}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => fileRef.current?.click()}
+              disabled={ocrBusy}
+              title="Extract itinerary from brochure/screenshot"
+            >
+              {ocrBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+              {ocrBusy ? "Extracting…" : "AI Extract"}
+            </Button>
+            <Button type="button" size="sm" variant="outline" onClick={addDay}>
+              <Plus className="w-4 h-4 mr-1" /> Add Day
+            </Button>
+          </div>
         </div>
 
         {/* Best time */}
