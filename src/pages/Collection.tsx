@@ -85,7 +85,7 @@ const Collection = () => {
                   batches={tripBatches}
                   wishlistProps={{
                     isSaved: isInWishlist(trip.trip_id),
-                    isToggling,
+                    isToggling: isToggling(trip.trip_id),
                     onToggle: toggleWishlist,
                   }}
                 />
