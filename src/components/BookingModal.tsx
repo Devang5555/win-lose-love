@@ -17,15 +17,23 @@ import { useWallet, computeWalletApplicable, WALLET_MAX_PER_BOOKING, WALLET_MIN_
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { BatchInfo } from "@/components/BatchSelector";
+import AddonSelector from "@/components/AddonSelector";
+import {
+  AddonCatalogItem,
+  SelectedAddon,
+  addonsTotal,
+  formatAddonsForBooking,
+} from "@/lib/addons";
 
 interface BookingModalProps {
   trip: Trip;
   isOpen: boolean;
   onClose: () => void;
   selectedBatch: BatchInfo | null;
+  availableAddons?: AddonCatalogItem[];
 }
 
-const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProps) => {
+const BookingModal = ({ trip, isOpen, onClose, selectedBatch, availableAddons = [] }: BookingModalProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -51,6 +59,7 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([]);
 
   if (!isOpen) return null;
 
@@ -78,13 +87,15 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
     return selectedBasePrice;
   })();
 
-  const totalPrice = selectedPrice * parseInt(formData.travelers);
+  const baseTotal = selectedPrice * parseInt(formData.travelers);
+  const addonsSubtotal = addonsTotal(selectedAddons);
+  const totalPrice = baseTotal + addonsSubtotal;
   const walletApplicable = useWalletCredits
     ? computeWalletApplicable(balance, totalPrice, isFrozen)
     : 0;
   const effectiveTotalPrice = Math.max(0, totalPrice - walletApplicable - couponDiscount);
   const advanceAmount = trip.booking?.advance || 2000;
-  const totalAdvance = Math.max(0, advanceAmount * parseInt(formData.travelers) - walletApplicable - couponDiscount);
+  const totalAdvance = Math.max(0, advanceAmount * parseInt(formData.travelers) + addonsSubtotal - walletApplicable - couponDiscount);
   const remainingAmount = Math.max(0, effectiveTotalPrice - totalAdvance);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
