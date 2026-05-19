@@ -1,84 +1,94 @@
-## Scope
+# GoBhraman Premium Upgrade — Phased Plan
 
-Three operational upgrades using existing tables/components. No new tables — reuse `tags[]` (trips, experiences), `batches`, `audit_logs`, `referral_codes`, `referral_earnings`. No backend complexity beyond one tiny migration to add a `marketing_tags text[]` column to `batches` (trips/experiences already have `tags[]`).
-
----
-
-## 1. Manual Urgency/Marketing Tags
-
-**Single source of truth:** `src/lib/marketingTags.ts` (new)
-- Constant list of 10 tags with label + emoji + tone class (token-based, no hex)
-- Helpers: `getMarketingTags(tags[])`, `setMarketingTags(tags[], selected[])`, max 2 active
-- Tags stored as prefixed strings inside existing `tags[]` array (`mkt:filling-fast`, etc.) → zero schema change for trips/experiences
-- For batches: add `marketing_tags text[]` column (single small migration)
-
-**New reusable UI:** `src/components/MarketingTagPicker.tsx`
-- Chip selector with max-2 enforcement, used inside admin editors
-- `src/components/MarketingTagBadge.tsx` — single badge renderer
-
-**Integrations (read-only display):**
-- `TripCard.tsx`, `ExperienceCard.tsx`, `DepartureStrip.tsx`, `BatchSelector.tsx`, `MobileBookingBar.tsx`, `HeroSection.tsx`/featured sections → render `<MarketingTagBadge>` if any present (top-left overlay or near price)
-- Existing auto-computed badges (Filling Fast from seat math) stay as fallback only when no manual tag set
-
-**Admin editors:**
-- `TripEditor.tsx`, experience editor, `BatchManagement.tsx` → drop in `<MarketingTagPicker>`
+This is a large scope. To stay safe (no booking/payment/admin regressions) I'll ship it in **8 sequential phases**, each independently shippable and reversible. You approve this plan, then I execute one phase at a time and check in after each.
 
 ---
 
-## 2. SuperAdmin Sync + Visibility
+## Phase 1 — Payment + Booking Stabilization (highest priority)
+Harden the existing flow without rearchitecting it.
 
-**No new tables.** Surface what already exists.
+- Audit `BookingModal`, `confirm_booking_after_payment` RPC, `verifyAdvancePayment`, screenshot upload path.
+- Guarantee booking row exists **before** payment popup opens (already partially true) and survives popup close.
+- Add screenshot upload fallback inside MyBookings for any booking stuck in `initiated`/`pending`.
+- Ensure admin always sees `advance_screenshot_url` + `remaining_screenshot_url` (add empty-state + recovery action).
+- Idempotency on `confirm_booking_after_payment` (already idempotent — verify).
+- Reconcile seat counts via existing `recalculate_batch_seats` — add an admin "Resync seats" button per batch.
+- Verify `send-booking-notification` (WhatsApp/email) is called on confirm + on admin verify; add retry log.
+- Experiences: confirm `ExperienceBookingModal` reuses same booking table + RPC (it does) — remove any divergent logic.
 
-- New tab in `Admin.tsx` (visible only to `super_admin`): **"SuperAdmin Console"**
-  - **Activity Feed**: live query on `audit_logs` (already populated by every privileged action) with filters: actor, entity_type, action_type, date range
-  - **Cross-section snapshot**: counts of bookings by status, pending payment proofs (uploaded but not verified), pending refunds, pending referrals, frozen wallets, recent fraud_flags — each linking to existing admin sub-pages
-  - **Override tools**: 
-    - manual booking status fix (already exists via `verifyAdvancePayment` skip-screenshot path → expose for any booking)
-    - resync seats: recompute `seats_booked` for a batch from `bookings` table (one RPC)
-    - force re-trigger WhatsApp/email notification for a booking
-- Extend `SuperAdminResetTools.tsx` with: "Recalculate batch seats" and "Reprocess pending referrals" buttons (call existing `process_pending_referrals_for_booking` per pending row)
-- Ensure all admin actions write to `audit_logs` (audit current admin code; add `create_audit_log` calls where missing — booking edits, refund processing, batch edits)
+## Phase 2 — Mobile-First Booking Cleanup
+- Collapse trip detail sidebar on mobile into: Pricing → Departure → Add-ons → CTA → WhatsApp.
+- Convert `BatchSelector` mobile view to **swipeable horizontal cards** (snap scroll).
+- Remove residual duplicate spacing/sections; tighten paddings; ensure sticky `MobileBookingBar` is the single CTA on mobile.
+- Thumb-zone audit: CTA ≥ 48px, bottom-safe-area aware.
+
+## Phase 3 — Contextual Trust System (finish)
+Already 80% done via `deriveTrustBadges`. Remaining:
+- Audit every page that still renders `TrustIndicators`/static badges; remove duplicates.
+- Tune badge rules per your matrix (camping/trek/long-trip lists you specified).
+- Cap at 4, single placement per page (top of detail page only).
+
+## Phase 4 — Social Proof + Gallery System
+New reusable `<SocialProofStrip />` + `<TripGallery />`:
+- Real photos (existing `images[]`), optional reels (new `videos[]` jsonb column on trips/experiences).
+- "Recently joined" (last 5 confirmed bookings, first-name + city only).
+- "Most booked this month" badge driven by booking counts.
+- Review snippets carousel (reuse `reviews` table).
+- Lightweight: lazy-loaded, no heavy lightbox lib.
+
+DB: non-destructive `ALTER TABLE trips/experiences ADD COLUMN videos jsonb DEFAULT '[]'`.
+
+## Phase 5 — Dynamic SEO + Sharing
+- Add `react-helmet-async` for per-route head (currently using imperative `SeoMeta`).
+- Per-trip OG image = first trip image; per-experience same.
+- JSON-LD `TouristTrip` / `Event` schema on detail pages.
+- Sitemap edge function: include experiences + blog posts + collection pages.
+- WhatsApp preview test via canonical + og:image.
+
+## Phase 6 — Discovery Collections
+- New route `/collections/:slug` with rule-based filters:
+  - `monsoon-escapes`, `weekend-treks`, `beginner-friendly`, `under-1999`, `camping`, `pune-experiences`.
+- Rules live in `src/lib/collections.ts` (tag/price/duration/location predicates).
+- Homepage strip + nav entry.
+- No new DB table — derived from existing trips/experiences.
+
+## Phase 7 — Experience Differentiation
+- New `ExperienceDetail` layout variant: event-card hero, "Who's coming" social block, vibe gallery, urban map embed.
+- Keep Trip layout (itinerary-focused) untouched.
+- Shared primitives, different composition.
+
+## Phase 8 — OCR Itinerary Helper (Admin)
+- New admin tool inside `TripItineraryEditor`: "Extract from image".
+- Edge function `extract-itinerary-ocr` using **Lovable AI Gateway** (`google/gemini-2.5-flash` — strong OCR + structured output, no extra key).
+- Returns structured JSON `{ days: [{ title, items: [{ time, activity, location }] }] }`.
+- Admin reviews + edits before save. No auto-publish.
 
 ---
 
-## 3. Referral Usage Flow
+## Technical guardrails (apply to all phases)
+- Non-destructive migrations only (per project memory).
+- No changes to `confirm_booking_after_payment` signature or seat semantics.
+- Email/password auth only; no Google.
+- Reuse `deriveTrustBadges`, `dynamicPricing`, `seatStatus`, existing RPCs.
+- All new colors via HSL tokens in `index.css`.
+- Mobile breakpoint `useIsMobile` (768px) consistent across new components.
 
-**Schema:** add nullable `referred_by_code text` and `referred_by_user_id uuid` to `profiles` (one tiny migration). `bookings.referral_code_used` already exists.
+## Files touched (high-level, per phase)
+- P1: `BookingModal.tsx`, `ExperienceBookingModal.tsx`, `MyBookings.tsx`, `Admin.tsx`, `send-booking-notification/index.ts`
+- P2: `TripDetail.tsx`, `BatchSelector.tsx`, `MobileBookingBar.tsx`
+- P3: `TripDetail.tsx`, `ExperienceDetail.tsx`, `lib/trustBadges.ts`
+- P4: new `SocialProofStrip.tsx`, `TripGallery.tsx`; migration for `videos` column
+- P5: `main.tsx` (HelmetProvider), per-page `<Helmet>`, `sitemap/index.ts`
+- P6: new `pages/Collection.tsx`, `lib/collections.ts`, `App.tsx` route, `Navbar.tsx`
+- P7: `ExperienceDetail.tsx` (variant), new `ExperienceHero.tsx`, `WhosComingBlock.tsx`
+- P8: new `extract-itinerary-ocr` edge function, `TripItineraryEditor.tsx` upload button
 
-**Signup (`src/pages/Auth.tsx`):**
-- New optional "Referral Code" input
-- Auto-fill from `?ref=CODE` URL param (already used in share links via `useWallet.getReferralLink`)
-- On successful signup → upsert into `profiles.referred_by_code` via new RPC `link_referral_on_signup(p_code)` that:
-  - validates code exists, is not user's own
-  - blocks if already linked
-  - stores referrer link only (NO wallet credit)
-
-**Booking flow:**
-- When creating a booking, auto-copy `profiles.referred_by_code` into `bookings.referral_code_used` if blank
-- After admin verifies advance payment (in `verifyAdvancePayment`) → call existing `credit_referral_reward(referral_code_used, user_id, booking_id)` — this already enforces trip-only, one-time, and wallet credit
-- Already gated to `confirmed/completed` Trips in existing function
-
-**Visibility:**
-- User: `WalletTab.tsx` already shows referral code + link + earnings; add "Successful invites: N" + "Pending: M" counts (derived from `referral_earnings`)
-- Admin: new compact section in admin `WalletManagement.tsx` (or new tab) showing all `referral_earnings` rows joined to bookings — code used, status, booking value, referrer/referred names
+## Out of scope (explicitly)
+- No rewrite of payment/booking RPCs.
+- No new auth providers.
+- No design-system overhaul — refinement only.
+- No heavy animation libs beyond existing `framer-motion`.
 
 ---
 
-## Technical Details
-
-- One DB migration: 
-  - `ALTER TABLE batches ADD COLUMN marketing_tags text[] DEFAULT '{}';`
-  - `ALTER TABLE profiles ADD COLUMN referred_by_code text, ADD COLUMN referred_by_user_id uuid;`
-  - New RPC `link_referral_on_signup(p_code text)` — security definer, validates and links
-  - New RPC `recalculate_batch_seats(p_batch_id uuid)` — sums confirmed bookings
-- New files:
-  - `src/lib/marketingTags.ts`
-  - `src/components/MarketingTagPicker.tsx`
-  - `src/components/MarketingTagBadge.tsx`
-  - `src/components/admin/SuperAdminConsole.tsx`
-- Edits: TripCard, ExperienceCard, DepartureStrip, BatchSelector, TripEditor, BatchManagement, experience editor, Admin.tsx (new tab), Auth.tsx (referral input), WalletTab.tsx (counts), useAuth.tsx (call link RPC after signup), MyBookings/booking creation (copy referral code), verifyAdvancePayment (trigger credit)
-
-## Out of Scope
-- No payment-system changes
-- No new analytics infra (reuse existing AdminAnalytics)
-- No redesign of existing components — pure additive layer
+**Approve this plan and I'll start with Phase 1 (Payment + Booking Stabilization).** I'll pause after each phase for your sign-off before moving on.
