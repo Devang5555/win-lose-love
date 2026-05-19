@@ -157,6 +157,8 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch, availableAddons = 
           payment_status: "pending",
           booking_status: "initiated",
           whatsapp_optin: formData.whatsappOptin,
+          addons: formatAddonsForBooking(selectedAddons),
+          addons_total: addonsSubtotal,
         })
         .select("id")
         .single();
