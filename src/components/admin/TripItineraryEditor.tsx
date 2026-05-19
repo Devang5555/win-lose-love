@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Trash2, ChevronUp, ChevronDown, MapPin, Calendar, GripVertical } from "lucide-react";
+import { useState, useRef } from "react";
+import { Plus, Trash2, ChevronUp, ChevronDown, MapPin, Calendar, GripVertical, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,8 @@ import {
   type RawItineraryDay,
 } from "@/lib/tripItineraryAdapter";
 import { getDefaultPolicies } from "@/lib/tripPolicies";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   tripName?: string;
@@ -31,10 +33,53 @@ const TripItineraryEditor = ({
   setPolicies,
 }: Props) => {
   const data: RawItineraryJson = itinerary ?? emptyAdminItinerary();
+  const { toast } = useToast();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [ocrBusy, setOcrBusy] = useState(false);
 
   const update = (patch: Partial<RawItineraryJson>) => setItinerary({ ...data, ...patch });
 
-  // ——— Days ———
+  const handleOcrFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Please upload an image (PNG/JPG)", variant: "destructive" });
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast({ title: "Image too large (max 8MB)", variant: "destructive" });
+      return;
+    }
+    setOcrBusy(true);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result as string);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+      const { data: resp, error } = await supabase.functions.invoke("extract-itinerary-ocr", {
+        body: { image: dataUrl },
+      });
+      if (error) throw error;
+      if (!resp?.success || !resp?.data?.itinerary?.length) {
+        toast({ title: "Couldn't extract itinerary", description: "Try a clearer image.", variant: "destructive" });
+        return;
+      }
+      const days = (resp.data.itinerary as RawItineraryDay[]).map((d, i) => ({
+        day: i + 1,
+        title: d.title || `Day ${i + 1}`,
+        icon: d.icon || "Sun",
+        stay: d.stay || "",
+        items: Array.isArray(d.items) ? d.items.filter(Boolean) : [],
+      }));
+      update({ itinerary: days, bestTime: resp.data.bestTime || data.bestTime });
+      toast({ title: `Extracted ${days.length} day(s)`, description: "Review and edit before saving." });
+    } catch (e: any) {
+      toast({ title: "OCR failed", description: e?.message ?? String(e), variant: "destructive" });
+    } finally {
+      setOcrBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
   const addDay = () => {
     const days = data.itinerary ?? [];
     const next = days.length + 1;
@@ -103,14 +148,34 @@ const TripItineraryEditor = ({
     <div className="space-y-8">
       {/* ——— Itinerary ——— */}
       <section>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <h3 className="text-lg font-medium text-foreground flex items-center gap-2">
             <Calendar className="w-5 h-5 text-primary" />
             Day-wise Itinerary
           </h3>
-          <Button type="button" size="sm" variant="outline" onClick={addDay}>
-            <Plus className="w-4 h-4 mr-1" /> Add Day
-          </Button>
+          <div className="flex gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleOcrFile(e.target.files[0])}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => fileRef.current?.click()}
+              disabled={ocrBusy}
+              title="Extract itinerary from brochure/screenshot"
+            >
+              {ocrBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+              {ocrBusy ? "Extracting…" : "AI Extract"}
+            </Button>
+            <Button type="button" size="sm" variant="outline" onClick={addDay}>
+              <Plus className="w-4 h-4 mr-1" /> Add Day
+            </Button>
+          </div>
         </div>
 
         {/* Best time */}

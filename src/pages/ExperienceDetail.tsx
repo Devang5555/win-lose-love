@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Clock, CheckCircle, XCircle, ShieldCheck, Calendar, Phone, Mail, Bell, MessageCircle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import SeoMeta from "@/components/SeoMeta";
+import JsonLd from "@/components/JsonLd";
 
 import ExperienceBookingModal from "@/components/ExperienceBookingModal";
 import DepartureSelectorModal from "@/components/DepartureSelectorModal";
@@ -79,8 +81,22 @@ const ExperienceDetail = () => {
 
   const slotForBooking = slots.find((s) => s.id === selectedSlot);
 
+  const seoTitle = `${experience.trip_name} | GoBhraman Experience`;
+  const seoDesc = (experience.summary || `${experience.trip_name} — ${experience.duration} ${experience.locations?.[0] ? "in " + experience.locations[0] : ""}. Book your spot on GoBhraman.`).slice(0, 158);
+  const experienceLd = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: experience.trip_name,
+    description: experience.summary || "",
+    image: experience.images?.[0],
+    location: { "@type": "Place", name: experience.locations?.[0] || "India" },
+    offers: { "@type": "Offer", price: effectivePrice, priceCurrency: "INR", availability: bookable ? "https://schema.org/InStock" : "https://schema.org/PreOrder" },
+  }), [experience, effectivePrice, bookable]);
+
   return (
     <div className="min-h-screen bg-background">
+      <SeoMeta title={seoTitle} description={seoDesc} image={experience.images?.[0]} type="event" />
+      <JsonLd data={experienceLd} />
       <Navbar />
 
       {/* Hero */}

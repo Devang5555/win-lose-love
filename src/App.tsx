@@ -39,6 +39,7 @@ const ProfileHelp = lazy(() => import("./pages/ProfileHelp"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const ExperiencesPage = lazy(() => import("./pages/Experiences"));
 const ExperienceDetailPage = lazy(() => import("./pages/ExperienceDetail"));
+const CollectionPage = lazy(() => import("./pages/Collection"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -95,6 +96,8 @@ const App = () => (
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/experiences" element={<ExperiencesPage />} />
                 <Route path="/experiences/:experienceId" element={<ExperienceDetailPage />} />
+                <Route path="/collections" element={<CollectionPage />} />
+                <Route path="/collections/:slug" element={<CollectionPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
