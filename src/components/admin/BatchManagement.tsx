@@ -460,6 +460,7 @@ const BatchManagement = ({ batches, onRefresh, defaultTripId, compact }: BatchMa
                           <div className="flex gap-1 items-center flex-wrap">
                             <Button variant="ghost" size="sm" title="Edit" onClick={() => handleEdit(batch)}><Edit className="w-4 h-4" /></Button>
                             <Button variant="ghost" size="sm" title="Duplicate (+7 days)" onClick={() => handleDuplicate(batch)}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="sm" title="Resync seat count from confirmed bookings (Super Admin)" onClick={() => handleResyncSeats(batch.id)}><RefreshCw className="w-4 h-4" /></Button>
                             <Button variant="ghost" size="sm" title={batch.status === "closed" ? "Reopen" : "Mark Sold Out"} className="text-orange-600 hover:text-orange-700" onClick={() => handleToggleSoldOut(batch)}><Ban className="w-4 h-4" /></Button>
                             {!defaultTripId && (
                               reassigning === batch.id ? (
