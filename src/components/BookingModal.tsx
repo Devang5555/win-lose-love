@@ -17,15 +17,23 @@ import { useWallet, computeWalletApplicable, WALLET_MAX_PER_BOOKING, WALLET_MIN_
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { BatchInfo } from "@/components/BatchSelector";
+import AddonSelector from "@/components/AddonSelector";
+import {
+  AddonCatalogItem,
+  SelectedAddon,
+  addonsTotal,
+  formatAddonsForBooking,
+} from "@/lib/addons";
 
 interface BookingModalProps {
   trip: Trip;
   isOpen: boolean;
   onClose: () => void;
   selectedBatch: BatchInfo | null;
+  availableAddons?: AddonCatalogItem[];
 }
 
-const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProps) => {
+const BookingModal = ({ trip, isOpen, onClose, selectedBatch, availableAddons = [] }: BookingModalProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -51,6 +59,7 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([]);
 
   if (!isOpen) return null;
 
@@ -78,13 +87,15 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
     return selectedBasePrice;
   })();
 
-  const totalPrice = selectedPrice * parseInt(formData.travelers);
+  const baseTotal = selectedPrice * parseInt(formData.travelers);
+  const addonsSubtotal = addonsTotal(selectedAddons);
+  const totalPrice = baseTotal + addonsSubtotal;
   const walletApplicable = useWalletCredits
     ? computeWalletApplicable(balance, totalPrice, isFrozen)
     : 0;
   const effectiveTotalPrice = Math.max(0, totalPrice - walletApplicable - couponDiscount);
   const advanceAmount = trip.booking?.advance || 2000;
-  const totalAdvance = Math.max(0, advanceAmount * parseInt(formData.travelers) - walletApplicable - couponDiscount);
+  const totalAdvance = Math.max(0, advanceAmount * parseInt(formData.travelers) + addonsSubtotal - walletApplicable - couponDiscount);
   const remainingAmount = Math.max(0, effectiveTotalPrice - totalAdvance);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,6 +157,8 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
           payment_status: "pending",
           booking_status: "initiated",
           whatsapp_optin: formData.whatsappOptin,
+          addons: formatAddonsForBooking(selectedAddons),
+          addons_total: addonsSubtotal,
         })
         .select("id")
         .single();
@@ -349,6 +362,7 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
     setCouponDiscount(0);
     setCouponCode(null);
     setCouponError(null);
+    setSelectedAddons([]);
     onClose();
   };
 
@@ -549,6 +563,16 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
                     )}
                   </div>
 
+                  {/* Adventure Add-ons */}
+                  {availableAddons.length > 0 && (
+                    <AddonSelector
+                      catalog={availableAddons}
+                      selected={selectedAddons}
+                      maxQtyHint={parseInt(formData.travelers) * 5}
+                      onChange={setSelectedAddons}
+                    />
+                  )}
+
                   {/* WhatsApp Opt-in */}
                   <div className="flex items-start gap-3 p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
                     <Checkbox
@@ -672,6 +696,16 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch }: BookingModalProp
                         <span className="text-muted-foreground">Travelers</span>
                         <span className="text-card-foreground">× {formData.travelers}</span>
                       </div>
+                      <div className="flex justify-between text-xs pt-1">
+                        <span className="text-muted-foreground">Base subtotal</span>
+                        <span className="text-card-foreground">{formatPrice(baseTotal)}</span>
+                      </div>
+                      {selectedAddons.filter((a) => a.qty > 0).map((a) => (
+                        <div key={a.id} className="flex justify-between text-xs text-muted-foreground">
+                          <span>+ {a.name} × {a.qty}</span>
+                          <span>{formatPrice(a.price * a.qty)}</span>
+                        </div>
+                      ))}
                       <div className="flex justify-between pt-2 border-t border-border font-medium">
                         <span className="text-card-foreground">Subtotal</span>
                         <span className="text-card-foreground">{formatPrice(totalPrice)}</span>

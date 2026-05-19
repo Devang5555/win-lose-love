@@ -18,6 +18,8 @@ import SmartImageManager from "./SmartImageManager";
 import SeoSection, { SeoData } from "./SeoSection";
 import { FEATURED_TAG_LABELS, FEATURED_TAGS, FeaturedTagKey, hasFeaturedTag, toggleFeaturedTag, ALL_FEATURED_TAGS } from "@/lib/featuredTags";
 import MarketingTagPicker from "@/components/MarketingTagPicker";
+import AddonEditor from "@/components/admin/AddonEditor";
+import { AddonCatalogItem, parseAddonCatalog } from "@/lib/addons";
 
 interface TripFormData {
   trip_id: string;
@@ -49,6 +51,7 @@ interface TripFormData {
   policies: string[];
   seo: SeoData;
   pricing_tiers: { label: string; price: number; description?: string }[];
+  addons: AddonCatalogItem[];
 }
 
 interface TripEditorProps {
@@ -87,6 +90,7 @@ const emptyForm: TripFormData = {
   policies: [],
   seo: {},
   pricing_tiers: [],
+  addons: [],
 };
 
 const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
@@ -165,6 +169,7 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
             : [],
           seo: ((data as any).seo as SeoData) || {},
           pricing_tiers: Array.isArray((data as any).pricing_tiers) ? (data as any).pricing_tiers : [],
+          addons: parseAddonCatalog((data as any).addons),
         });
       }
     } catch (error) {
@@ -213,6 +218,16 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
       policies: formData.policies.length > 0 ? { items: formData.policies.filter((p) => p.trim()) } : null,
       seo: formData.seo && Object.values(formData.seo).some((v) => v && (typeof v !== "object" || Object.keys(v).length)) ? formData.seo : null,
       pricing_tiers: formData.pricing_tiers.filter((t) => t.label && t.price > 0),
+      addons: formData.addons
+        .filter((a) => a.name?.trim() && a.price > 0)
+        .map((a) => ({
+          id: a.id || crypto.randomUUID(),
+          name: a.name.trim(),
+          price: a.price,
+          max_qty: a.max_qty,
+          description: a.description?.trim() || undefined,
+          default_qty: a.default_qty,
+        })),
     };
 
     try {
@@ -507,6 +522,12 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                 </Button>
               </div>
             </section>
+
+            {/* Adventure Add-ons (reusable for Trips & Experiences) */}
+            <AddonEditor
+              addons={formData.addons}
+              onChange={(next) => setFormData({ ...formData, addons: next })}
+            />
             <section>
               <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                 <List className="w-5 h-5 text-primary" />

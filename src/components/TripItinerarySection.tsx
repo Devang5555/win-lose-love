@@ -4,6 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import ScrollReveal from "@/components/ScrollReveal";
+import ItineraryTimeline from "@/components/ItineraryTimeline";
 import type { TripItineraryData } from "@/data/tripItineraries";
 
 interface TripItinerarySectionProps {
@@ -59,9 +60,12 @@ const TripItinerarySection = ({ data, policies }: TripItinerarySectionProps) => 
         )}
       </div>
 
-      {/* Day-wise Accordion */}
-      <div>
-        <SectionDivider icon={MapPin} title="🗓️ Day-wise Itinerary" />
+      {/* Day-wise — Timeline for short trips (≤2 days), Accordion for longer */}
+      {data.itinerary.length <= 2 ? (
+        <ItineraryTimeline days={data.itinerary} title="🗺️ Journey Timeline" />
+      ) : (
+        <div>
+          <SectionDivider icon={MapPin} title="🗓️ Day-wise Itinerary" />
         <Accordion type="single" collapsible defaultValue="day-1" className="space-y-3">
           {data.itinerary.map((day) => (
             <ScrollReveal key={day.day} delay={day.day * 0.06}>
@@ -105,7 +109,8 @@ const TripItinerarySection = ({ data, policies }: TripItinerarySectionProps) => 
             </ScrollReveal>
           ))}
         </Accordion>
-      </div>
+        </div>
+      )}
 
       {/* Stay Summary Table */}
       {data.staySummary && data.staySummary.length > 0 && (
