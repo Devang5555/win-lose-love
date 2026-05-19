@@ -33,6 +33,7 @@ import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
 import TrustBadges from "@/components/TrustBadges";
 import TrustIndicators from "@/components/TrustIndicators";
+import LiveSignals from "@/components/LiveSignals";
 import { parseAddonCatalog } from "@/lib/addons";
 import { getTripItinerary } from "@/data/tripItineraries";
 import { adaptAdminItinerary, isAdminItineraryUsable } from "@/lib/tripItineraryAdapter";
