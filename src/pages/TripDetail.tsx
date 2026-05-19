@@ -341,6 +341,20 @@ const TripDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
+              {/* Dynamic Trust Badges */}
+              <div className="mb-8">
+                <TrustBadges
+                  duration={tripDuration}
+                  type={(liveDbTrip as any)?.type || "trip"}
+                  category={(liveDbTrip as any)?.experience_category || null}
+                  tags={(liveDbTrip as any)?.tags || []}
+                  inclusions={tripInclusions}
+                  locations={tripLocations}
+                  name={tripName}
+                  capacity={tripCapacity}
+                />
+              </div>
+
               {/* Highlights */}
               {tripHighlights.length > 0 && (
                 <div className="mb-8">
