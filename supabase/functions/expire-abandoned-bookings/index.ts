@@ -12,14 +12,28 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate: accept x-cron-secret header OR service_role JWT
-    const cronSecret = Deno.env.get("CRON_SECRET");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    // Auth: accept env CRON_SECRET, internal_config.cron_secret, or service_role JWT.
+    // Reading from internal_config keeps cron + function in sync without env coordination.
+    const envSecret = Deno.env.get("CRON_SECRET");
     const providedSecret = req.headers.get("x-cron-secret");
     const authHeader = req.headers.get("Authorization");
-    
+
     let authorized = false;
-    if (providedSecret && cronSecret && providedSecret === cronSecret) {
-      authorized = true;
+    if (providedSecret) {
+      if (envSecret && providedSecret === envSecret) {
+        authorized = true;
+      } else {
+        const { data: cfg } = await supabase
+          .from("internal_config")
+          .select("value")
+          .eq("key", "cron_secret")
+          .maybeSingle();
+        if (cfg?.value && providedSecret === cfg.value) authorized = true;
+      }
     }
     if (!authorized && authHeader?.startsWith("Bearer ")) {
       try {
@@ -34,9 +48,6 @@ Deno.serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 
