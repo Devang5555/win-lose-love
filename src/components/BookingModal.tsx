@@ -696,6 +696,16 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch, availableAddons = 
                         <span className="text-muted-foreground">Travelers</span>
                         <span className="text-card-foreground">× {formData.travelers}</span>
                       </div>
+                      <div className="flex justify-between text-xs pt-1">
+                        <span className="text-muted-foreground">Base subtotal</span>
+                        <span className="text-card-foreground">{formatPrice(baseTotal)}</span>
+                      </div>
+                      {selectedAddons.filter((a) => a.qty > 0).map((a) => (
+                        <div key={a.id} className="flex justify-between text-xs text-muted-foreground">
+                          <span>+ {a.name} × {a.qty}</span>
+                          <span>{formatPrice(a.price * a.qty)}</span>
+                        </div>
+                      ))}
                       <div className="flex justify-between pt-2 border-t border-border font-medium">
                         <span className="text-card-foreground">Subtotal</span>
                         <span className="text-card-foreground">{formatPrice(totalPrice)}</span>
