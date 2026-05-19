@@ -208,6 +208,8 @@ export type Database = {
       }
       bookings: {
         Row: {
+          addons: Json
+          addons_total: number
           advance_paid: number
           advance_screenshot_url: string | null
           batch_id: string | null
@@ -245,6 +247,8 @@ export type Database = {
           whatsapp_optin: boolean | null
         }
         Insert: {
+          addons?: Json
+          addons_total?: number
           advance_paid?: number
           advance_screenshot_url?: string | null
           batch_id?: string | null
@@ -282,6 +286,8 @@ export type Database = {
           whatsapp_optin?: boolean | null
         }
         Update: {
+          addons?: Json
+          addons_total?: number
           advance_paid?: number
           advance_screenshot_url?: string | null
           batch_id?: string | null
@@ -1015,6 +1021,7 @@ export type Database = {
       }
       trips: {
         Row: {
+          addons: Json
           advance_amount: number | null
           base_price: number | null
           booking_live: boolean | null
@@ -1057,6 +1064,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          addons?: Json
           advance_amount?: number | null
           base_price?: number | null
           booking_live?: boolean | null
@@ -1099,6 +1107,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          addons?: Json
           advance_amount?: number | null
           base_price?: number | null
           booking_live?: boolean | null
