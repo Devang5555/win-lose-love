@@ -563,6 +563,16 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch, availableAddons = 
                     )}
                   </div>
 
+                  {/* Adventure Add-ons */}
+                  {availableAddons.length > 0 && (
+                    <AddonSelector
+                      catalog={availableAddons}
+                      selected={selectedAddons}
+                      maxQtyHint={parseInt(formData.travelers) * 5}
+                      onChange={setSelectedAddons}
+                    />
+                  )}
+
                   {/* WhatsApp Opt-in */}
                   <div className="flex items-start gap-3 p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
                     <Checkbox
