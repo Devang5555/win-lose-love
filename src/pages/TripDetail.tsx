@@ -31,8 +31,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
-
+import TrustBadges from "@/components/TrustBadges";
 import TrustIndicators from "@/components/TrustIndicators";
+import { parseAddonCatalog } from "@/lib/addons";
 import { getTripItinerary } from "@/data/tripItineraries";
 import { adaptAdminItinerary, isAdminItineraryUsable } from "@/lib/tripItineraryAdapter";
 import { resolveTripPolicies } from "@/lib/tripPolicies";
@@ -764,6 +765,7 @@ const TripDetail = () => {
           isOpen={isBookingOpen}
           onClose={() => setIsBookingOpen(false)}
           selectedBatch={selectedBatch}
+          availableAddons={parseAddonCatalog((liveDbTrip as any)?.addons)}
         />
       )}
 
