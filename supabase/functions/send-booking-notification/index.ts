@@ -174,6 +174,28 @@ Deno.serve(async (req) => {
       sendWhatsAppText(userPhone, userMessage),
     ]);
 
+    // Observability: log each send attempt to booking_notifications (best-effort)
+    try {
+      await supabase.from("booking_notifications").insert([
+        {
+          booking_id: booking.id,
+          channel: "whatsapp",
+          type: `admin_${notifType}`,
+          status: adminSend.ok ? "sent" : "failed",
+          metadata: { phone: ADMIN_PHONE, response: adminSend },
+        },
+        {
+          booking_id: booking.id,
+          channel: "whatsapp",
+          type: `user_${notifType}`,
+          status: userSend.ok ? "sent" : "failed",
+          metadata: { phone: userPhone, response: userSend },
+        },
+      ]);
+    } catch (logErr) {
+      console.warn("notification log insert failed:", logErr);
+    }
+
     // Always also return click-to-chat URLs as fallback for the client
     const adminWhatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(adminMessage)}`;
     const userWhatsappUrl = `https://wa.me/${userPhone}?text=${encodeURIComponent(userMessage)}`;
