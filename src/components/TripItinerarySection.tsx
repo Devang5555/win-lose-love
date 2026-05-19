@@ -109,7 +109,8 @@ const TripItinerarySection = ({ data, policies }: TripItinerarySectionProps) => 
             </ScrollReveal>
           ))}
         </Accordion>
-      </div>
+        </div>
+      )}
 
       {/* Stay Summary Table */}
       {data.staySummary && data.staySummary.length > 0 && (
