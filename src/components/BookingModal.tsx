@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { BatchInfo } from "@/components/BatchSelector";
 import AddonSelector from "@/components/AddonSelector";
+import PickupSelector, { PickupOption } from "@/components/PickupSelector";
 import {
   AddonCatalogItem,
   SelectedAddon,
@@ -508,60 +509,64 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch, availableAddons = 
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="travelers" className="flex items-center gap-2 mb-2">
-                        <Users className="w-4 h-4 text-primary" />
-                        Travelers
-                      </Label>
-                      {(() => {
-                        const maxTravelers = selectedBatch 
-                          ? Math.min(10, selectedBatch.available_seats)
-                          : 10;
-                        return (
-                          <Select
-                            value={formData.travelers}
-                            onValueChange={(value) => setFormData({ ...formData, travelers: value })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Array.from({ length: maxTravelers }, (_, i) => i + 1).map((num) => (
-                                <SelectItem key={num} value={num.toString()}>
-                                  {num} {num === 1 ? 'Person' : 'People'}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        );
-                      })()}
-                      {selectedBatch && selectedBatch.available_seats <= 3 && (
-                        <p className="text-xs text-destructive mt-1">Only {selectedBatch.available_seats} seat{selectedBatch.available_seats !== 1 ? 's' : ''} left!</p>
-                      )}
-                    </div>
-
-                    {hasMultiplePrices && (
-                      <div>
-                        <Label htmlFor="pickup" className="flex items-center gap-2 mb-2">
-                          <Calendar className="w-4 h-4 text-primary" />
-                          Pickup Point
-                        </Label>
+                  <div>
+                    <Label htmlFor="travelers" className="flex items-center gap-2 mb-2">
+                      <Users className="w-4 h-4 text-primary" />
+                      Travelers
+                    </Label>
+                    {(() => {
+                      const maxTravelers = selectedBatch
+                        ? Math.min(10, selectedBatch.available_seats)
+                        : 10;
+                      return (
                         <Select
-                          value={formData.pickupPoint}
-                          onValueChange={(value) => setFormData({ ...formData, pickupPoint: value })}
+                          value={formData.travelers}
+                          onValueChange={(value) => setFormData({ ...formData, travelers: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="mumbai">Mumbai ({formatPrice(typeof trip.price === 'object' ? trip.price.default : 0)})</SelectItem>
-                            <SelectItem value="pune">Pune ({formatPrice(typeof trip.price === 'object' ? trip.price.fromPune! : 0)})</SelectItem>
+                            {Array.from({ length: maxTravelers }, (_, i) => i + 1).map((num) => (
+                              <SelectItem key={num} value={num.toString()}>
+                                {num} {num === 1 ? 'Person' : 'People'}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
-                      </div>
+                      );
+                    })()}
+                    {selectedBatch && selectedBatch.available_seats <= 3 && (
+                      <p className="text-xs text-destructive mt-1">Only {selectedBatch.available_seats} seat{selectedBatch.available_seats !== 1 ? 's' : ''} left!</p>
                     )}
                   </div>
+
+                  {hasMultiplePrices && typeof trip.price === 'object' && (() => {
+                    const pickupOptions: PickupOption[] = [
+                      {
+                        id: 'mumbai',
+                        city: 'Mumbai',
+                        meetingPoint: 'Dadar / Borivali pickup',
+                        departureTime: 'Fri · 9:00 PM',
+                        price: trip.price.default,
+                        tag: 'Most chosen',
+                      },
+                      {
+                        id: 'pune',
+                        city: 'Pune',
+                        meetingPoint: 'Wakad / Swargate pickup',
+                        departureTime: 'Sat · 4:00 AM',
+                        price: trip.price.fromPune!,
+                      },
+                    ];
+                    return (
+                      <PickupSelector
+                        options={pickupOptions}
+                        value={formData.pickupPoint}
+                        onChange={(id) => setFormData({ ...formData, pickupPoint: id })}
+                      />
+                    );
+                  })()}
 
                   {/* Adventure Add-ons */}
                   {availableAddons.length > 0 && (
