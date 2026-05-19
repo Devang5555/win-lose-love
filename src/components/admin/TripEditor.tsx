@@ -522,6 +522,12 @@ const TripEditor = ({ tripId, onClose, onSave }: TripEditorProps) => {
                 </Button>
               </div>
             </section>
+
+            {/* Adventure Add-ons (reusable for Trips & Experiences) */}
+            <AddonEditor
+              addons={formData.addons}
+              onChange={(next) => setFormData({ ...formData, addons: next })}
+            />
             <section>
               <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                 <List className="w-5 h-5 text-primary" />
