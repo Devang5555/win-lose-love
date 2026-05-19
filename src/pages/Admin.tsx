@@ -388,13 +388,20 @@ const Admin = () => {
         }
       }
 
+      const remaining = booking.total_amount - booking.advance_paid;
+      const isFullyPaid = remaining <= 0;
+
       const { error } = await supabase
         .from("bookings")
         .update({
           booking_status: "confirmed",
-          payment_status: "advance_verified",
+          payment_status: isFullyPaid ? "fully_paid" : "advance_verified",
           verified_by_admin_id: user.id,
           rejection_reason: null,
+          ...(isFullyPaid ? {
+            remaining_payment_status: "verified",
+            remaining_payment_verified_at: new Date().toISOString(),
+          } : {}),
         })
         .eq("id", booking.id);
 
