@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Clock, CheckCircle, XCircle, ShieldCheck, Calendar, Phone, Mail, Bell, MessageCircle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import SeoMeta from "@/components/SeoMeta";
+import JsonLd from "@/components/JsonLd";
 
 import ExperienceBookingModal from "@/components/ExperienceBookingModal";
 import DepartureSelectorModal from "@/components/DepartureSelectorModal";
