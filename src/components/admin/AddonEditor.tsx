@@ -34,7 +34,7 @@ const AddonEditor = ({ addons, onChange }: Props) => {
         </span>
       </h3>
       <p className="text-xs text-muted-foreground mb-3">
-        Example: <em>"Rappelling Experience"</em> at ₹250, max qty 10. Travelers can opt in
+        Example: <em>"Rappelling Experience"</em> at ₹250, max pp 10. Travelers can opt in
         and choose quantity. Add-ons don't affect seat counts.
       </p>
 
@@ -62,7 +62,7 @@ const AddonEditor = ({ addons, onChange }: Props) => {
               />
             </div>
             <div className="md:col-span-2">
-              <Label className="text-[11px] mb-1 block">Max Qty</Label>
+              <Label className="text-[11px] mb-1 block">Max pp</Label>
               <Input
                 type="number"
                 placeholder="Optional"
