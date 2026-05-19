@@ -566,7 +566,7 @@ const TripDetail = () => {
             <div className="lg:col-span-1">
               <div className="sticky top-28 space-y-6">
                 {/* Booking Card */}
-                <div className={`bg-card rounded-2xl border-2 p-6 shadow-xl ${isBookable ? 'border-primary/50' : 'border-border'}`}>
+                <div className={`bg-card rounded-2xl border-2 p-4 lg:p-6 shadow-xl ${isBookable ? 'border-primary/50' : 'border-border'}`}>
                   {!isBookable && (
                     <div className="bg-sunset/10 border border-sunset/30 rounded-xl p-4 mb-6 text-center">
                       <p className="text-sunset font-bold text-lg">🚀 Coming Soon</p>
