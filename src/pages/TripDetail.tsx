@@ -628,6 +628,9 @@ const TripDetail = () => {
                         <span className="text-card-foreground font-medium">Max {tripCapacity} explorers</span>
                       </div>
                     )}
+                    {isBookable && tripId && (
+                      <LiveSignals tripId={tripId} />
+                    )}
                   </div>
 
                   {/* Batch Selector */}
