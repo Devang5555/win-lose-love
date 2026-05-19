@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import TrustIndicators from "@/components/TrustIndicators";
+
 import ExperienceBookingModal from "@/components/ExperienceBookingModal";
 import DepartureSelectorModal from "@/components/DepartureSelectorModal";
 
@@ -321,7 +321,7 @@ const ExperienceDetail = () => {
                   {!bookable ? "Coming Soon" : allSoldOut ? "Sold Out" : "Reserve Your Spot"}
                 </Button>
 
-                <TrustIndicators className="mt-2" />
+                
 
                 <div className="text-center space-y-1 pt-2 border-t border-border">
                   <p className="text-xs text-muted-foreground">Need help?</p>

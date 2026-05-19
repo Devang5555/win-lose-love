@@ -32,7 +32,7 @@ import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
 import TrustBadges from "@/components/TrustBadges";
-import TrustIndicators from "@/components/TrustIndicators";
+
 import LiveSignals from "@/components/LiveSignals";
 import { parseAddonCatalog } from "@/lib/addons";
 import { getTripItinerary } from "@/data/tripItineraries";
@@ -736,8 +736,6 @@ const TripDetail = () => {
                     Share Experience
                   </Button>
 
-                  {/* Trust indicators */}
-                  <TrustIndicators className="mt-1" />
                 </div>
 
                 {/* Contact Card */}
