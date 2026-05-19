@@ -249,6 +249,20 @@ const BatchManagement = ({ batches, onRefresh, defaultTripId, compact }: BatchMa
     }
   };
 
+  const handleResyncSeats = async (batchId: string) => {
+    const { data, error } = await supabase.rpc("recalculate_batch_seats", { p_batch_id: batchId });
+    if (error) {
+      toast({
+        title: "Resync failed",
+        description: error.message.includes("Permission") ? "Only Super Admin can resync seat counts." : error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({ title: "Seats resynced", description: `Confirmed seats: ${data ?? 0}` });
+      onRefresh();
+    }
+  };
+
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
