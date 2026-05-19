@@ -574,7 +574,8 @@ const TripDetail = () => {
                     </div>
                   )}
 
-                  <div className="mb-6">
+                  {/* Price block — hidden on mobile (MobileBookingBar handles it) */}
+                  <div className="mb-6 hidden lg:block">
                     {hasPunePrice && punePrice && (
                       <div className="flex justify-between items-center mb-2 text-sm text-muted-foreground">
                         <span>From Pune</span>
