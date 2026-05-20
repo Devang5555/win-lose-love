@@ -16,6 +16,7 @@ import JsonLd from "@/components/JsonLd";
 
 import ExperienceBookingModal from "@/components/ExperienceBookingModal";
 import DepartureSelectorModal from "@/components/DepartureSelectorModal";
+import TripGallery, { HeroGalleryButton } from "@/components/TripGallery";
 
 interface PricingTier { label: string; price: number; description?: string }
 
