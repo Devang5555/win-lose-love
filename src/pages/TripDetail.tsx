@@ -31,6 +31,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
+import TripGallery, { HeroGalleryButton } from "@/components/TripGallery";
 import TrustBadges from "@/components/TrustBadges";
 
 import LiveSignals from "@/components/LiveSignals";
