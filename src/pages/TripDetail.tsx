@@ -267,9 +267,10 @@ const TripDetail = () => {
         <img
           src={tripImages[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80"}
           alt={tripName}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover animate-cinematic-zoom will-change-transform"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+        <HeroGalleryButton images={tripImages} alt={tripName} />
 
         {/* Flex overlay: back button at top, content at bottom */}
         <div className="absolute inset-0 flex flex-col justify-between pt-24 md:pt-28 pb-4 px-4 md:pb-8 md:px-8 lg:pb-12 lg:px-12">
