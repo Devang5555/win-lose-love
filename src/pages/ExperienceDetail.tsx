@@ -137,6 +137,10 @@ const ExperienceDetail = () => {
               </Card>
             )}
 
+            <TripGallery images={experience.images || []} alt={experience.trip_name} />
+
+
+
             {experience.highlights?.length > 0 && (
               <Card>
                 <CardHeader><CardTitle className="font-serif">✨ Highlights</CardTitle></CardHeader>
