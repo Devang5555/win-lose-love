@@ -52,12 +52,15 @@ const TripGallery = ({ images, alt = "Photo", altMap }: TripGalleryProps) => {
   };
 
   return (
-    <section className="mt-6 lg:mt-8">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground">Gallery</h2>
+    <section className="mt-8 lg:mt-10">
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground leading-tight">Gallery</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{images.length} photos from this journey</p>
+        </div>
         <button
           onClick={() => openAt(0)}
-          className="text-sm font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1"
+          className="text-sm font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1.5"
         >
           <Expand className="w-4 h-4" />
           View all
@@ -67,14 +70,14 @@ const TripGallery = ({ images, alt = "Photo", altMap }: TripGalleryProps) => {
       {/* Mobile: horizontal snap strip */}
       <div
         ref={stripRef}
-        className="md:hidden flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 scrollbar-hide"
+        className="md:hidden flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 -mx-4 px-4 scrollbar-hide"
         style={{ scrollbarWidth: "none" }}
       >
         {rest.map((src, i) => (
           <button
             key={src + i}
             onClick={() => openAt(i)}
-            className="snap-center flex-shrink-0 w-[78%] aspect-[4/3] rounded-2xl overflow-hidden bg-muted shadow-soft active:scale-[0.98] transition-transform"
+            className="snap-center flex-shrink-0 w-[82%] aspect-[4/3] rounded-2xl overflow-hidden bg-muted shadow-soft active:scale-[0.98] transition-transform"
           >
             <img
               src={src}
@@ -86,32 +89,27 @@ const TripGallery = ({ images, alt = "Photo", altMap }: TripGalleryProps) => {
         ))}
       </div>
 
-      {/* Desktop: masonry-ish grid */}
-      <div className="hidden md:grid grid-cols-3 gap-3">
-        {rest.slice(0, 5).map((src, i) => (
-          <button
-            key={src + i}
-            onClick={() => openAt(i)}
-            className={cn(
-              "group relative overflow-hidden rounded-2xl bg-muted shadow-soft",
-              i === 0 ? "col-span-2 row-span-2 aspect-[4/3]" : "aspect-square"
-            )}
-          >
-            <img
-              src={src}
-              alt={altMap?.[src] || `${alt} ${i + 2}`}
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            {i === 4 && rest.length > 5 && (
-              <div className="absolute inset-0 bg-black/55 flex items-center justify-center text-white font-bold text-lg backdrop-blur-sm">
-                +{rest.length - 5} more
-              </div>
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Desktop: single cinematic photo with overlay */}
+      <button
+        onClick={() => openAt(0)}
+        className="hidden md:block group relative w-full aspect-[21/9] overflow-hidden rounded-3xl bg-muted shadow-card"
+      >
+        <img
+          src={rest[0]}
+          alt={altMap?.[rest[0]] || `${alt} 2`}
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        {rest.length > 1 && (
+          <div className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-background/90 backdrop-blur-md px-4 py-2 text-sm font-semibold text-foreground shadow-lg border border-border/40 transition-transform group-hover:scale-105">
+            <Grid3x3 className="w-4 h-4" />
+            +{rest.length - 1} more photos
+          </div>
+        )}
+      </button>
+
+
 
       <Lightbox open={open} onClose={() => setOpen(false)} images={images} alt={alt} altMap={altMap} initial={startIndex + 1} />
     </section>
