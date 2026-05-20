@@ -358,6 +358,10 @@ const TripDetail = () => {
                 />
               </div>
 
+              {/* Immersive photo gallery */}
+              <TripGallery images={tripImages} alt={tripName} />
+
+
               {/* Highlights */}
               {tripHighlights.length > 0 && (
                 <div className="mb-8">
