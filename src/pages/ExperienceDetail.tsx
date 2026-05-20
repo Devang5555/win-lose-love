@@ -16,6 +16,7 @@ import JsonLd from "@/components/JsonLd";
 
 import ExperienceBookingModal from "@/components/ExperienceBookingModal";
 import DepartureSelectorModal from "@/components/DepartureSelectorModal";
+import TripGallery, { HeroGalleryButton } from "@/components/TripGallery";
 
 interface PricingTier { label: string; price: number; description?: string }
 
@@ -105,8 +106,9 @@ const ExperienceDetail = () => {
         <img
           src={experience.images?.[0] || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200"}
           alt={experience.trip_name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover animate-cinematic-zoom will-change-transform"
         />
+        <HeroGalleryButton images={experience.images || []} alt={experience.trip_name} />
         <div className="absolute bottom-0 left-0 right-0 z-20 container mx-auto px-4 pb-6 md:pb-10">
           <div className="flex flex-wrap gap-2 mb-3">
             {experience.tags?.map((tag) => (
@@ -134,6 +136,10 @@ const ExperienceDetail = () => {
                 <CardContent><p className="text-muted-foreground leading-relaxed">{experience.summary}</p></CardContent>
               </Card>
             )}
+
+            <TripGallery images={experience.images || []} alt={experience.trip_name} />
+
+
 
             {experience.highlights?.length > 0 && (
               <Card>

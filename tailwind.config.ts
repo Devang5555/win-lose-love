@@ -97,6 +97,10 @@ export default {
 			'slide-in-bottom': {
 				'0%': { transform: 'translateY(100%)' },
 				'100%': { transform: 'translateY(0)' }
+			},
+			'cinematic-zoom': {
+				'0%': { transform: 'scale(1)' },
+				'100%': { transform: 'scale(1.08)' }
 			}
 		},
 		animation: {
@@ -104,7 +108,8 @@ export default {
 			'accordion-up': 'accordion-up 0.2s ease-out',
 			'float': 'float 3s ease-in-out infinite',
 			'shimmer': 'shimmer 2s linear infinite',
-			'slide-in-bottom': 'slide-in-bottom 0.3s ease-out'
+			'slide-in-bottom': 'slide-in-bottom 0.3s ease-out',
+			'cinematic-zoom': 'cinematic-zoom 20s ease-in-out infinite alternate'
 		},
 		fontFamily: {
 			sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
