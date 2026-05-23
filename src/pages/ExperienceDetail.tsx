@@ -84,7 +84,7 @@ const ExperienceDetail = () => {
 
   const seoTitle = `${experience.trip_name} | GoBhraman Experience`;
   const seoDesc = (experience.summary || `${experience.trip_name} — ${experience.duration} ${experience.locations?.[0] ? "in " + experience.locations[0] : ""}. Book your spot on GoBhraman.`).slice(0, 158);
-  const experienceLd = useMemo(() => ({
+  const experienceLd = {
     "@context": "https://schema.org",
     "@type": "Event",
     name: experience.trip_name,
@@ -92,7 +92,7 @@ const ExperienceDetail = () => {
     image: experience.images?.[0],
     location: { "@type": "Place", name: experience.locations?.[0] || "India" },
     offers: { "@type": "Offer", price: effectivePrice, priceCurrency: "INR", availability: bookable ? "https://schema.org/InStock" : "https://schema.org/PreOrder" },
-  }), [experience, effectivePrice, bookable]);
+  };
 
   return (
     <div className="min-h-screen bg-background">
