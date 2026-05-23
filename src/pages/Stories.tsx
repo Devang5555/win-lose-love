@@ -29,7 +29,7 @@ const Stories = () => {
 
   const fetchData = async () => {
     const [reviewsRes, bookingsRes, tripsRes] = await Promise.all([
-      supabase.from("reviews").select("id, rating, review_text, trip_id, created_at, user_id").eq("is_visible", true).order("rating", { ascending: false }).limit(50),
+      (supabase as any).from("public_reviews").select("id, rating, review_text, trip_id, created_at, reviewer_name").order("rating", { ascending: false }).limit(50),
       supabase.from("bookings").select("num_travelers").eq("booking_status", "confirmed"),
       supabase.from("trips").select("trip_id, trip_name"),
     ]);
@@ -39,20 +39,19 @@ const Stories = () => {
     trips.forEach(t => { tripMap[t.trip_id] = t.trip_name; });
 
     if (reviewsRes.data) {
-      // Fetch profile names
-      const userIds = [...new Set(reviewsRes.data.map(r => r.user_id))];
-      const { data: profiles } = await supabase.from("profiles").select("id, full_name").in("id", userIds);
-      const profileMap = new Map(profiles?.map(p => [p.id, p.full_name || "Traveler"]) ?? []);
-
-      const enriched = reviewsRes.data.map(r => ({
-        ...r,
-        reviewer_name: profileMap.get(r.user_id) || "Anonymous Traveler",
+      const enriched = reviewsRes.data.map((r: any) => ({
+        id: r.id,
+        rating: r.rating,
+        review_text: r.review_text,
+        trip_id: r.trip_id,
+        created_at: r.created_at,
+        reviewer_name: r.reviewer_name || "Traveler",
       }));
       setReviews(enriched);
 
       // Calculate top-rated trips
       const tripStats: Record<string, { total: number; count: number }> = {};
-      reviewsRes.data.forEach(r => {
+      reviewsRes.data.forEach((r: any) => {
         if (!tripStats[r.trip_id]) tripStats[r.trip_id] = { total: 0, count: 0 };
         tripStats[r.trip_id].total += r.rating;
         tripStats[r.trip_id].count++;

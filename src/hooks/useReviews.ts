@@ -34,26 +34,24 @@ export const useReviews = (tripId?: string) => {
   const fetchReviews = useCallback(async () => {
     if (!tripId) { setLoading(false); return; }
 
-    const { data, error } = await supabase
-      .from("reviews")
-      .select("*")
+    const { data, error } = await (supabase as any)
+      .from("public_reviews")
+      .select("id, rating, review_text, trip_id, created_at, reviewer_name")
       .eq("trip_id", tripId)
-      .eq("is_visible", true)
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      // Fetch reviewer names from profiles
-      const userIds = [...new Set(data.map((r) => r.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .in("id", userIds);
-
-      const profileMap = new Map(profiles?.map((p) => [p.id, p.full_name]) ?? []);
-
-      const enriched: Review[] = data.map((r) => ({
-        ...r,
-        reviewer_name: profileMap.get(r.user_id) || "Anonymous Traveler",
+      const enriched: Review[] = data.map((r: any) => ({
+        id: r.id,
+        user_id: "",
+        trip_id: r.trip_id,
+        booking_id: "",
+        rating: r.rating,
+        review_text: r.review_text,
+        created_at: r.created_at,
+        is_verified: true,
+        is_visible: true,
+        reviewer_name: r.reviewer_name || "Traveler",
       }));
 
       setReviews(enriched);
