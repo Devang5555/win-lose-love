@@ -1384,7 +1384,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_reviews: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          rating: number | null
+          review_text: string | null
+          reviewer_name: string | null
+          trip_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_wallet_adjust: {
