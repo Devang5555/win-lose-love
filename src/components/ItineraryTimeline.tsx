@@ -10,6 +10,8 @@ export interface TimelineDay {
   title: string;
   stay?: string;
   items: string[];
+  /** Optional photo for this step — renders a premium image inside the card. */
+  image?: string;
 }
 
 interface Props {
