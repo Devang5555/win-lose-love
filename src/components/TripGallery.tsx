@@ -9,6 +9,9 @@ interface TripGalleryProps {
   altMap?: Record<string, string>;
 }
 
+/** Max photos shown in the desktop masonry wall before "+N more". */
+const MASONRY_LIMIT = 9;
+
 /* ------- Hero corner button: opens lightbox on the hero ------- */
 export const HeroGalleryButton = ({
   images,
@@ -89,27 +92,38 @@ const TripGallery = ({ images, alt = "Photo", altMap }: TripGalleryProps) => {
         ))}
       </div>
 
-      {/* Desktop: single cinematic photo with overlay */}
-      <button
-        onClick={() => openAt(0)}
-        className="hidden md:block group relative w-full aspect-[21/9] overflow-hidden rounded-3xl bg-muted shadow-card"
-      >
-        <img
-          src={rest[0]}
-          alt={altMap?.[rest[0]] || `${alt} 2`}
-          loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-        {rest.length > 1 && (
-          <div className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-background/90 backdrop-blur-md px-4 py-2 text-sm font-semibold text-foreground shadow-lg border border-border/40 transition-transform group-hover:scale-105">
-            <Grid3x3 className="w-4 h-4" />
-            +{rest.length - 1} more photos
-          </div>
-        )}
-      </button>
-
-
+      {/* Desktop: lazy masonry photo wall */}
+      <div className="hidden md:block">
+        <div className="columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
+          {rest.slice(0, MASONRY_LIMIT).map((src, i) => {
+            const isLast = i === Math.min(rest.length, MASONRY_LIMIT) - 1;
+            const overflow = rest.length - MASONRY_LIMIT;
+            return (
+              <button
+                key={src + i}
+                onClick={() => openAt(i)}
+                className="group relative mb-3 block w-full overflow-hidden rounded-2xl bg-muted shadow-soft break-inside-avoid"
+              >
+                <img
+                  src={src}
+                  alt={altMap?.[src] || `${alt} ${i + 2}`}
+                  loading="lazy"
+                  className={cn(
+                    "w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-105",
+                    i % 3 === 0 ? "aspect-[3/4]" : i % 3 === 1 ? "aspect-[4/3]" : "aspect-square"
+                  )}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                {isLast && overflow > 0 && (
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-[2px] text-white font-semibold text-lg gap-2">
+                    <Grid3x3 className="w-5 h-5" />+{overflow} more
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <Lightbox open={open} onClose={() => setOpen(false)} images={images} alt={alt} altMap={altMap} initial={startIndex + 1} />
     </section>

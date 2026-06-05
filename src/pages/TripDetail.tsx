@@ -32,6 +32,8 @@ import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
 import TripGallery, { HeroGalleryButton } from "@/components/TripGallery";
+import StoryGallery from "@/components/StoryGallery";
+import ParallaxImage from "@/components/ParallaxImage";
 import TrustBadges from "@/components/TrustBadges";
 
 import LiveSignals from "@/components/LiveSignals";
@@ -378,6 +380,36 @@ const TripDetail = () => {
                   </div>
                 </div>
               )}
+
+              {/* Destination story — image + headline scroll narrative */}
+              {tripImages.length > 1 && tripHighlights.length > 0 && (
+                <StoryGallery
+                  title={`The ${tripName} Story`}
+                  subtitle="Scroll through the moments that make this journey unforgettable."
+                  alt={tripName}
+                  stories={tripHighlights.slice(0, 4).map((h, i) => ({
+                    image: tripImages[(i % (tripImages.length - 1)) + 1] || tripImages[0],
+                    headline: h,
+                  }))}
+                />
+              )}
+
+              {/* Parallax breather between sections */}
+              {tripImages.length > 2 && (
+                <div className="my-10 md:my-14 -mx-4 md:mx-0">
+                  <ParallaxImage
+                    src={tripImages[2] || tripImages[0]}
+                    alt={tripName}
+                    aspect="aspect-[21/9]"
+                    rounded="md:rounded-3xl rounded-none"
+                  >
+                    <p className="font-serif text-2xl md:text-4xl font-bold text-white drop-shadow-lg max-w-xl leading-tight">
+                      Every frame is a memory waiting to happen.
+                    </p>
+                  </ParallaxImage>
+                </div>
+              )}
+
 
               {/* Stay Details for camping trips */}
               {trip?.stayDetails && (
