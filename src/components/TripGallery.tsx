@@ -9,6 +9,9 @@ interface TripGalleryProps {
   altMap?: Record<string, string>;
 }
 
+/** Max photos shown in the desktop masonry wall before "+N more". */
+const MASONRY_LIMIT = 9;
+
 /* ------- Hero corner button: opens lightbox on the hero ------- */
 export const HeroGalleryButton = ({
   images,
