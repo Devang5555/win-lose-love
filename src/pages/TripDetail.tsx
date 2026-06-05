@@ -32,6 +32,8 @@ import { useWallet } from "@/hooks/useWallet";
 import WalletBanner from "@/components/WalletBanner";
 import TripItinerarySection from "@/components/TripItinerarySection";
 import TripGallery, { HeroGalleryButton } from "@/components/TripGallery";
+import StoryGallery from "@/components/StoryGallery";
+import ParallaxImage from "@/components/ParallaxImage";
 import TrustBadges from "@/components/TrustBadges";
 
 import LiveSignals from "@/components/LiveSignals";
