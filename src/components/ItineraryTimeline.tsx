@@ -75,15 +75,27 @@ const ItineraryTimeline = ({ days, title = "Journey Timeline" }: Props) => {
                       {itemEmoji(item)}
                     </span>
 
-                    <div className="bg-card rounded-xl border border-border/60 shadow-sm px-4 py-3 hover:border-primary/30 transition-colors">
-                      {idx === 0 && (
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-primary mb-1">
-                          {days.length > 1 ? `Day ${day.day} • ${day.title}` : day.title}
-                        </p>
+                    <div className="bg-card rounded-xl border border-border/60 shadow-sm overflow-hidden hover:border-primary/30 transition-colors">
+                      {idx === 0 && day.image && (
+                        <div className="aspect-[16/9] overflow-hidden bg-muted">
+                          <img
+                            src={day.image}
+                            alt={day.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-[900ms] ease-out hover:scale-105"
+                          />
+                        </div>
                       )}
-                      <p className="text-sm text-foreground/90 leading-relaxed">
-                        {item}
-                      </p>
+                      <div className="px-4 py-3">
+                        {idx === 0 && (
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary mb-1">
+                            {days.length > 1 ? `Day ${day.day} • ${day.title}` : day.title}
+                          </p>
+                        )}
+                        <p className="text-sm text-foreground/90 leading-relaxed">
+                          {item}
+                        </p>
+                      </div>
                     </div>
                   </li>
                 </ScrollReveal>
