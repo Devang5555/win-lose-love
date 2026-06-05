@@ -206,9 +206,8 @@ const BookingModal = ({ trip, isOpen, onClose, selectedBatch, availableAddons = 
           payment_status: "pending_advance",
           notes: formData.upiTransactionId ? `UPI: ${formData.upiTransactionId}` : null,
           referral_code_used: formData.referralCode || null,
-          wallet_discount: walletApplicable,
-          coupon_code: couponCode,
-          coupon_discount: couponDiscount,
+          // Note: wallet_discount, coupon_code and coupon_discount are applied
+          // server-side via apply_wallet_to_booking / apply_coupon_to_booking RPCs.
         })
         .eq("id", bookingId);
 

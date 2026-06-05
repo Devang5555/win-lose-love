@@ -773,14 +773,14 @@ For queries, please contact us.
         const refund = refunds.find(r => r.id === refundId);
         if (refund) {
           await supabase.from("bookings").update({ booking_status: "refunded" }).eq("id", refund.booking_id);
-          // Audit log
+          // Audit log (written via SECURITY DEFINER RPC; direct table inserts are blocked)
           if (user) {
-            await supabase.from("audit_logs").insert({
-              user_id: user.id,
-              action_type: "refund_processed",
-              entity_type: "refund",
-              entity_id: refundId,
-              metadata: { booking_id: refund.booking_id, amount: refund.amount, reason: refund.reason },
+            await supabase.rpc("create_audit_log", {
+              p_user_id: user.id,
+              p_action_type: "refund_processed",
+              p_entity_type: "refund",
+              p_entity_id: refundId,
+              p_metadata: { booking_id: refund.booking_id, amount: refund.amount, reason: refund.reason },
             });
           }
         }
