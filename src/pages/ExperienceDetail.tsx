@@ -141,6 +141,36 @@ const ExperienceDetail = () => {
 
             <TripGallery images={experience.images || []} alt={experience.trip_name} />
 
+            {/* Destination story — image + headline scroll narrative */}
+            {(experience.images?.length || 0) > 1 && (experience.highlights?.length || 0) > 0 && (
+              <StoryGallery
+                title={`Inside ${experience.trip_name}`}
+                subtitle="A glimpse into what makes this experience special."
+                alt={experience.trip_name}
+                stories={experience.highlights.slice(0, 3).map((h: string, i: number) => ({
+                  image: experience.images[(i % (experience.images.length - 1)) + 1] || experience.images[0],
+                  headline: h,
+                }))}
+              />
+            )}
+
+            {/* Parallax breather */}
+            {(experience.images?.length || 0) > 2 && (
+              <div className="-mx-4 md:mx-0">
+                <ParallaxImage
+                  src={experience.images[2] || experience.images[0]}
+                  alt={experience.trip_name}
+                  aspect="aspect-[21/9]"
+                  rounded="md:rounded-3xl rounded-none"
+                >
+                  <p className="font-serif text-2xl md:text-4xl font-bold text-white drop-shadow-lg max-w-xl leading-tight">
+                    Made for moments you'll never forget.
+                  </p>
+                </ParallaxImage>
+              </div>
+            )}
+
+
 
 
             {experience.highlights?.length > 0 && (
